@@ -310,8 +310,6 @@ export default function PrintPV() {
                   const totalAmount = (item?.caisseAmount || 0) + (item?.coffreAmount || 0);
                   const count = totalAmount > 0 ? Math.round(totalAmount / denom) : 0;
                   
-                  if (totalAmount === 0) return null;
-                  
                   return (
                     <tr key={denom}>
                       <td className="text-center">{denom} MAD</td>
@@ -345,13 +343,11 @@ export default function PrintPV() {
                   const caisseAmount = item?.caisseAmount || 0;
                   const coffreAmount = item?.coffreAmount || 0;
                   
-                  if (caisseAmount === 0 && coffreAmount === 0) return null;
-                  
                   return (
                     <tr key={denom}>
                       <td className="text-center">{denom} MAD</td>
-                      <td className="text-right">{caisseAmount > 0 ? caisseAmount.toFixed(2) : '-'}</td>
-                      <td className="text-right">{coffreAmount > 0 ? coffreAmount.toFixed(2) : '-'}</td>
+                      <td className="text-right">{caisseAmount > 0 ? caisseAmount.toFixed(2) : '0.00'}</td>
+                      <td className="text-right">{coffreAmount > 0 ? coffreAmount.toFixed(2) : '0.00'}</td>
                     </tr>
                   );
                 })}
