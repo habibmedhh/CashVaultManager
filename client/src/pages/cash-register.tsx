@@ -222,8 +222,10 @@ export default function CashRegister() {
         throw new Error("Erreur lors de l'enregistrement");
       }
 
-      // Invalider le cache pour recharger les données
-      queryClient.invalidateQueries({ queryKey: ["/api/cash-register", dateKey] });
+      const savedResult = await response.json();
+
+      // Mettre à jour le cache avec les données sauvegardées
+      queryClient.setQueryData(["/api/cash-register", dateKey], savedResult);
 
       toast({
         title: "Enregistré",
