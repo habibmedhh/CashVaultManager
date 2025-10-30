@@ -33,7 +33,18 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**October 30, 2025**: Enhanced PDF/Excel exports with professional visual design
+**October 30, 2025 (Latest)**: Added professional print view for direct PV printing
+- **Print View**: New dedicated print page optimized for A4 format (1-1.5 pages)
+  - Clean, compact layout with two-column grid to maximize space utilization
+  - All PV details included: Billets, Détail Caisse/Coffre, Opérations, Soldes, Transactions, Signatures
+  - Professional styling with @media print CSS for optimal print output
+  - Auto-triggered print dialog on page load
+  - Accessible via "Imprimer" button on main cash register page
+  - Opens in new window to avoid disrupting current work
+  - Data passed via localStorage for seamless transition
+  - Calculation logic mirrors main page exactly (verified parity for totals, solde final, écart)
+
+**October 30, 2025 (Earlier)**: Enhanced PDF/Excel exports with professional visual design
 - **Export System**: Complete redesign of PDF and Excel exports with professional styling
   - **PDF Export** (jsPDF + autoTable): Professional color scheme (slate-800 headers, blue-900 sections), alternating rows (slate-50/white), highlighted totals, emphasized important lines, clean borders
   - **Excel Export** (ExcelJS): Migrated from `xlsx` to `exceljs` for full styling support. Features: merged title cells, colored section headers, alternating row fills, bold totals, number formatting (#,##0.00), professional borders, signature section
