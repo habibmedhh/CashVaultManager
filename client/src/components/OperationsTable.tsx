@@ -53,7 +53,14 @@ export default function OperationsTable({
     ? operations.filter(op => op.number !== 0 || op.amount !== 0)
     : operations;
 
-  const total = operations.reduce((sum, op) => sum + op.amount, 0);
+  // Total des opérations = IN - OUT
+  const total = operations.reduce((sum, op) => {
+    if (op.type === "OUT") {
+      return sum - op.amount;
+    }
+    // Pour IN ou opérations sans type (compatibilité avec anciennes données)
+    return sum + op.amount;
+  }, 0);
   const totalNumber = operations.reduce((sum, op) => sum + op.number, 0);
 
   const formatNumber = (num: number) => {
