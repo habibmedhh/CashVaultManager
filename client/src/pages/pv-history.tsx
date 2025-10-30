@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import type { CashRegister } from "@shared/schema";
 
@@ -29,6 +31,7 @@ interface CashItem {
 export default function PVHistory() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [showAllPVs, setShowAllPVs] = useState(false);
 
   const { data: allPVs, isLoading } = useQuery<CashRegister[]>({
     queryKey: ["/api/cash-registers"],
@@ -59,9 +62,11 @@ export default function PVHistory() {
         return sum + op.amount;
       }, 0);
 
-      return { totalCash, totalOperations };
+      const ecartCaisse = totalCash - (pv.soldeDepart + totalOperations);
+
+      return { totalCash, totalOperations, ecartCaisse };
     } catch (e) {
-      return { totalCash: 0, totalOperations: 0 };
+      return { totalCash: 0, totalOperations: 0, ecartCaisse: 0 };
     }
   };
 
@@ -125,7 +130,7 @@ export default function PVHistory() {
               Filtres
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="flex gap-4 flex-wrap">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Date de début</label>
@@ -192,6 +197,18 @@ export default function PVHistory() {
                 </div>
               )}
             </div>
+
+            <div className="flex items-center gap-3 pt-2 border-t">
+              <Switch
+                id="show-all-pvs"
+                checked={showAllPVs}
+                onCheckedChange={setShowAllPVs}
+                data-testid="switch-show-all-pvs"
+              />
+              <Label htmlFor="show-all-pvs" className="cursor-pointer">
+                Afficher tous les PVs (y compris les anciennes versions)
+              </Label>
+            </div>
           </CardContent>
         </Card>
 
@@ -214,11 +231,13 @@ export default function PVHistory() {
 
         <div className="space-y-6">
           {sortedDates.map((dateKey) => {
-            const pvs = groupedByDate![dateKey].sort((a, b) => {
+            const allPvsForDate = groupedByDate![dateKey].sort((a, b) => {
               const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
               const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
               return timeB - timeA;
             });
+
+            const pvs = showAllPVs ? allPvsForDate : [allPvsForDate[0]];
 
             return (
               <Card key={dateKey}>
@@ -228,14 +247,14 @@ export default function PVHistory() {
                       {format(parseISO(dateKey), "EEEE d MMMM yyyy", { locale: fr })}
                     </span>
                     <Badge variant="secondary" data-testid={`badge-count-${dateKey}`}>
-                      {pvs.length} PV{pvs.length > 1 ? "s" : ""}
+                      {showAllPVs ? `${pvs.length} PV${pvs.length > 1 ? "s" : ""}` : `1/${allPvsForDate.length} PV`}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {pvs.map((pv, index) => {
-                      const { totalCash, totalOperations } = calculatePVTotals(pv);
+                      const { totalCash, totalOperations, ecartCaisse } = calculatePVTotals(pv);
                       const createdTime = pv.createdAt
                         ? format(new Date(pv.createdAt), "HH:mm:ss")
                         : "N/A";
@@ -264,7 +283,7 @@ export default function PVHistory() {
                                   )}
                                 </div>
 
-                                <div className="flex gap-6 items-center">
+                                <div className="flex gap-4 items-center flex-wrap">
                                   <div className="text-right">
                                     <div className="text-xs text-muted-foreground mb-1">
                                       Total Caisse
@@ -294,6 +313,25 @@ export default function PVHistory() {
                                     </div>
                                     <div className="font-mono font-semibold" data-testid={`text-solde-${pv.id}`}>
                                       {formatNumber(pv.soldeDepart)} MAD
+                                    </div>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Écart Caisse
+                                    </div>
+                                    <div
+                                      className={`font-mono font-semibold ${
+                                        Math.abs(ecartCaisse) < 0.01
+                                          ? "text-foreground"
+                                          : ecartCaisse > 0
+                                          ? "text-emerald-600"
+                                          : "text-rose-600"
+                                      }`}
+                                      data-testid={`text-ecart-${pv.id}`}
+                                    >
+                                      {ecartCaisse >= 0 ? "+" : ""}
+                                      {formatNumber(ecartCaisse)} MAD
                                     </div>
                                   </div>
                                 </div>
