@@ -1,34 +1,25 @@
 import EditableCell from "./EditableCell";
 
-interface Denomination {
+interface CashItem {
   value: number;
-  caisseQty: number;
-  coffreQty: number;
+  caisseAmount: number;
+  coffreAmount: number;
+  color: string;
+  icon: string;
+  type: "billet" | "piece";
 }
 
 interface IntegratedCashTableProps {
-  bills: Denomination[];
-  coins: Denomination[];
-  onBillChange: (index: number, field: "caisseQty" | "coffreQty", value: number) => void;
-  onCoinChange: (index: number, field: "caisseQty" | "coffreQty", value: number) => void;
+  items: CashItem[];
+  onItemChange: (index: number, field: "caisseAmount" | "coffreAmount", value: number) => void;
 }
 
 export default function IntegratedCashTable({
-  bills,
-  coins,
-  onBillChange,
-  onCoinChange,
+  items,
+  onItemChange,
 }: IntegratedCashTableProps) {
-  const calculateTotal = (items: Denomination[], field: "caisseQty" | "coffreQty") => {
-    return items.reduce((sum, item) => sum + item.value * item[field], 0);
-  };
-
-  const totalBillsCaisse = calculateTotal(bills, "caisseQty");
-  const totalBillsCoffre = calculateTotal(bills, "coffreQty");
-  const totalCoinsCaisse = calculateTotal(coins, "caisseQty");
-  const totalCoinsCoffre = calculateTotal(coins, "coffreQty");
-  const totalCaisse = totalBillsCaisse + totalCoinsCaisse;
-  const totalCoffre = totalBillsCoffre + totalCoinsCoffre;
+  const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
+  const totalCoffre = items.reduce((sum, item) => sum + item.coffreAmount, 0);
   const grandTotal = totalCaisse + totalCoffre;
 
   const formatNumber = (num: number) => {
@@ -39,130 +30,77 @@ export default function IntegratedCashTable({
   };
 
   return (
-    <div className="border-2 border-border rounded-md overflow-hidden shadow-sm">
+    <div className="border-2 border-border rounded-md overflow-hidden shadow-md">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gradient-to-r from-primary/10 to-primary/5 border-b-2 border-border">
-            <th className="border-r border-border px-3 py-3 text-sm font-bold text-left" rowSpan={2}>
-              Billets
+          <tr className="bg-gradient-to-r from-primary/15 to-primary/8">
+            <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left w-20">
+              
             </th>
-            <th className="border-r border-border px-3 py-3 text-sm font-bold text-center bg-editable/30" colSpan={2}>
+            <th className="border-r border-border px-2 py-2 text-xs font-bold text-center bg-editable/40" colSpan={1}>
               Caisse
             </th>
-            <th className="px-3 py-3 text-sm font-bold text-center bg-blue-50" colSpan={2}>
+            <th className="px-2 py-2 text-xs font-bold text-center bg-blue-100/60" colSpan={1}>
               Coffre
-            </th>
-          </tr>
-          <tr className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border">
-            <th className="border-r border-border px-2 py-2 text-xs font-semibold uppercase bg-editable/20 w-24">
-              Nombre
-            </th>
-            <th className="border-r border-border px-2 py-2 text-xs font-semibold uppercase bg-editable/20 w-28">
-              Montant
-            </th>
-            <th className="border-r border-border px-2 py-2 text-xs font-semibold uppercase bg-blue-50 w-24">
-              Nombre
-            </th>
-            <th className="px-2 py-2 text-xs font-semibold uppercase bg-blue-50 w-28">
-              Montant
             </th>
           </tr>
         </thead>
         <tbody>
-          {bills.map((bill, index) => (
-            <tr key={`bill-${index}`} className="hover:bg-muted/20 transition-colors">
-              <td className="border-r border-border px-3 py-1 text-sm font-medium bg-muted/10">
-                {formatNumber(bill.value)}
+          {items.map((item, index) => (
+            <tr key={index} className="hover:bg-muted/20 transition-colors">
+              <td className="border-r border-border px-2 py-1 text-center bg-muted/10">
+                <div className="flex items-center justify-center gap-1">
+                  <span className="text-base" style={{ color: item.color }}>
+                    {item.icon}
+                  </span>
+                  <span className="text-xs font-semibold">
+                    {formatNumber(item.value)}
+                  </span>
+                </div>
               </td>
               <td className="border-r border-border p-0">
                 <EditableCell
-                  value={bill.caisseQty}
-                  onChange={(val) => onBillChange(index, "caisseQty", val)}
-                  className="border-0 w-full rounded-none"
-                  dataTestId={`input-bill-caisse-${index}`}
+                  value={item.caisseAmount}
+                  onChange={(val) => onItemChange(index, "caisseAmount", val)}
+                  className="border-0 w-full rounded-none h-8 text-xs px-1"
+                  dataTestId={`input-item-caisse-${index}`}
                 />
               </td>
-              <td className="border-r border-border px-2 py-1 text-right font-mono text-sm tabular-nums bg-muted/5">
-                {formatNumber(bill.value * bill.caisseQty)}
-              </td>
-              <td className="border-r border-border p-0">
+              <td className="p-0">
                 <EditableCell
-                  value={bill.coffreQty}
-                  onChange={(val) => onBillChange(index, "coffreQty", val)}
-                  className="border-0 w-full rounded-none bg-blue-50/50"
-                  dataTestId={`input-bill-coffre-${index}`}
+                  value={item.coffreAmount}
+                  onChange={(val) => onItemChange(index, "coffreAmount", val)}
+                  className="border-0 w-full rounded-none h-8 text-xs px-1 bg-blue-50/50"
+                  dataTestId={`input-item-coffre-${index}`}
                 />
-              </td>
-              <td className="px-2 py-1 text-right font-mono text-sm tabular-nums bg-blue-50/30">
-                {formatNumber(bill.value * bill.coffreQty)}
               </td>
             </tr>
           ))}
           
-          <tr className="border-t-2 border-border">
-            <td className="border-r border-border px-3 py-2 text-sm font-bold bg-primary/5" colSpan={1}>
-              Pièces
-            </td>
-            <td className="border-r border-border" colSpan={2}></td>
-            <td colSpan={2}></td>
-          </tr>
-          
-          {coins.map((coin, index) => (
-            <tr key={`coin-${index}`} className="hover:bg-muted/20 transition-colors">
-              <td className="border-r border-border px-3 py-1 text-sm font-medium bg-muted/10">
-                {formatNumber(coin.value)}
-              </td>
-              <td className="border-r border-border p-0">
-                <EditableCell
-                  value={coin.caisseQty}
-                  onChange={(val) => onCoinChange(index, "caisseQty", val)}
-                  className="border-0 w-full rounded-none"
-                  dataTestId={`input-coin-caisse-${index}`}
-                />
-              </td>
-              <td className="border-r border-border px-2 py-1 text-right font-mono text-sm tabular-nums bg-muted/5">
-                {formatNumber(coin.value * coin.caisseQty)}
-              </td>
-              <td className="border-r border-border p-0">
-                <EditableCell
-                  value={coin.coffreQty}
-                  onChange={(val) => onCoinChange(index, "coffreQty", val)}
-                  className="border-0 w-full rounded-none bg-blue-50/50"
-                  dataTestId={`input-coin-coffre-${index}`}
-                />
-              </td>
-              <td className="px-2 py-1 text-right font-mono text-sm tabular-nums bg-blue-50/30">
-                {formatNumber(coin.value * coin.coffreQty)}
-              </td>
-            </tr>
-          ))}
-          
-          <tr className="border-t-2 border-border bg-gradient-to-r from-accent/30 to-accent/20 font-bold">
-            <td className="border-r border-border px-3 py-3 text-base">
+          <tr className="border-t-2 border-border bg-gradient-to-r from-accent/40 to-accent/20 font-bold">
+            <td className="border-r border-border px-2 py-2 text-sm">
               Total
             </td>
-            <td className="border-r border-border" colSpan={1}></td>
             <td
-              className="border-r border-border px-2 py-3 text-right font-mono text-base tabular-nums bg-editable/40"
+              className="border-r border-border px-2 py-2 text-right font-mono text-sm tabular-nums bg-editable/50"
               data-testid="text-total-caisse"
             >
               {formatNumber(totalCaisse)}
             </td>
-            <td className="border-r border-border" colSpan={1}></td>
             <td
-              className="px-2 py-3 text-right font-mono text-base tabular-nums bg-blue-100/60"
+              className="px-2 py-2 text-right font-mono text-sm tabular-nums bg-blue-100/70"
               data-testid="text-total-coffre"
             >
               {formatNumber(totalCoffre)}
             </td>
           </tr>
           
-          <tr className="border-t-2 border-primary/30 bg-gradient-to-r from-primary/10 to-primary/5 font-bold">
-            <td className="px-3 py-3 text-lg" colSpan={3}>
-              Total Général
+          <tr className="border-t-2 border-primary/40 bg-gradient-to-r from-primary/15 to-primary/8 font-bold">
+            <td className="px-2 py-2 text-base">
+              Total
             </td>
             <td
-              className="px-3 py-3 text-right font-mono text-lg tabular-nums bg-primary/20"
+              className="px-2 py-2 text-right font-mono text-base tabular-nums bg-primary/25"
               colSpan={2}
               data-testid="text-grand-total"
             >

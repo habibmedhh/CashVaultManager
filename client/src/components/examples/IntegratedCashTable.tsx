@@ -2,51 +2,33 @@ import { useState } from "react";
 import IntegratedCashTable from "../IntegratedCashTable";
 
 export default function IntegratedCashTableExample() {
-  const [bills, setBills] = useState([
-    { value: 200, caisseQty: 1, coffreQty: 0 },
-    { value: 100, caisseQty: 2, coffreQty: 1 },
-    { value: 50, caisseQty: 0, coffreQty: 0 },
-    { value: 20, caisseQty: 1, coffreQty: 0 },
-    { value: 10, caisseQty: 0, coffreQty: 0 },
-    { value: 5, caisseQty: 0, coffreQty: 0 },
+  const [items, setItems] = useState([
+    { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "💵", type: "billet" as const },
+    { value: 100, caisseAmount: 200, coffreAmount: 100, color: "#92400E", icon: "💵", type: "billet" as const },
+    { value: 50, caisseAmount: 0, coffreAmount: 0, color: "#059669", icon: "💵", type: "billet" as const },
+    { value: 20, caisseAmount: 20, coffreAmount: 0, color: "#7C3AED", icon: "💵", type: "billet" as const },
+    { value: 10, caisseAmount: 0, coffreAmount: 0, color: "#DC2626", icon: "💵", type: "billet" as const },
+    { value: 5, caisseAmount: 0, coffreAmount: 0, color: "#EA580C", icon: "💵", type: "billet" as const },
+    { value: 2, caisseAmount: 2, coffreAmount: 0, color: "#64748B", icon: "🪙", type: "piece" as const },
+    { value: 1, caisseAmount: 0, coffreAmount: 0, color: "#71717A", icon: "🪙", type: "piece" as const },
+    { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "🪙", type: "piece" as const },
+    { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "🪙", type: "piece" as const },
+    { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "🪙", type: "piece" as const },
   ]);
 
-  const [coins, setCoins] = useState([
-    { value: 2, caisseQty: 0, coffreQty: 0 },
-    { value: 1, caisseQty: 0, coffreQty: 0 },
-    { value: 0.5, caisseQty: 0, coffreQty: 0 },
-    { value: 0.2, caisseQty: 1, coffreQty: 0 },
-    { value: 0.1, caisseQty: 3, coffreQty: 0 },
-  ]);
-
-  const handleBillChange = (
+  const handleItemChange = (
     index: number,
-    field: "caisseQty" | "coffreQty",
+    field: "caisseAmount" | "coffreAmount",
     value: number
   ) => {
-    const newBills = [...bills];
-    newBills[index][field] = value;
-    setBills(newBills);
-  };
-
-  const handleCoinChange = (
-    index: number,
-    field: "caisseQty" | "coffreQty",
-    value: number
-  ) => {
-    const newCoins = [...coins];
-    newCoins[index][field] = value;
-    setCoins(newCoins);
+    const newItems = [...items];
+    newItems[index][field] = value;
+    setItems(newItems);
   };
 
   return (
-    <div className="p-4">
-      <IntegratedCashTable
-        bills={bills}
-        coins={coins}
-        onBillChange={handleBillChange}
-        onCoinChange={handleCoinChange}
-      />
+    <div className="p-4 max-w-md">
+      <IntegratedCashTable items={items} onItemChange={handleItemChange} />
     </div>
   );
 }

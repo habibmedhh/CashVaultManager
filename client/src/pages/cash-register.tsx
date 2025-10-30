@@ -10,35 +10,34 @@ import OperationsTable, { type Operation } from "@/components/OperationsTable";
 import BalanceSection, { type Transaction } from "@/components/BalanceSection";
 import { useToast } from "@/hooks/use-toast";
 
-interface Denomination {
+interface CashItem {
   value: number;
-  caisseQty: number;
-  coffreQty: number;
+  caisseAmount: number;
+  coffreAmount: number;
+  color: string;
+  icon: string;
+  type: "billet" | "piece";
 }
 
 export default function CashRegister() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
 
-  const [bills, setBills] = useState<Denomination[]>([
-    { value: 200, caisseQty: 1, coffreQty: 0 },
-    { value: 100, caisseQty: 2, coffreQty: 1 },
-    { value: 50, caisseQty: 0, coffreQty: 0 },
-    { value: 20, caisseQty: 1, coffreQty: 0 },
-    { value: 10, caisseQty: 0, coffreQty: 0 },
-    { value: 5, caisseQty: 0, coffreQty: 0 },
-    { value: 2, caisseQty: 1, coffreQty: 0 },
-  ]);
-
-  const [coins, setCoins] = useState<Denomination[]>([
-    { value: 2, caisseQty: 0, coffreQty: 0 },
-    { value: 1, caisseQty: 0, coffreQty: 0 },
-    { value: 0.5, caisseQty: 0, coffreQty: 0 },
-    { value: 0.2, caisseQty: 1, coffreQty: 3 },
-    { value: 0.1, caisseQty: 3, coffreQty: 0 },
-    { value: 0.05, caisseQty: 0, coffreQty: 0 },
-    { value: 0.02, caisseQty: 0, coffreQty: 0 },
-    { value: 0.01, caisseQty: 1, coffreQty: 0 },
+  const [items, setItems] = useState<CashItem[]>([
+    { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "💵", type: "billet" },
+    { value: 100, caisseAmount: 200, coffreAmount: 100, color: "#92400E", icon: "💵", type: "billet" },
+    { value: 50, caisseAmount: 0, coffreAmount: 0, color: "#059669", icon: "💵", type: "billet" },
+    { value: 20, caisseAmount: 20, coffreAmount: 0, color: "#7C3AED", icon: "💵", type: "billet" },
+    { value: 10, caisseAmount: 0, coffreAmount: 0, color: "#DC2626", icon: "💵", type: "billet" },
+    { value: 5, caisseAmount: 0, coffreAmount: 0, color: "#EA580C", icon: "💵", type: "billet" },
+    { value: 2, caisseAmount: 2, coffreAmount: 0, color: "#64748B", icon: "🪙", type: "piece" },
+    { value: 1, caisseAmount: 0, coffreAmount: 0, color: "#71717A", icon: "🪙", type: "piece" },
+    { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "🪙", type: "piece" },
+    { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "🪙", type: "piece" },
+    { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "🪙", type: "piece" },
+    { value: 0.05, caisseAmount: 0, coffreAmount: 0, color: "#F5F5F5", icon: "🪙", type: "piece" },
+    { value: 0.02, caisseAmount: 0, coffreAmount: 0, color: "#FAFAFA", icon: "🪙", type: "piece" },
+    { value: 0.01, caisseAmount: 0.01, coffreAmount: 0, color: "#FEFEFE", icon: "🪙", type: "piece" },
   ]);
 
   const [operations, setOperations] = useState<Operation[]>([
@@ -70,24 +69,14 @@ export default function CashRegister() {
 
   const [soldeDepart, setSoldeDepart] = useState(11366.75);
 
-  const handleBillChange = (
+  const handleItemChange = (
     index: number,
-    field: "caisseQty" | "coffreQty",
+    field: "caisseAmount" | "coffreAmount",
     value: number
   ) => {
-    const newBills = [...bills];
-    newBills[index][field] = value;
-    setBills(newBills);
-  };
-
-  const handleCoinChange = (
-    index: number,
-    field: "caisseQty" | "coffreQty",
-    value: number
-  ) => {
-    const newCoins = [...coins];
-    newCoins[index][field] = value;
-    setCoins(newCoins);
+    const newItems = [...items];
+    newItems[index][field] = value;
+    setItems(newItems);
   };
 
   const handleOperationChange = (
@@ -138,20 +127,13 @@ export default function CashRegister() {
     setTransactions(transactions.filter((t) => t.id !== id));
   };
 
-  const calculateTotal = (items: Denomination[], field: "caisseQty" | "coffreQty") => {
-    return items.reduce((sum, item) => sum + item.value * item[field], 0);
-  };
-
-  const totalBillsCaisse = calculateTotal(bills, "caisseQty");
-  const totalCoinsCaisse = calculateTotal(coins, "caisseQty");
-  const totalCaisse = totalBillsCaisse + totalCoinsCaisse;
+  const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
   const totalOperations = operations.reduce((sum, op) => sum + op.amount, 0);
 
   const handleSave = () => {
     console.log("Saving cash register data...", {
       date,
-      bills,
-      coins,
+      items,
       operations,
       transactions,
       soldeDepart,
@@ -184,23 +166,24 @@ export default function CashRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-4 border-b-2 border-primary/20 shadow-sm print:hidden rounded-md px-4 pt-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-3">
+      <div className="max-w-6xl mx-auto space-y-4">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-3 border-b-2 border-primary/20 shadow-sm print:hidden rounded-md px-3 pt-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 PV D'ARRÊTÉ DE CAISSE
               </h1>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
+                    size="sm"
                     className="gap-2 border-2"
                     data-testid="button-date-picker"
                   >
-                    <CalendarIcon className="w-4 h-4" />
-                    {format(date, "dd/MM/yyyy", { locale: fr })}
+                    <CalendarIcon className="w-3 h-3" />
+                    <span className="text-xs">{format(date, "dd/MM/yyyy", { locale: fr })}</span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -214,46 +197,47 @@ export default function CashRegister() {
               </Popover>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} data-testid="button-save" className="shadow-md">
-                <Save className="w-4 h-4 mr-2" />
-                Enregistrer
+              <Button onClick={handleSave} size="sm" data-testid="button-save" className="shadow-md">
+                <Save className="w-3 h-3 mr-1" />
+                <span className="text-xs">Enregistrer</span>
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleDownloadExcel}
                 data-testid="button-download-excel"
                 className="border-2"
               >
-                <Download className="w-4 h-4 mr-2" />
-                Excel
+                <Download className="w-3 h-3 mr-1" />
+                <span className="text-xs">Excel</span>
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleDownloadPDF}
                 data-testid="button-download-pdf"
                 className="border-2"
               >
-                <Download className="w-4 h-4 mr-2" />
-                PDF
+                <Download className="w-3 h-3 mr-1" />
+                <span className="text-xs">PDF</span>
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handlePrint}
                 data-testid="button-print"
                 className="border-2"
               >
-                <Printer className="w-4 h-4 mr-2" />
-                Imprimer
+                <Printer className="w-3 h-3 mr-1" />
+                <span className="text-xs">Imprimer</span>
               </Button>
             </div>
           </div>
         </div>
 
         <IntegratedCashTable
-          bills={bills}
-          coins={coins}
-          onBillChange={handleBillChange}
-          onCoinChange={handleCoinChange}
+          items={items}
+          onItemChange={handleItemChange}
         />
 
         <div className="border-2 border-border rounded-md overflow-hidden shadow-sm">
@@ -265,7 +249,7 @@ export default function CashRegister() {
           />
         </div>
 
-        <div className="border-2 border-border rounded-md p-4 shadow-sm bg-card">
+        <div className="border-2 border-border rounded-md p-3 shadow-sm bg-card">
           <BalanceSection
             transactions={transactions}
             onTransactionChange={handleTransactionChange}

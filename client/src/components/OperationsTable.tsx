@@ -33,33 +33,33 @@ export default function OperationsTable({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between mb-3 px-4 pt-4">
-        <h3 className="text-lg font-bold uppercase tracking-wide bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+      <div className="flex items-center justify-between mb-2 px-3 pt-3">
+        <h3 className="text-base font-bold uppercase tracking-wide bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
           Opérations
         </h3>
         <Button
           size="sm"
           onClick={onAddOperation}
           data-testid="button-add-operation"
-          className="shadow-sm"
+          className="shadow-sm h-7 text-xs"
         >
-          <Plus className="w-4 h-4 mr-1" />
+          <Plus className="w-3 h-3 mr-1" />
           Ajouter
         </Button>
       </div>
       <table className="border-collapse">
         <thead>
           <tr className="bg-gradient-to-r from-primary/10 to-primary/5 border-y-2 border-border">
-            <th className="border-r border-border px-3 py-3 text-xs font-bold uppercase text-left">
+            <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left">
               Opération
             </th>
-            <th className="border-r border-border px-3 py-3 text-xs font-bold uppercase text-center w-32">
+            <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-center w-24">
               Nombre
             </th>
-            <th className="border-r border-border px-3 py-3 text-xs font-bold uppercase text-right w-36">
+            <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-right w-28">
               Montant
             </th>
-            <th className="px-2 py-3 w-12"></th>
+            <th className="px-1 py-2 w-10"></th>
           </tr>
         </thead>
         <tbody>
@@ -70,7 +70,7 @@ export default function OperationsTable({
                   type="text"
                   value={op.name}
                   onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
-                  className="h-10 px-3 w-full bg-editable hover-elevate active-elevate-2 focus:ring-2 focus:ring-primary focus:outline-none text-sm"
+                  className="h-8 px-2 w-full bg-editable hover-elevate active-elevate-2 focus:ring-2 focus:ring-primary focus:outline-none text-xs"
                   data-testid={`input-operation-name-${op.id}`}
                 />
               </td>
@@ -78,7 +78,7 @@ export default function OperationsTable({
                 <EditableCell
                   value={op.number}
                   onChange={(val) => onOperationChange(op.id, "number", val)}
-                  className="border-0 w-full rounded-none text-center"
+                  className="border-0 w-full rounded-none text-center h-8 text-xs px-1"
                   dataTestId={`input-operation-number-${op.id}`}
                 />
               </td>
@@ -87,29 +87,29 @@ export default function OperationsTable({
                   value={op.amount}
                   onChange={(val) => onOperationChange(op.id, "amount", val)}
                   allowFormula={true}
-                  className="border-0 w-full rounded-none"
+                  className="border-0 w-full rounded-none h-8 text-xs px-1"
                   dataTestId={`input-operation-amount-${op.id}`}
                 />
               </td>
-              <td className="p-1 text-center">
+              <td className="p-0 text-center">
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={() => onRemoveOperation(op.id)}
-                  className="h-8 w-8"
+                  className="h-7 w-7"
                   data-testid={`button-remove-operation-${op.id}`}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </td>
             </tr>
           ))}
           <tr className="font-bold border-t-2 border-primary/30 bg-gradient-to-r from-accent/40 to-accent/20">
-            <td className="border-r border-border px-3 py-3 text-base" colSpan={2}>
+            <td className="border-r border-border px-2 py-2 text-sm" colSpan={2}>
               TOTAL
             </td>
             <td
-              className="border-r border-border px-3 py-3 text-right font-mono text-lg tabular-nums bg-accent/50"
+              className="border-r border-border px-2 py-2 text-right font-mono text-sm tabular-nums bg-accent/50"
               data-testid="text-operations-total"
             >
               {formatNumber(total)}
