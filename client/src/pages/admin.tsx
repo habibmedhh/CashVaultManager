@@ -377,55 +377,55 @@ export default function Admin() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Transactions</span>
-                    <span className={day.transactions !== 0 ? "text-blue-600 font-semibold" : ""}>
+                    <span className={day.transactions !== 0 ? "text-blue-600 dark:text-blue-400 font-semibold" : ""}>
                       {formatNumber(day.transactions)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Change</span>
-                    <span className={day.change !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.change !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.change)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Recharge</span>
-                    <span className={day.recharge !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.recharge !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.recharge)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">PayExpress</span>
-                    <span className={day.payExpress !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.payExpress !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.payExpress)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">SpeedBox</span>
-                    <span className={day.speedBox !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.speedBox !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.speedBox)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">CTM</span>
-                    <span className={day.ctm !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.ctm !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.ctm)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Connexions</span>
-                    <span className={day.connexions !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.connexions !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.connexions)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Alimentation</span>
-                    <span className={day.alimentation !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.alimentation !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.alimentation)} DH
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Versement</span>
-                    <span className={day.versement !== 0 ? "text-emerald-600 font-semibold" : ""}>
+                    <span className={day.versement !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.versement)} DH
                     </span>
                   </div>
@@ -504,21 +504,21 @@ export default function Admin() {
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <span className="text-sm text-muted-foreground">Total opérations</span>
-                    <span className="font-semibold text-emerald-600">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       {formatNumber(totalOperations)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <span className="text-sm text-muted-foreground">Versements</span>
-                    <span className="font-semibold text-emerald-600">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                       +{formatNumber(totalVersements)} DH
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <span className="text-sm text-muted-foreground">Retraits</span>
-                    <span className="font-semibold text-red-600">
+                    <span className="font-semibold text-red-600 dark:text-red-400">
                       -{formatNumber(totalRetraits)} DH
                     </span>
                   </div>
@@ -531,11 +531,11 @@ export default function Admin() {
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div className="text-center p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded">
                       <div className="text-xs text-muted-foreground mb-1">Caisse</div>
-                      <div className="font-bold text-emerald-600">{formatNumber(totalCaisse)} DH</div>
+                      <div className="font-bold text-emerald-600 dark:text-emerald-400">{formatNumber(totalCaisse)} DH</div>
                     </div>
                     <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
                       <div className="text-xs text-muted-foreground mb-1">Coffre</div>
-                      <div className="font-bold text-blue-600">{formatNumber(totalCoffre)} DH</div>
+                      <div className="font-bold text-blue-600 dark:text-blue-400">{formatNumber(totalCoffre)} DH</div>
                     </div>
                   </div>
 
@@ -551,8 +551,8 @@ export default function Admin() {
                   }`}>
                     <span className="font-bold">Écart Caisse</span>
                     <span className={`font-bold text-lg ${
-                      ecart > 0 ? 'text-emerald-600' :
-                      ecart < 0 ? 'text-red-600' :
+                      ecart > 0 ? 'text-emerald-600 dark:text-emerald-400' :
+                      ecart < 0 ? 'text-red-600 dark:text-red-400' :
                       ''
                     }`}>
                       {ecart >= 0 ? '+' : ''}{formatNumber(ecart)} DH
