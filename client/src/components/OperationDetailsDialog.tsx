@@ -49,20 +49,26 @@ export default function OperationDetailsDialog({
   };
 
   const handleAdd = () => {
-    if (!newLabel.trim() || !newAmount) return;
+    if (!newAmount) return;
 
     const amount = parseFloat(newAmount.replace(",", "."));
     if (isNaN(amount)) return;
 
     const newDetail: DetailedOperation = {
       id: Date.now().toString(),
-      label: newLabel.trim(),
+      label: newLabel.trim() || `Opération ${details.length + 1}`,
       amount,
     };
 
     onDetailsChange([...details, newDetail]);
     setNewLabel("");
     setNewAmount("");
+    
+    // Refocus on amount input for quick entry
+    setTimeout(() => {
+      const amountInput = document.getElementById("detail-amount");
+      if (amountInput) amountInput.focus();
+    }, 0);
   };
 
   const handleRemove = (id: string) => {
@@ -96,22 +102,8 @@ export default function OperationDetailsDialog({
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="detail-label" className="text-xs">
-                  Libellé
-                </Label>
-                <Input
-                  id="detail-label"
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Description de l'opération"
-                  className="h-8 text-xs"
-                  data-testid="input-detail-label"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="detail-amount" className="text-xs">
-                  Montant (DH)
+                <Label htmlFor="detail-amount" className="text-xs font-semibold">
+                  Montant (DH) *
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -123,6 +115,7 @@ export default function OperationDetailsDialog({
                     placeholder="0.00"
                     className="h-8 text-xs font-mono"
                     data-testid="input-detail-amount"
+                    autoFocus
                   />
                   <Button
                     onClick={handleAdd}
@@ -133,6 +126,20 @@ export default function OperationDetailsDialog({
                     <Plus className="w-3 h-3" />
                   </Button>
                 </div>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="detail-label" className="text-xs">
+                  Libellé (optionnel)
+                </Label>
+                <Input
+                  id="detail-label"
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Description"
+                  className="h-8 text-xs"
+                  data-testid="input-detail-label"
+                />
               </div>
             </div>
           </div>
@@ -156,11 +163,11 @@ export default function OperationDetailsDialog({
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 bg-muted/30 border-b border-border">
                     <tr>
-                      <th className="border-r border-border px-2 py-1 text-xs font-semibold uppercase text-left">
-                        Libellé
-                      </th>
                       <th className="border-r border-border px-2 py-1 text-xs font-semibold uppercase text-right w-28">
                         Montant
+                      </th>
+                      <th className="border-r border-border px-2 py-1 text-xs font-semibold uppercase text-left">
+                        Libellé
                       </th>
                       <th className="px-1 py-1 w-10"></th>
                     </tr>
@@ -173,11 +180,11 @@ export default function OperationDetailsDialog({
                           index % 2 === 0 ? "bg-muted/5" : ""
                         }`}
                       >
-                        <td className="border-r border-border px-2 py-1 text-xs">
-                          {detail.label}
-                        </td>
                         <td className="border-r border-border px-2 py-1 text-right font-mono text-xs tabular-nums">
                           {formatNumber(detail.amount)}
+                        </td>
+                        <td className="border-r border-border px-2 py-1 text-xs">
+                          {detail.label}
                         </td>
                         <td className="p-0 text-center">
                           <Button
