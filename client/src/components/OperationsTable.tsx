@@ -134,19 +134,19 @@ export default function OperationsTable({
             </Button>
           </div>
         </div>
-        <table className="border-collapse">
+        <table className="border-collapse w-full">
           <thead>
             <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
-              <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left w-40 text-white">
+              <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white">
                 Opération
               </th>
-              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-14 text-white">
+              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-12 text-white">
                 Nombre
               </th>
-              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-28 text-white">
+              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white">
                 Montant
               </th>
-              <th className="px-1 py-1.5 w-16 text-white"></th>
+              <th className="px-1 py-1.5 w-14 text-white"></th>
             </tr>
           </thead>
           <tbody>
