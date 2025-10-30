@@ -38,15 +38,25 @@ export function exportToPDF(data: CashData) {
   // Configuration des polices et styles
   doc.setFont('helvetica');
   
-  // En-tête : PV D'ARRETER DE CAISSE : [date]
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  const title = `PV D'ARRETER DE CAISSE : ${data.date}`;
-  const titleWidth = doc.getTextWidth(title);
+  // En-tête avec fond coloré : PV D'ARRETER DE CAISSE : [date]
   const pageWidth = doc.internal.pageSize.getWidth();
+  
+  // Rectangle de fond pour le titre
+  doc.setFillColor(30, 41, 59); // Slate-800
+  doc.rect(0, 0, pageWidth, 25, 'F');
+  
+  // Titre en blanc
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  const title = `PV D'ARRÊTÉ DE CAISSE : ${data.date}`;
+  const titleWidth = doc.getTextWidth(title);
   doc.text(title, (pageWidth - titleWidth) / 2, 15);
   
-  let yPos = 25;
+  // Rétablir la couleur de texte noire
+  doc.setTextColor(0, 0, 0);
+  
+  let yPos = 32;
   
   // Parse des données
   const billsArray: any[] = data.billsData ? JSON.parse(data.billsData) : [];
@@ -98,13 +108,33 @@ export function exportToPDF(data: CashData) {
     startY: yPos,
     head: [['Billets', 'NBB', 'caisse-et-coffre-Agence']],
     body: billsRows,
-    theme: 'grid',
-    styles: { fontSize: 9, halign: 'right' },
-    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+    theme: 'striped',
+    styles: { 
+      fontSize: 9, 
+      halign: 'right',
+      lineColor: [203, 213, 225], // Slate-300
+      lineWidth: 0.1
+    },
+    headStyles: { 
+      fillColor: [30, 58, 138], // Blue-900
+      textColor: [255, 255, 255], 
+      fontStyle: 'bold', 
+      halign: 'center',
+      fontSize: 10
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252] // Slate-50
+    },
     columnStyles: {
-      0: { halign: 'center' },
+      0: { halign: 'center', fontStyle: 'bold' },
       1: { halign: 'center' },
-      2: { halign: 'right' }
+      2: { halign: 'right', fontStyle: 'bold' }
+    },
+    footStyles: {
+      fillColor: [241, 245, 249], // Slate-100
+      textColor: [15, 23, 42], // Slate-900
+      fontStyle: 'bold',
+      fontSize: 10
     }
   });
   
@@ -145,13 +175,32 @@ export function exportToPDF(data: CashData) {
     startY: yPos,
     head: [['Opérations', 'NOMBRE', 'MONTANT']],
     body: operationsRows,
-    theme: 'grid',
-    styles: { fontSize: 9 },
-    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+    theme: 'striped',
+    styles: { 
+      fontSize: 9,
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1
+    },
+    headStyles: { 
+      fillColor: [30, 58, 138], // Blue-900
+      textColor: [255, 255, 255], 
+      fontStyle: 'bold', 
+      halign: 'center',
+      fontSize: 10
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252] // Slate-50
+    },
     columnStyles: {
-      0: { halign: 'left' },
+      0: { halign: 'left', fontStyle: 'normal' },
       1: { halign: 'center' },
-      2: { halign: 'right' }
+      2: { halign: 'right', fontStyle: 'bold' }
+    },
+    footStyles: {
+      fillColor: [241, 245, 249],
+      textColor: [15, 23, 42],
+      fontStyle: 'bold',
+      fontSize: 10
     }
   });
   
@@ -220,12 +269,32 @@ export function exportToPDF(data: CashData) {
   autoTable(doc, {
     startY: yPos,
     body: soldeRows,
-    theme: 'grid',
-    styles: { fontSize: 9 },
+    theme: 'striped',
+    styles: { 
+      fontSize: 9,
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
     columnStyles: {
-      0: { halign: 'left', cellWidth: 80 },
+      0: { halign: 'left', cellWidth: 80, fontStyle: 'bold' },
       1: { halign: 'center', cellWidth: 30 },
-      2: { halign: 'right', cellWidth: 50 }
+      2: { halign: 'right', cellWidth: 50, fontStyle: 'bold' }
+    },
+    didParseCell: function(data: any) {
+      // Mettre en évidence les lignes importantes
+      const rowText = data.cell.raw;
+      if (typeof rowText === 'object' && rowText?.content) {
+        const content = rowText.content;
+        if (content === 'Solde départ' || content === 'Solde final' || content === 'Ecart de la caisse') {
+          data.cell.styles.fillColor = [241, 245, 249]; // Slate-100
+          data.cell.styles.textColor = [15, 23, 42]; // Slate-900
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fontSize = 10;
+        }
+      }
     }
   });
   
@@ -241,7 +310,17 @@ export function exportToPDF(data: CashData) {
     startY: yPos,
     body: signaturesRows,
     theme: 'grid',
-    styles: { fontSize: 9, halign: 'center' },
+    styles: { 
+      fontSize: 9, 
+      halign: 'center',
+      lineColor: [203, 213, 225],
+      lineWidth: 0.5
+    },
+    bodyStyles: {
+      fillColor: [248, 250, 252],
+      fontStyle: 'bold',
+      textColor: [15, 23, 42]
+    },
     columnStyles: {
       0: { cellWidth: 60 },
       1: { cellWidth: 60 },
@@ -286,13 +365,32 @@ export function exportToPDF(data: CashData) {
     startY: yPos,
     head: [['Billets', 'caisse', 'coffre']],
     body: detailRows,
-    theme: 'grid',
-    styles: { fontSize: 9 },
-    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+    theme: 'striped',
+    styles: { 
+      fontSize: 9,
+      lineColor: [203, 213, 225],
+      lineWidth: 0.1
+    },
+    headStyles: { 
+      fillColor: [30, 58, 138], // Blue-900
+      textColor: [255, 255, 255], 
+      fontStyle: 'bold', 
+      halign: 'center',
+      fontSize: 10
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
     columnStyles: {
-      0: { halign: 'center', cellWidth: 30 },
-      1: { halign: 'right', cellWidth: 40 },
-      2: { halign: 'right', cellWidth: 40 }
+      0: { halign: 'center', cellWidth: 30, fontStyle: 'bold' },
+      1: { halign: 'right', cellWidth: 40, fontStyle: 'bold' },
+      2: { halign: 'right', cellWidth: 40, fontStyle: 'bold' }
+    },
+    footStyles: {
+      fillColor: [241, 245, 249],
+      textColor: [15, 23, 42],
+      fontStyle: 'bold',
+      fontSize: 10
     }
   });
   

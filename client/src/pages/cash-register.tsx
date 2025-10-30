@@ -271,7 +271,7 @@ export default function CashRegister() {
     }
   };
 
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
     try {
       const billsData = items.filter(item => item.type === "billet");
       const coinsData = items.filter(item => item.type === "piece");
@@ -287,7 +287,7 @@ export default function CashRegister() {
         agencyName: currentUser?.agencyId || undefined,
       };
       
-      exportToExcel(exportData);
+      await exportToExcel(exportData);
       
       toast({
         title: "Exportation Excel",
