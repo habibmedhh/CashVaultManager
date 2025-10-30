@@ -14,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
 import { type User } from "@shared/schema";
 import { Card } from "@/components/ui/card";
+import { exportToPDF } from "@/lib/exportPDF";
+import { exportToExcel } from "@/lib/exportExcel";
 
 interface CashItem {
   value: number;
@@ -270,19 +272,65 @@ export default function CashRegister() {
   };
 
   const handleDownloadExcel = () => {
-    console.log("Downloading Excel...");
-    toast({
-      title: "Téléchargement Excel",
-      description: "Le fichier Excel sera téléchargé prochainement.",
-    });
+    try {
+      const billsData = items.filter(item => item.type === "billet");
+      const coinsData = items.filter(item => item.type === "piece");
+      
+      const exportData = {
+        date: format(date, "dd/MM/yyyy", { locale: fr }),
+        billsData: JSON.stringify(billsData),
+        coinsData: JSON.stringify(coinsData),
+        operationsData: JSON.stringify(operations),
+        transactionsData: JSON.stringify(transactions),
+        soldeDepart,
+        userName: currentUser?.name,
+        agencyName: currentUser?.agencyId,
+      };
+      
+      exportToExcel(exportData);
+      
+      toast({
+        title: "Exportation Excel",
+        description: "Le fichier Excel a été téléchargé avec succès.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'exporter le fichier Excel.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDownloadPDF = () => {
-    console.log("Downloading PDF...");
-    toast({
-      title: "Téléchargement PDF",
-      description: "Le fichier PDF sera téléchargé prochainement.",
-    });
+    try {
+      const billsData = items.filter(item => item.type === "billet");
+      const coinsData = items.filter(item => item.type === "piece");
+      
+      const exportData = {
+        date: format(date, "dd/MM/yyyy", { locale: fr }),
+        billsData: JSON.stringify(billsData),
+        coinsData: JSON.stringify(coinsData),
+        operationsData: JSON.stringify(operations),
+        transactionsData: JSON.stringify(transactions),
+        soldeDepart,
+        userName: currentUser?.name,
+        agencyName: currentUser?.agencyId,
+      };
+      
+      exportToPDF(exportData);
+      
+      toast({
+        title: "Exportation PDF",
+        description: "Le fichier PDF a été téléchargé avec succès.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'exporter le fichier PDF.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePrint = () => {
