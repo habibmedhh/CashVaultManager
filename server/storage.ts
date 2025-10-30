@@ -7,6 +7,7 @@ import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   getUsersByAgency(agencyId: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined>;
@@ -44,6 +45,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(
       (user) => user.username === username,
     );
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
   async getUsersByAgency(agencyId: string): Promise<User[]> {
@@ -196,6 +201,11 @@ export class DbStorage implements IStorage {
   async getUserByUsername(username: string): Promise<User | undefined> {
     const result = await this.db.select().from(users).where(eq(users.username, username));
     return result[0];
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const result = await this.db.select().from(users);
+    return result;
   }
 
   async getUsersByAgency(agencyId: string): Promise<User[]> {

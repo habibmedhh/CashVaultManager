@@ -388,10 +388,22 @@ export default function PVHistory() {
                           })[0];
                         });
 
+                        console.log(`[DEBUG] Agency ${agencyKey} - Date ${dateKey}:`, {
+                          totalPVs: agencyPvs.length,
+                          uniqueUsers: Object.keys(pvsByUser).length,
+                          latestPvsPerAgent: latestPvsPerAgent.map(pv => ({
+                            userId: pv.userId,
+                            createdAt: pv.createdAt,
+                            soldeDepart: pv.soldeDepart
+                          }))
+                        });
+
                         // If showAllPVs is true, include all versions
                         const latestPvs = showAllPVs ? agencyPvs : latestPvsPerAgent;
 
                         const consolidatedTotals = calculateConsolidatedTotals(latestPvsPerAgent);
+                        
+                        console.log(`[DEBUG] Consolidated totals for ${agencyKey}:`, consolidatedTotals);
                         const pvAgency = agencies.find(a => a.id === agencyKey);
 
                         return (
