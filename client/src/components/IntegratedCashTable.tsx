@@ -30,17 +30,17 @@ export default function IntegratedCashTable({
   };
 
   return (
-    <div className="border-2 border-border rounded-md overflow-hidden shadow-md">
+    <div className="border-2 border-border rounded-md overflow-hidden shadow-md max-w-sm">
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gradient-to-r from-primary/15 to-primary/8">
-            <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left w-20">
+            <th className="border-r border-border px-1 py-1 text-xs font-bold uppercase text-left w-16">
               
             </th>
-            <th className="border-r border-border px-2 py-2 text-xs font-bold text-center bg-editable/40" colSpan={1}>
+            <th className="border-r border-border px-1 py-1 text-xs font-bold text-center bg-editable/40 w-20">
               Caisse
             </th>
-            <th className="px-2 py-2 text-xs font-bold text-center bg-blue-100/60" colSpan={1}>
+            <th className="px-1 py-1 text-xs font-bold text-center bg-blue-100/60 w-20">
               Coffre
             </th>
           </tr>
@@ -48,12 +48,12 @@ export default function IntegratedCashTable({
         <tbody>
           {items.map((item, index) => (
             <tr key={index} className="hover:bg-muted/20 transition-colors">
-              <td className="border-r border-border px-2 py-1 text-center bg-muted/10">
-                <div className="flex items-center justify-center gap-1">
-                  <span className="text-base" style={{ color: item.color }}>
+              <td className="border-r border-border px-1 py-0.5 text-center bg-muted/10">
+                <div className="flex items-center justify-center gap-0.5">
+                  <span className="text-sm" style={{ color: item.color }}>
                     {item.icon}
                   </span>
-                  <span className="text-xs font-semibold">
+                  <span className="text-xs font-medium">
                     {formatNumber(item.value)}
                   </span>
                 </div>
@@ -62,7 +62,7 @@ export default function IntegratedCashTable({
                 <EditableCell
                   value={item.caisseAmount}
                   onChange={(val) => onItemChange(index, "caisseAmount", val)}
-                  className="border-0 w-full rounded-none h-8 text-xs px-1"
+                  className="border-0 w-full rounded-none h-7 text-xs px-0.5"
                   dataTestId={`input-item-caisse-${index}`}
                 />
               </td>
@@ -70,7 +70,7 @@ export default function IntegratedCashTable({
                 <EditableCell
                   value={item.coffreAmount}
                   onChange={(val) => onItemChange(index, "coffreAmount", val)}
-                  className="border-0 w-full rounded-none h-8 text-xs px-1 bg-blue-50/50"
+                  className="border-0 w-full rounded-none h-7 text-xs px-0.5 bg-blue-50/50"
                   dataTestId={`input-item-coffre-${index}`}
                 />
               </td>
@@ -78,17 +78,17 @@ export default function IntegratedCashTable({
           ))}
           
           <tr className="border-t-2 border-border bg-gradient-to-r from-accent/40 to-accent/20 font-bold">
-            <td className="border-r border-border px-2 py-2 text-sm">
+            <td className="border-r border-border px-1 py-1 text-xs">
               Total
             </td>
             <td
-              className="border-r border-border px-2 py-2 text-right font-mono text-sm tabular-nums bg-editable/50"
+              className="border-r border-border px-1 py-1 text-right font-mono text-xs tabular-nums bg-editable/50"
               data-testid="text-total-caisse"
             >
               {formatNumber(totalCaisse)}
             </td>
             <td
-              className="px-2 py-2 text-right font-mono text-sm tabular-nums bg-blue-100/70"
+              className="px-1 py-1 text-right font-mono text-xs tabular-nums bg-blue-100/70"
               data-testid="text-total-coffre"
             >
               {formatNumber(totalCoffre)}
@@ -96,11 +96,11 @@ export default function IntegratedCashTable({
           </tr>
           
           <tr className="border-t-2 border-primary/40 bg-gradient-to-r from-primary/15 to-primary/8 font-bold">
-            <td className="px-2 py-2 text-base">
+            <td className="px-1 py-1 text-sm">
               Total
             </td>
             <td
-              className="px-2 py-2 text-right font-mono text-base tabular-nums bg-primary/25"
+              className="px-1 py-1 text-right font-mono text-sm tabular-nums bg-primary/25"
               colSpan={2}
               data-testid="text-grand-total"
             >
