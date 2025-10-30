@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import TransactionDialog from "./TransactionDialog";
+import AddTransactionDialog from "./AddTransactionDialog";
 import EditableCell from "./EditableCell";
 
 export interface Transaction {
@@ -59,13 +59,13 @@ export default function BalanceSection({
     setDialogOpen(true);
   };
 
-  const handleAddFromDialog = (label: string, amount: number) => {
-    onAddTransaction(dialogType, label, amount);
+  const handleAddFromDialog = (category: string, amount: number) => {
+    onAddTransaction(dialogType, category, amount);
   };
 
   return (
     <>
-      <TransactionDialog
+      <AddTransactionDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         type={dialogType}
