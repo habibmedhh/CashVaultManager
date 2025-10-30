@@ -51,7 +51,8 @@ interface OperationRow {
   transactionType?: "versement" | "retrait";
   amount: number;
   number: number;
-  details?: DetailedOperation[];
+  detailLabel?: string;
+  isDetailRow?: boolean;
 }
 
 export default function OperationsDetail() {
@@ -84,7 +85,23 @@ export default function OperationsDetail() {
         const time = pv.createdAt ? format(new Date(pv.createdAt), "HH:mm:ss") : "N/A";
 
         operations.forEach((op) => {
-          if (op.amount !== 0 || op.number !== 0) {
+          if (op.details && op.details.length > 0) {
+            op.details.forEach((detail) => {
+              if (detail.amount !== 0) {
+                rows.push({
+                  pvId: pv.id,
+                  date: pv.date,
+                  time,
+                  operationName: op.name,
+                  operationType: "operation",
+                  amount: op.type === "OUT" ? -detail.amount : detail.amount,
+                  number: 1,
+                  detailLabel: detail.label,
+                  isDetailRow: true,
+                });
+              }
+            });
+          } else if (op.amount !== 0 || op.number !== 0) {
             rows.push({
               pvId: pv.id,
               date: pv.date,
@@ -93,7 +110,7 @@ export default function OperationsDetail() {
               operationType: "operation",
               amount: op.type === "OUT" ? -op.amount : op.amount,
               number: op.number,
-              details: op.details,
+              isDetailRow: false,
             });
           }
         });
@@ -109,6 +126,7 @@ export default function OperationsDetail() {
               transactionType: trans.type,
               amount: trans.type === "versement" ? trans.amount : -trans.amount,
               number: 1,
+              isDetailRow: false,
             });
           }
         });
@@ -347,6 +365,7 @@ export default function OperationsDetail() {
                       <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Heure</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Opération</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold">Description</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Type</th>
                       <th className="px-4 py-3 text-right text-sm font-semibold">Nombre</th>
                       <th className="px-4 py-3 text-right text-sm font-semibold">Montant</th>
@@ -366,18 +385,10 @@ export default function OperationsDetail() {
                           {row.time}
                         </td>
                         <td className="px-4 py-3 text-sm" data-testid={`text-name-${index}`}>
-                          <div>
-                            {row.operationName}
-                            {row.details && row.details.length > 0 && (
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {row.details.map((d, i) => (
-                                  <div key={d.id}>
-                                    • {d.label}: {formatNumber(d.amount)} MAD
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                          {row.operationName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground" data-testid={`text-detail-${index}`}>
+                          {row.detailLabel || "-"}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           {row.operationType === "operation" ? (
