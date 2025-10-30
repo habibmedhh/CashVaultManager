@@ -38,6 +38,7 @@ export default function OperationsTable({
     : operations;
 
   const total = operations.reduce((sum, op) => sum + op.amount, 0);
+  const totalNumber = operations.reduce((sum, op) => sum + op.number, 0);
 
   const formatNumber = (num: number) => {
     return num.toLocaleString("fr-FR", {
@@ -169,8 +170,14 @@ export default function OperationsTable({
               </tr>
             ))}
             <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
-              <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700" colSpan={2}>
+              <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700">
                 TOTAL
+              </td>
+              <td
+                className="border-r border-slate-300 px-1 py-1.5 text-center font-mono text-[11px] tabular-nums text-slate-900"
+                data-testid="text-operations-total-number"
+              >
+                {totalNumber}
               </td>
               <td
                 className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-slate-900"
