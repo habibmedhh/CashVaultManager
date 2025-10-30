@@ -321,7 +321,7 @@ export default function PrintPV() {
                   );
                 })}
                 <tr className="total-row">
-                  <td colSpan={2}>TOTAL CAISSE</td>
+                  <td colSpan={2}>TOTAL</td>
                   <td className="text-right">{totalCash.toFixed(2)}</td>
                 </tr>
               </tbody>
@@ -395,36 +395,58 @@ export default function PrintPV() {
             </table>
           </div>
 
+          {/* Section Récapitulatif Caisse/Coffre */}
+          <div className="print-section">
+            <div className="section-title">RÉCAPITULATIF</div>
+            <table className="print-table">
+              <tbody>
+                <tr>
+                  <td>Total Caisse</td>
+                  <td className="text-right font-bold">{totalCaisse.toFixed(2)} DH</td>
+                </tr>
+                <tr>
+                  <td>Total Coffre</td>
+                  <td className="text-right font-bold">{totalCoffre.toFixed(2)} DH</td>
+                </tr>
+                <tr className="total-row">
+                  <td>Total Caisse + Coffre</td>
+                  <td className="text-right">{totalCash.toFixed(2)} DH</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           {/* Section Soldes et Transactions */}
           <div className="print-section">
             <div className="section-title">SOLDES ET TRANSACTIONS</div>
             <table className="print-table">
               <tbody>
                 <tr className="important-row">
-                  <td>Solde départ</td>
-                  <td className="text-center">-</td>
-                  <td className="text-right">{pvData.soldeDepart.toFixed(2)}</td>
+                  <td colSpan={2}>Solde départ</td>
+                  <td className="text-right">{pvData.soldeDepart.toFixed(2)} DH</td>
                 </tr>
                 <tr>
                   <td>Versement banque</td>
-                  <td className="text-center">{versementCount}</td>
-                  <td className="text-right">{totalVersements.toFixed(2)}</td>
+                  <td className="text-center">({versementCount})</td>
+                  <td className="text-right">{totalVersements.toFixed(2)} DH</td>
                 </tr>
                 <tr>
                   <td>Retrait banque</td>
-                  <td className="text-center">{retraitCount}</td>
-                  <td className="text-right">{totalRetraits.toFixed(2)}</td>
+                  <td className="text-center">({retraitCount})</td>
+                  <td className="text-right">{totalRetraits.toFixed(2)} DH</td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>Total Opérations</td>
+                  <td className="text-right">{totalOperationsAmount.toFixed(2)} DH</td>
                 </tr>
                 <tr className="important-row">
-                  <td>Solde final</td>
-                  <td className="text-center">-</td>
-                  <td className="text-right">{soldeFinal.toFixed(2)}</td>
+                  <td colSpan={2}>Solde final</td>
+                  <td className="text-right">{soldeFinal.toFixed(2)} DH</td>
                 </tr>
                 <tr className="important-row">
-                  <td>Écart de la caisse</td>
-                  <td className="text-center">{totalOperationsCount}</td>
+                  <td colSpan={2}>Écart de la caisse</td>
                   <td className={`text-right ${ecart > 0 ? 'ecart-positive' : ecart < 0 ? 'ecart-negative' : ''}`}>
-                    {ecart.toFixed(2)}
+                    {ecart.toFixed(2)} DH
                   </td>
                 </tr>
               </tbody>
