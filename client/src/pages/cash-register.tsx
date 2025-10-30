@@ -5,14 +5,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Download, Printer, Save } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import CashCountTable from "@/components/CashCountTable";
+import IntegratedCashTable from "@/components/IntegratedCashTable";
 import OperationsTable, { type Operation } from "@/components/OperationsTable";
 import BalanceSection, { type Transaction } from "@/components/BalanceSection";
 import { useToast } from "@/hooks/use-toast";
 
 interface Denomination {
   value: number;
-  quantity: number;
+  caisseQty: number;
+  coffreQty: number;
 }
 
 export default function CashRegister() {
@@ -20,24 +21,24 @@ export default function CashRegister() {
   const [date, setDate] = useState<Date>(new Date());
 
   const [bills, setBills] = useState<Denomination[]>([
-    { value: 200, quantity: 1 },
-    { value: 100, quantity: 2 },
-    { value: 50, quantity: 0 },
-    { value: 20, quantity: 1 },
-    { value: 10, quantity: 0 },
-    { value: 5, quantity: 0 },
-    { value: 2, quantity: 1 },
+    { value: 200, caisseQty: 1, coffreQty: 0 },
+    { value: 100, caisseQty: 2, coffreQty: 1 },
+    { value: 50, caisseQty: 0, coffreQty: 0 },
+    { value: 20, caisseQty: 1, coffreQty: 0 },
+    { value: 10, caisseQty: 0, coffreQty: 0 },
+    { value: 5, caisseQty: 0, coffreQty: 0 },
+    { value: 2, caisseQty: 1, coffreQty: 0 },
   ]);
 
   const [coins, setCoins] = useState<Denomination[]>([
-    { value: 2, quantity: 0 },
-    { value: 1, quantity: 0 },
-    { value: 0.5, quantity: 0 },
-    { value: 0.2, quantity: 1 },
-    { value: 0.1, quantity: 3 },
-    { value: 0.05, quantity: 0 },
-    { value: 0.02, quantity: 0 },
-    { value: 0.01, quantity: 1 },
+    { value: 2, caisseQty: 0, coffreQty: 0 },
+    { value: 1, caisseQty: 0, coffreQty: 0 },
+    { value: 0.5, caisseQty: 0, coffreQty: 0 },
+    { value: 0.2, caisseQty: 1, coffreQty: 3 },
+    { value: 0.1, caisseQty: 3, coffreQty: 0 },
+    { value: 0.05, caisseQty: 0, coffreQty: 0 },
+    { value: 0.02, caisseQty: 0, coffreQty: 0 },
+    { value: 0.01, caisseQty: 1, coffreQty: 0 },
   ]);
 
   const [operations, setOperations] = useState<Operation[]>([
@@ -54,6 +55,12 @@ export default function CashRegister() {
     { id: "11", name: "ENVOI MG + VU", number: 0, amount: 0 },
     { id: "12", name: "PAIEMENT MARCHAND", number: 0, amount: -23012 },
     { id: "13", name: "TAXES / IMPOTS", number: 0, amount: 0 },
+    { id: "14", name: "ASSURANCE AXA SAHAM", number: 0, amount: 0 },
+    { id: "15", name: "MIZAT MALL PAY EXPRESSE", number: 0, amount: 0 },
+    { id: "16", name: "RECHARGE DETAILLANT", number: 0, amount: 100 },
+    { id: "17", name: "RECHARGE COMPTE", number: 0, amount: 0 },
+    { id: "18", name: "RETRAIT COMPTE", number: 0, amount: 0 },
+    { id: "19", name: "Factures IAM ORANGE IAVI", number: 75, amount: -6662.61 },
   ]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -63,15 +70,23 @@ export default function CashRegister() {
 
   const [soldeDepart, setSoldeDepart] = useState(11366.75);
 
-  const handleBillQuantityChange = (index: number, quantity: number) => {
+  const handleBillChange = (
+    index: number,
+    field: "caisseQty" | "coffreQty",
+    value: number
+  ) => {
     const newBills = [...bills];
-    newBills[index].quantity = quantity;
+    newBills[index][field] = value;
     setBills(newBills);
   };
 
-  const handleCoinQuantityChange = (index: number, quantity: number) => {
+  const handleCoinChange = (
+    index: number,
+    field: "caisseQty" | "coffreQty",
+    value: number
+  ) => {
     const newCoins = [...coins];
-    newCoins[index].quantity = quantity;
+    newCoins[index][field] = value;
     setCoins(newCoins);
   };
 
@@ -123,15 +138,13 @@ export default function CashRegister() {
     setTransactions(transactions.filter((t) => t.id !== id));
   };
 
-  const totalBills = bills.reduce(
-    (sum, b) => sum + b.value * b.quantity,
-    0
-  );
-  const totalCoins = coins.reduce(
-    (sum, c) => sum + c.value * c.quantity,
-    0
-  );
-  const totalCaisse = totalBills + totalCoins;
+  const calculateTotal = (items: Denomination[], field: "caisseQty" | "coffreQty") => {
+    return items.reduce((sum, item) => sum + item.value * item[field], 0);
+  };
+
+  const totalBillsCaisse = calculateTotal(bills, "caisseQty");
+  const totalCoinsCaisse = calculateTotal(coins, "caisseQty");
+  const totalCaisse = totalBillsCaisse + totalCoinsCaisse;
   const totalOperations = operations.reduce((sum, op) => sum + op.amount, 0);
 
   const handleSave = () => {
@@ -170,25 +183,20 @@ export default function CashRegister() {
     window.print();
   };
 
-  const formatNumber = (num: number) => {
-    return num.toLocaleString("fr-FR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="sticky top-0 z-10 bg-background pb-4 border-b print:hidden">
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-4 border-b-2 border-primary/20 shadow-sm print:hidden rounded-md px-4 pt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold">PV D'ARRÊTÉ DE CAISSE</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                PV D'ARRÊTÉ DE CAISSE
+              </h1>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="gap-2"
+                    className="gap-2 border-2"
                     data-testid="button-date-picker"
                   >
                     <CalendarIcon className="w-4 h-4" />
@@ -206,7 +214,7 @@ export default function CashRegister() {
               </Popover>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} data-testid="button-save">
+              <Button onClick={handleSave} data-testid="button-save" className="shadow-md">
                 <Save className="w-4 h-4 mr-2" />
                 Enregistrer
               </Button>
@@ -214,6 +222,7 @@ export default function CashRegister() {
                 variant="outline"
                 onClick={handleDownloadExcel}
                 data-testid="button-download-excel"
+                className="border-2"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Excel
@@ -222,6 +231,7 @@ export default function CashRegister() {
                 variant="outline"
                 onClick={handleDownloadPDF}
                 data-testid="button-download-pdf"
+                className="border-2"
               >
                 <Download className="w-4 h-4 mr-2" />
                 PDF
@@ -230,6 +240,7 @@ export default function CashRegister() {
                 variant="outline"
                 onClick={handlePrint}
                 data-testid="button-print"
+                className="border-2"
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Imprimer
@@ -238,60 +249,34 @@ export default function CashRegister() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <CashCountTable
-            title="Billets"
-            denominations={bills}
-            onQuantityChange={handleBillQuantityChange}
-            dataTestIdPrefix="bills"
+        <IntegratedCashTable
+          bills={bills}
+          coins={coins}
+          onBillChange={handleBillChange}
+          onCoinChange={handleCoinChange}
+        />
+
+        <div className="border-2 border-border rounded-md overflow-hidden shadow-sm">
+          <OperationsTable
+            operations={operations}
+            onOperationChange={handleOperationChange}
+            onAddOperation={handleAddOperation}
+            onRemoveOperation={handleRemoveOperation}
           />
-          <div>
-            <CashCountTable
-              title="Pièces"
-              denominations={coins}
-              onQuantityChange={handleCoinQuantityChange}
-              dataTestIdPrefix="coins"
-            />
-            <div className="mt-4 border p-4 space-y-2 bg-card">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Caisse:</span>
-                <span className="font-mono tabular-nums" data-testid="text-total-caisse">
-                  {formatNumber(totalCaisse)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Coffre:</span>
-                <span className="font-mono tabular-nums" data-testid="text-total-coffre">
-                  {formatNumber(0)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t font-bold text-lg">
-                <span>Total:</span>
-                <span className="font-mono tabular-nums" data-testid="text-grand-total">
-                  {formatNumber(totalCaisse)}
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <OperationsTable
-          operations={operations}
-          onOperationChange={handleOperationChange}
-          onAddOperation={handleAddOperation}
-          onRemoveOperation={handleRemoveOperation}
-        />
-
-        <BalanceSection
-          transactions={transactions}
-          onTransactionChange={handleTransactionChange}
-          onAddTransaction={handleAddTransaction}
-          onRemoveTransaction={handleRemoveTransaction}
-          soldeDepart={soldeDepart}
-          onSoldeChange={setSoldeDepart}
-          totalCaisse={totalCaisse}
-          totalOperations={totalOperations}
-        />
+        <div className="border-2 border-border rounded-md p-4 shadow-sm bg-card">
+          <BalanceSection
+            transactions={transactions}
+            onTransactionChange={handleTransactionChange}
+            onAddTransaction={handleAddTransaction}
+            onRemoveTransaction={handleRemoveTransaction}
+            soldeDepart={soldeDepart}
+            onSoldeChange={setSoldeDepart}
+            totalCaisse={totalCaisse}
+            totalOperations={totalOperations}
+          />
+        </div>
       </div>
     </div>
   );
