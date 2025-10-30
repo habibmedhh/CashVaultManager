@@ -76,9 +76,35 @@ export default function OperationsDetail() {
   const allOperations = useMemo(() => {
     if (!allPVs) return [];
 
+    // Grouper par date et prendre seulement le dernier PV pour chaque date
+    const groupedByDate = allPVs.reduce((acc, pv) => {
+      const dateKey = pv.date;
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(pv);
+      return acc;
+    }, {} as Record<string, CashRegister[]>);
+
+    // Pour chaque date, ne garder que le PV le plus récent
+    const latestPVs: CashRegister[] = Object.values(groupedByDate).map((pvs) => {
+      return pvs.sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        
+        // Comparer par timestamp d'abord
+        if (timeB !== timeA) {
+          return timeB - timeA;
+        }
+        
+        // Si les timestamps sont identiques, utiliser l'ID comme tiebreaker
+        return b.id.localeCompare(a.id);
+      })[0];
+    });
+
     const rows: OperationRow[] = [];
 
-    allPVs.forEach((pv) => {
+    latestPVs.forEach((pv) => {
       try {
         const operations: Operation[] = JSON.parse(pv.operationsData);
         const transactions: Transaction[] = JSON.parse(pv.transactionsData);
