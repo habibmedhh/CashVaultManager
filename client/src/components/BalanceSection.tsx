@@ -133,11 +133,11 @@ export default function BalanceSection({
                 </tr>
               ))}
               <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
-                <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700">
+                <td className="border-r border-slate-300 px-1.5 py-1.5 text-[11px] text-slate-700">
                   TOTAL
                 </td>
                 <td
-                  className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-emerald-700"
+                  className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-emerald-700 whitespace-nowrap"
                   data-testid="text-versement-total"
                 >
                   {formatNumber(totalVersements)} DH
@@ -203,11 +203,11 @@ export default function BalanceSection({
                 </tr>
               ))}
               <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
-                <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700">
+                <td className="border-r border-slate-300 px-1.5 py-1.5 text-[11px] text-slate-700">
                   TOTAL
                 </td>
                 <td
-                  className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-rose-700"
+                  className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-rose-700 whitespace-nowrap"
                   data-testid="text-retrait-total"
                 >
                   {formatNumber(totalRetraits)} DH
