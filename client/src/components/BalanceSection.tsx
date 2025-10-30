@@ -198,27 +198,6 @@ export default function BalanceSection({
           <tbody>
             <tr className="hover:bg-muted/10">
               <td className="border-r border-b border-border px-2 py-1 text-xs font-medium">
-                Total sans remise
-              </td>
-              <td
-                className="border-b border-border px-2 py-1 text-right font-mono text-xs tabular-nums bg-muted/20"
-                data-testid="text-total-sans-remise"
-              >
-                {formatNumber(totalSansRemise)}
-              </td>
-            </tr>
-            <tr className="hover:bg-muted/10">
-              <td className="border-r border-b border-border px-2 py-1 text-xs font-medium">
-                Total avo remise
-              </td>
-              <td className="border-b border-border p-0">
-                <div className="text-right font-mono text-xs tabular-nums bg-muted/20 h-8 px-2 flex items-center justify-end">
-                  {formatNumber(0)}
-                </div>
-              </td>
-            </tr>
-            <tr className="hover:bg-muted/10">
-              <td className="border-r border-b border-border px-2 py-1 text-xs font-medium">
                 Solde départ
               </td>
               <td className="border-b border-border p-0">

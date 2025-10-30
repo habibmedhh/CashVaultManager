@@ -35,8 +35,6 @@ export default function CashRegister() {
     { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "🪙", type: "piece" },
     { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "🪙", type: "piece" },
     { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "🪙", type: "piece" },
-    { value: 0.05, caisseAmount: 0, coffreAmount: 0, color: "#F5F5F5", icon: "🪙", type: "piece" },
-    { value: 0.02, caisseAmount: 0, coffreAmount: 0, color: "#FAFAFA", icon: "🪙", type: "piece" },
     { value: 0.01, caisseAmount: 0.01, coffreAmount: 0, color: "#FEFEFE", icon: "🪙", type: "piece" },
   ]);
 

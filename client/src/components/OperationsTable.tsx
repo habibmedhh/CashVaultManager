@@ -90,7 +90,7 @@ export default function OperationsTable({
         <table className="border-collapse">
           <thead>
             <tr className="bg-gradient-to-r from-primary/10 to-primary/5 border-y-2 border-border">
-              <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left">
+              <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left w-48">
                 Opération
               </th>
               <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-center w-20">
