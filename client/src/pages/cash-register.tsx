@@ -246,6 +246,7 @@ export default function CashRegister() {
             onOperationChange={handleOperationChange}
             onAddOperation={handleAddOperation}
             onRemoveOperation={handleRemoveOperation}
+            date={date}
           />
         </div>
 
