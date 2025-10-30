@@ -4,6 +4,13 @@ This is a professional cash register management application (MAD - "PV d'ArrÃªtÃ
 
 The system tracks cash denominations (bills and coins) across two locations (cash register and safe), manages various transaction operations (Western Union, MoneyGram, RIA, etc.), handles bank deposits and withdrawals, and automatically calculates balances and discrepancies.
 
+## Key Features
+
+1. **Daily PV Management**: Create and save multiple PVs per day, with automatic timestamp tracking
+2. **PV History**: View all historical PVs with date range filtering and detailed summaries
+3. **Operations Detail**: Comprehensive view of all operations and transactions with advanced filtering (by date, type, amount, search)
+4. **Multi-page Navigation**: Sidebar navigation for easy access to different features
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -18,7 +25,12 @@ Preferred communication style: Simple, everyday language.
 
 **State Management**: React's built-in useState and useEffect hooks for local component state. TanStack Query (React Query) handles server state management, caching, and data synchronization with the backend.
 
-**Routing**: Wouter provides lightweight client-side routing. Currently implements a single-page application pattern with the main cash register interface at the root route.
+**Routing**: Wouter provides lightweight client-side routing with multiple pages:
+- `/` - Main cash register PV interface
+- `/historique` - PV history with date filtering
+- `/operations` - Detailed operations view with advanced filters
+
+**Navigation**: Shadcn sidebar component provides persistent navigation across all pages.
 
 **Design System**: Custom color palette with deep navy/slate blue backgrounds, emerald for positive values, ruby for negative values, and sapphire for primary actions. Typography uses Inter for interface text and JetBrains Mono for numeric values to ensure tabular alignment and readability of financial data.
 
@@ -35,8 +47,10 @@ Preferred communication style: Simple, everyday language.
 **Language**: TypeScript with ES modules for type safety and modern JavaScript features.
 
 **API Design**: RESTful endpoints for cash register data operations:
-- `POST /api/cash-register` - Save cash register data
-- `GET /api/cash-register/:date` - Retrieve data by date
+- `POST /api/cash-register` - Save cash register data (creates new PV each time)
+- `GET /api/cash-register/:date` - Retrieve latest PV for specific date
+- `GET /api/cash-registers` - Retrieve all PVs sorted by date
+- `GET /api/cash-registers/range/:startDate/:endDate` - Retrieve PVs in date range
 
 **Storage Strategy**: Dual-layer storage implementation via `IStorage` interface:
 - In-memory storage (`MemStorage`) for development/testing
@@ -52,9 +66,19 @@ Preferred communication style: Simple, everyday language.
 
 **Database Schema**:
 - `users` table: Authentication with username/password
-- `cash_registers` table: Stores daily cash register records with date as natural key, serialized JSON for complex data structures (bills, coins, operations, transactions), and `solde_depart` (opening balance)
+- `cash_registers` table: Stores cash register records with:
+  - `date`: Natural date key (YYYY-MM-DD format)
+  - `createdAt`: Timestamp for tracking when PV was created (allows multiple PVs per day)
+  - Indexes on both `date` and `createdAt` for efficient querying
+  - Serialized JSON for complex data structures (bills, coins, operations, transactions)
+  - `solde_depart` (opening balance)
 
 **Schema Evolution Strategy**: JSON fields allow flexibility for adding new transaction types or cash denominations without schema migrations. Core financial data (totals, dates, user references) remain in structured columns.
+
+**PV Versioning Strategy**: The system now supports multiple PVs per day by creating a new record each time the user saves. The latest PV for any given date is retrieved using the `createdAt` timestamp. This allows:
+- Historical tracking of all changes throughout the day
+- Ability to review previous states of the PV
+- Audit trail for financial operations
 
 **Database Connectivity**: Configured for PostgreSQL via Neon serverless driver (`@neondatabase/serverless`), with connection string from `DATABASE_URL` environment variable.
 
