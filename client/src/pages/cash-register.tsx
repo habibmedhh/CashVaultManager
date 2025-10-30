@@ -164,12 +164,12 @@ export default function CashRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-3">
+    <div className="min-h-screen bg-slate-50 p-3">
       <div className="max-w-6xl mx-auto space-y-4">
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-3 border-b-2 border-primary/20 shadow-sm print:hidden rounded-md px-3 pt-3">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-800 to-slate-700 shadow-lg print:hidden rounded-lg px-4 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <h1 className="text-lg font-bold tracking-tight text-white">
                 PV D'ARRÊTÉ DE CAISSE
               </h1>
               <Popover>
@@ -177,7 +177,7 @@ export default function CashRegister() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-2"
+                    className="gap-2 bg-slate-600 border-slate-500 hover:bg-slate-500 text-white"
                     data-testid="button-date-picker"
                   >
                     <CalendarIcon className="w-3 h-3" />
@@ -195,16 +195,16 @@ export default function CashRegister() {
               </Popover>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} size="sm" data-testid="button-save" className="shadow-md">
+              <Button onClick={handleSave} size="sm" data-testid="button-save" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
                 <Save className="w-3 h-3 mr-1" />
-                <span className="text-xs">Enregistrer</span>
+                <span className="text-xs font-medium">Enregistrer</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadExcel}
                 data-testid="button-download-excel"
-                className="border-2"
+                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
               >
                 <Download className="w-3 h-3 mr-1" />
                 <span className="text-xs">Excel</span>
@@ -214,7 +214,7 @@ export default function CashRegister() {
                 size="sm"
                 onClick={handleDownloadPDF}
                 data-testid="button-download-pdf"
-                className="border-2"
+                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
               >
                 <Download className="w-3 h-3 mr-1" />
                 <span className="text-xs">PDF</span>
@@ -224,7 +224,7 @@ export default function CashRegister() {
                 size="sm"
                 onClick={handlePrint}
                 data-testid="button-print"
-                className="border-2"
+                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
               >
                 <Printer className="w-3 h-3 mr-1" />
                 <span className="text-xs">Imprimer</span>
@@ -238,7 +238,7 @@ export default function CashRegister() {
           onItemChange={handleItemChange}
         />
 
-        <div className="border-2 border-border rounded-md overflow-hidden shadow-sm">
+        <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
           <OperationsTable
             operations={operations}
             onOperationChange={handleOperationChange}
@@ -248,7 +248,7 @@ export default function CashRegister() {
           />
         </div>
 
-        <div className="border-2 border-border rounded-md p-3 shadow-sm bg-card">
+        <div className="border border-border rounded-lg p-3 shadow-sm bg-card">
           <BalanceSection
             transactions={transactions}
             onTransactionChange={handleTransactionChange}

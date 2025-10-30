@@ -1,188 +1,165 @@
-# Design Guidelines: Cash Register Management Application
+# Design Guidelines: Professional Cash Register Management Application (MAD)
 
 ## Design Approach
 
-**Selected Approach:** Design System - Utility-Focused
-This is a productivity tool for cash management requiring precision, clarity, and efficiency. The design prioritizes data entry accuracy and calculation visibility over visual aesthetics. Drawing inspiration from modern spreadsheet applications (Google Sheets, Airtable) and enterprise data tools (Notion tables, Linear data views) while maintaining Excel familiarity.
+**Selected Approach:** Design System - Financial Data Productivity
+Inspired by modern fintech applications (Stripe Dashboard, Revolut Business) and premium spreadsheet tools (Airtable, Notion databases), prioritizing precision, trust, and operational efficiency. Every design decision reinforces financial credibility and data clarity.
 
-**Core Principle:** Faithful spreadsheet recreation with modern web polish - every pixel serves data clarity and operational efficiency.
+**Core Principle:** Professional financial tool with refined aesthetics - where sophisticated visual design enhances, never distracts from, critical cash management operations.
 
-## Layout System
+## Color System
 
-**Spacing Primitives:** Use Tailwind units of 1, 2, 4, and 6 consistently
-- Cell padding: p-2
-- Section spacing: mb-4 and mb-6 between major sections
-- Container margins: mx-4 on mobile, mx-6 on desktop
-- Table borders: border and border-2 for emphasis
+**Primary Palette:**
+- Deep Navy: #1e293b (primary backgrounds, headers)
+- Slate Blue: #334155 (secondary surfaces, table headers)
+- Crisp White: #ffffff (input backgrounds, cards)
+- Soft Gray: #f8fafc (alternate row backgrounds)
 
-**Page Structure:**
-- Full-width container (max-w-7xl mx-auto) for optimal table viewing
-- Header bar with date selector and action buttons (h-16)
-- Main content area with scrollable table sections
-- Fixed action bar at top for Save/Download/Print functions
-- Responsive breakpoint: single column on mobile (stacked tables), full table view on tablet+
+**Accent Colors:**
+- Emerald: #059669 (positive values, deposits, success states)
+- Amber: #d97706 (warnings, pending calculations)
+- Ruby: #dc2626 (negative values, withdrawals, errors)
+- Sapphire: #2563eb (primary actions, interactive elements)
+
+**Gradients (Subtle Application):**
+- Header gradient: linear from #1e293b to #334155 (top to bottom, 5% opacity variation)
+- Card elevation: subtle radial gradient for depth on calculation cards
+- Button hover states: 10% lighter gradient overlay
+
+**Surface Hierarchy:**
+- Level 0 (Background): #f1f5f9
+- Level 1 (Cards/Tables): #ffffff with 1px border #e2e8f0
+- Level 2 (Headers): #334155 with white text
+- Level 3 (Active cells): #eff6ff with sapphire border
 
 ## Typography
 
-**Font Family:** 
-- Primary: 'Inter' or 'Roboto' for clean data readability
-- Monospace: 'Roboto Mono' for numeric values and calculations
+**Font Stack:**
+- Primary: 'Inter' (400, 500, 600, 700) - all interface text
+- Numeric: 'JetBrains Mono' (500, 600) - currency values, calculations
+- Arabic Support: 'IBM Plex Sans Arabic' for dirham symbol and mixed content
 
 **Hierarchy:**
-- Page title (PV d'arrêté de caisse): text-2xl font-semibold
-- Section headers: text-lg font-medium uppercase tracking-wide
-- Table headers: text-sm font-semibold uppercase
-- Cell labels: text-sm font-medium
-- Numeric values: text-base font-mono tabular-nums (ensures number alignment)
-- Formula display: text-xs font-mono italic
-- Total rows: text-base font-bold
+- App Title: text-2xl font-semibold tracking-tight (Deep Navy)
+- Section Headers: text-base font-semibold uppercase tracking-wider letter-spacing-0.05em (Slate Blue)
+- Table Headers: text-sm font-semibold uppercase (White on Slate Blue background)
+- Labels: text-sm font-medium (Deep Navy)
+- Numeric Values: text-base font-mono tabular-nums font-medium (Deep Navy)
+- Totals: text-lg font-mono font-semibold (Deep Navy)
+- Currency Symbol: "DH" or "د.م." positioned consistently after amounts
+
+## Layout System
+
+**Spacing Primitives:** Tailwind units of 1, 2, 3, 4, 6
+- Cell padding: px-3 py-2 (compact yet readable)
+- Inter-section spacing: mb-6
+- Container padding: px-4 md:px-6
+- Table row height: h-11 (optimized for data density)
+
+**Page Structure:**
+- Maximum width container: max-w-7xl mx-auto
+- Fixed header bar: h-14 with gradient background, sticky top-0 z-20
+- Content area: pt-4 pb-6 with subtle background pattern
+- Action bar integrated into header: right-aligned button group
+- Date selector: left side of header with calendar icon
+- Three-section layout: Billets/Pièces (grid-cols-2 gap-4) → Opérations (full-width) → Soldes (grid-cols-3 gap-4)
 
 ## Component Library
 
-### Core Table Structure
-**Three Main Tables:** Each with distinct visual separation (mb-6 between tables)
+### Table Components
 
-1. **Billets & Pièces Section (Top):**
-   - Two side-by-side tables (grid-cols-2 gap-4 on desktop)
-   - Column headers: Dénomination | Quantité | Montant
-   - Row height: h-10 for comfortable data entry
-   - Footer row for totals with emphasized styling
+**Primary Table Structure:**
+- Container: rounded-lg border border-slate-200 overflow-hidden
+- Header row: slate-blue background, white text, h-10, border-b-2
+- Data rows: alternating backgrounds (white/soft-gray), h-11, border-b
+- Hover state: subtle sapphire tint (bg-blue-50 bg-opacity-30)
+- Total rows: border-t-2 border-slate-300, font-bold, pt-3 mt-1
 
-2. **Opérations Section (Middle):**
-   - Full-width table
-   - Columns: Libellé | Montant | Type (Entrée/Sortie)
-   - Multiple input rows (minimum 10 visible rows)
-   - Auto-calculating total row
+**Billets & Pièces Tables:**
+- Side-by-side cards with elevation (shadow-sm)
+- Headers: "BILLETS" and "PIÈCES" in tracking-wider uppercase
+- Three columns: Dénomination (40%) | Quantité (30%) | Montant (30%)
+- Pre-filled denominations (500, 200, 100... for bills; 10, 5, 2... for coins)
+- Automatic calculation: Quantité × Dénomination = Montant
+- Subtotals row with emerald accent for positive sums
 
-3. **Versements/Retraits + Soldes Section (Bottom):**
-   - Split layout: left side for transactions, right side for balance summary
-   - Solde départ, Solde final, Écart caisse displayed prominently
-   - Écart caisse gets special visual treatment (larger text, emphasized border)
+**Opérations Table:**
+- Full-width card with shadow-md
+- Four columns: # (5%) | Libellé (45%) | Montant (30%) | Type (20%)
+- Minimum 12 visible rows with add-row button
+- Type column: dropdown with emerald (Entrée) or ruby (Sortie) badge
+- Running total calculation displayed in footer
 
-### Cell Types
+**Soldes Panel:**
+- Three-column grid with distinct cards
+- Left: Versements (deposits) with emerald accent border
+- Center: Retraits (withdrawals) with ruby accent border  
+- Right: Récapitulatif (summary) with sapphire accent border, larger text
+- Écart caisse: prominent display with border-2, conditional color (green if 0, amber if small variance, red if significant)
+
+### Input Fields
 
 **Editable Cells:**
-- Input fields styled as table cells: border, p-2, rounded-none
-- Focus state: prominent outline (ring-2) and subtle background shift
-- Placeholder text for guidance
-- Text alignment: right-aligned for numbers, left for labels
-- Validation indicators for invalid entries
+- Seamless table integration: border-none when inactive
+- Focus state: ring-2 ring-sapphire ring-offset-1, bg-blue-50
+- Number inputs: text-right, font-mono, tabular-nums
+- Text inputs: text-left, font-sans
+- Validation: invalid inputs show subtle ruby border shake animation
 
 **Calculated Cells:**
-- Read-only appearance with subtle background differentiation
-- Display formula on hover via tooltip
-- Click outside triggers calculation and display update
-- Formula preview in small text below value when focused
+- Read-only: bg-slate-50 with lock icon (size-3) positioned absolute top-1 right-1
+- Formula tooltip on hover: rounded-md bg-slate-800 text-white px-2 py-1 text-xs
+- Update animation: brief emerald glow (duration-300) when recalculated
 
-**Header Cells:**
-- Bold text, subtle background differentiation
-- Borders on all sides for grid clarity
-- Sticky positioning for long tables (sticky top-0)
+### Buttons & Actions
 
-### Navigation & Actions
+**Action Bar Buttons:**
+- Primary (Enregistrer): sapphire background, white text, px-5 py-2, rounded-md, font-medium, shadow-sm
+- Secondary (Télécharger Excel/PDF): white background, slate-700 text, border, px-4 py-2, rounded-md
+- Icon-only (Imprimer): square button (h-9 w-9) with icon, tooltip on hover
+- Group spacing: gap-2 with separator lines (border-r) between groups
 
-**Action Bar (Top):**
-- Fixed or sticky positioning (sticky top-0 z-10)
-- Button group with consistent spacing (gap-2)
-- Primary action (Enregistrer): prominent button size (px-6 py-2)
-- Secondary actions (Télécharger Excel, PDF, Imprimer): standard size (px-4 py-2)
-- Date picker integrated into header: inline calendar icon
+**Date Picker:**
+- Integrated button: slate background, white text, rounded-md, flex items-center gap-2
+- Calendar icon: size-4
+- Selected date: font-medium with subtle gradient background
 
-**Button Specifications:**
-- All buttons: rounded corners (rounded-md), medium font weight
-- Icon + text for clarity
-- Grouped by function with dividers between groups
+### Visual Enhancements
 
-### Form Elements
+**Card Elevation:**
+- Primary cards (tables): shadow-sm border border-slate-200
+- Summary cards: shadow-md with hover lift (translate-y--1 transition-transform)
+- Modals: shadow-2xl with backdrop blur
 
-**Input Fields within Tables:**
-- Seamless integration: no visible borders when not focused
-- Border appears on focus
-- Number inputs with step controls hidden (appearance: textfield)
-- Tab navigation follows logical top-to-bottom, left-to-right flow
-
-**Dropdowns (for transaction types):**
-- Minimal styling to blend with table aesthetic
-- Clear selected value display
-- Options list with adequate spacing (py-2)
-
-### Data Display
-
-**Numeric Formatting:**
-- Thousand separators for readability
-- Two decimal places for currency (XX.XX)
-- Negative values with minus sign (not parentheses)
-- Alignment: all numbers right-aligned within cells
-
-**Totals & Calculations:**
-- Distinct row styling (border-t-2, font-bold)
-- Larger text size for critical totals (Solde final, Écart caisse)
-- Visual separation from input rows (pt-2 spacing)
-
-### Modals & Overlays
-
-**Confirmation Dialogs:**
-- Simple centered modal (max-w-md)
-- Clear messaging with action buttons
-- Used for: confirming save, overwrite warnings, print preview
-
-**Print Preview:**
-- Full-screen overlay showing print layout
-- A4 paper format simulation
-- Close button (top-right) and Print button (bottom-right)
+**Subtle Details:**
+- Divider lines: 1px solid #e2e8f0 with 2px spacing
+- Corner radius: rounded-lg for containers, rounded-md for inputs
+- Micro-interactions: 150ms transitions for hover states
+- Loading states: skeleton screens with gradient shimmer animation
 
 ## Responsive Behavior
 
-**Desktop (lg and above):**
-- Full table layout with all columns visible
-- Side-by-side Billets/Pièces tables
-- Action bar spans full width
+**Desktop (lg+):** Full layout with side-by-side tables, all columns visible, action bar expanded
 
-**Tablet (md):**
-- Stack Billets/Pièces tables vertically
-- Maintain table structure with horizontal scroll if needed
-- Action bar remains at top
+**Tablet (md):** Stack Billets/Pièces vertically, maintain table structure, compact action bar
 
-**Mobile (base):**
-- Single column layout
-- Each section stacks vertically
-- Simplified action bar (icon-only buttons with tooltips)
-- Horizontal scroll for wide tables with fixed first column
+**Mobile (base):** Single column, horizontal scroll for tables with sticky first column, icon-only action buttons with labels below
 
 ## Accessibility
 
-**Keyboard Navigation:**
-- Tab through all editable cells in logical order
-- Enter to edit cell, Escape to cancel
-- Arrow keys for cell navigation within tables
-- Keyboard shortcuts for actions (Ctrl+S for save, Ctrl+P for print)
-
-**Screen Reader Support:**
-- Descriptive labels for all input fields
-- Table headers properly associated (scope attributes)
-- Status announcements for calculations and saves
-- Error messages linked to inputs (aria-describedby)
-
-**Visual Clarity:**
-- High contrast between text and backgrounds
-- Clear focus indicators (minimum 2px outline)
-- Sufficient touch targets (minimum 44x44px on mobile)
-- No color-only indicators (use icons + color)
-
-## Animations
-
-**Minimal, purposeful only:**
-- Fade-in for modals (duration-200)
-- Subtle highlight flash on calculated cell update (duration-300)
-- Loading spinner during save/download operations
-- No decorative animations - focus remains on data
+- Keyboard navigation: tab order follows visual flow, arrow keys for cell navigation
+- Focus indicators: minimum 2px ring with high contrast
+- ARIA labels: all inputs, calculated fields, and actions properly labeled
+- Screen reader announcements: calculation updates, save confirmations, errors
+- Touch targets: minimum 44×44px on mobile
+- Color independence: icons + text for all status indicators
 
 ## Print Optimization
 
-**Print Layout:**
-- A4 format with appropriate margins (1.5cm all sides)
-- Page breaks respect table boundaries
-- Header with date on every page
-- Footer with page numbers
-- Remove action buttons and interactive elements
-- Ensure all borders print clearly
+- A4 format, 1.5cm margins
+- Grayscale conversion: maintain readability
+- Remove interactive elements, show all calculated values
+- Header: date and "PV d'arrêté de caisse" on every page
+- Footer: page numbers, timestamp
+- Table borders: 0.5pt solid for clarity
+- Page breaks: respect section boundaries

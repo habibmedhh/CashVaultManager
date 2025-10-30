@@ -60,14 +60,14 @@ export default function OperationsTable({
     <>
       <div className="flex flex-col">
         <div className="flex items-center justify-between mb-2 px-3 pt-3">
-          <h3 className="text-base font-bold uppercase tracking-wide bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
             Opérations
           </h3>
           <Button
             size="sm"
             onClick={onAddOperation}
             data-testid="button-add-operation"
-            className="shadow-sm h-7 text-xs"
+            className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
           >
             <Plus className="w-3 h-3 mr-1" />
             Ajouter
@@ -75,52 +75,52 @@ export default function OperationsTable({
         </div>
         <table className="border-collapse">
           <thead>
-            <tr className="bg-gradient-to-r from-primary/10 to-primary/5 border-y-2 border-border">
-              <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-left w-48">
+            <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
+              <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left w-40 text-white">
                 Opération
               </th>
-              <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-center w-20">
+              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white">
                 Nombre
               </th>
-              <th className="border-r border-border px-2 py-2 text-xs font-bold uppercase text-right w-28">
+              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white">
                 Montant
               </th>
-              <th className="px-1 py-2 w-20"></th>
+              <th className="px-1 py-1.5 w-16 text-white"></th>
             </tr>
           </thead>
           <tbody>
             {operations.map((op, index) => (
-              <tr key={op.id} className={`hover:bg-muted/30 transition-colors ${index % 2 === 0 ? 'bg-muted/5' : ''}`}>
-                <td className="border-r border-border p-0">
+              <tr key={op.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                <td className="border-r border-slate-200 p-0">
                   <input
                     type="text"
                     value={op.name}
                     onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
-                    className="h-8 px-2 w-full bg-editable hover-elevate active-elevate-2 focus:ring-2 focus:ring-primary focus:outline-none text-xs"
+                    className="h-7 px-1.5 w-full bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary focus:outline-none text-[11px]"
                     data-testid={`input-operation-name-${op.id}`}
                   />
                 </td>
-                <td className="border-r border-border p-0">
+                <td className="border-r border-slate-200 p-0">
                   <EditableCell
                     value={op.number}
                     onChange={(val) => onOperationChange(op.id, "number", val)}
-                    className="border-0 w-full rounded-none text-center h-8 text-xs px-1"
+                    className="border-0 w-full rounded-none text-center h-7 text-[11px] px-0.5"
                     dataTestId={`input-operation-number-${op.id}`}
                   />
                 </td>
-                <td className="border-r border-border p-0">
+                <td className="border-r border-slate-200 p-0">
                   <div className="flex items-center">
                     <EditableCell
                       value={op.amount}
                       onChange={(val) => onOperationChange(op.id, "amount", val)}
                       allowFormula={true}
-                      className="border-0 flex-1 rounded-none h-8 text-xs px-1"
+                      className="border-0 flex-1 rounded-none h-7 text-[11px] px-0.5"
                       dataTestId={`input-operation-amount-${op.id}`}
                       editable={!op.details || op.details.length === 0}
                     />
                     {op.details && op.details.length > 0 && (
                       <div className="px-1">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" title="Calculé à partir des détails" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir des détails" />
                       </div>
                     )}
                   </div>
@@ -131,7 +131,7 @@ export default function OperationsTable({
                       size="icon"
                       variant="ghost"
                       onClick={() => handleOpenDetails(op.id)}
-                      className="h-7 w-7"
+                      className="h-6 w-6"
                       title="Opérations détaillées"
                       data-testid={`button-details-${op.id}`}
                     >
@@ -141,7 +141,7 @@ export default function OperationsTable({
                       size="icon"
                       variant="ghost"
                       onClick={() => onRemoveOperation(op.id)}
-                      className="h-7 w-7"
+                      className="h-6 w-6"
                       data-testid={`button-remove-operation-${op.id}`}
                     >
                       <X className="w-3 h-3" />
@@ -150,15 +150,15 @@ export default function OperationsTable({
                 </td>
               </tr>
             ))}
-            <tr className="font-bold border-t-2 border-primary/30 bg-gradient-to-r from-accent/40 to-accent/20">
-              <td className="border-r border-border px-2 py-2 text-sm" colSpan={2}>
+            <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
+              <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700" colSpan={2}>
                 TOTAL
               </td>
               <td
-                className="border-r border-border px-2 py-2 text-right font-mono text-sm tabular-nums bg-accent/50"
+                className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-slate-900"
                 data-testid="text-operations-total"
               >
-                {formatNumber(total)}
+                {formatNumber(total)} DH
               </td>
               <td></td>
             </tr>

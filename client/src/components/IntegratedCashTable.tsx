@@ -30,39 +30,39 @@ export default function IntegratedCashTable({
   };
 
   return (
-    <div className="border-2 border-border rounded-md overflow-hidden shadow-md max-w-sm">
+    <div className="border border-border rounded-lg overflow-hidden shadow-sm max-w-xs bg-card">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gradient-to-r from-primary/15 to-primary/8">
-            <th className="border-r border-border px-1 py-1 text-xs font-bold uppercase text-left w-16">
+          <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
+            <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left w-14 text-white">
               
             </th>
-            <th className="border-r border-border px-1 py-1 text-xs font-bold text-center bg-editable/40 w-20">
+            <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white">
               Caisse
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-center bg-blue-100/60 w-20">
+            <th className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white">
               Coffre
             </th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={index} className="hover:bg-muted/20 transition-colors">
-              <td className="border-r border-border px-1 py-0.5 text-center bg-muted/10">
+            <tr key={index} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
+              <td className="border-r border-slate-200 px-1 py-0.5 text-center bg-slate-50/30">
                 <div className="flex items-center justify-center gap-0.5">
-                  <span className="text-sm" style={{ color: item.color }}>
+                  <span className="text-xs" style={{ color: item.color }}>
                     {item.icon}
                   </span>
-                  <span className="text-xs font-medium">
+                  <span className="text-[10px] font-semibold text-slate-700">
                     {formatNumber(item.value)}
                   </span>
                 </div>
               </td>
-              <td className="border-r border-border p-0">
+              <td className="border-r border-slate-200 p-0">
                 <EditableCell
                   value={item.caisseAmount}
                   onChange={(val) => onItemChange(index, "caisseAmount", val)}
-                  className="border-0 w-full rounded-none h-7 text-xs px-0.5"
+                  className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
                   dataTestId={`input-item-caisse-${index}`}
                 />
               </td>
@@ -70,41 +70,41 @@ export default function IntegratedCashTable({
                 <EditableCell
                   value={item.coffreAmount}
                   onChange={(val) => onItemChange(index, "coffreAmount", val)}
-                  className="border-0 w-full rounded-none h-7 text-xs px-0.5 bg-blue-50/50"
+                  className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
                   dataTestId={`input-item-coffre-${index}`}
                 />
               </td>
             </tr>
           ))}
           
-          <tr className="border-t-2 border-border bg-gradient-to-r from-accent/40 to-accent/20 font-bold">
-            <td className="border-r border-border px-1 py-1 text-xs">
+          <tr className="border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50 font-semibold">
+            <td className="border-r border-slate-300 px-1 py-1 text-[10px] text-slate-700">
               Total
             </td>
             <td
-              className="border-r border-border px-1 py-1 text-right font-mono text-xs tabular-nums bg-editable/50"
+              className="border-r border-slate-300 px-1 py-1 text-right font-mono text-[11px] tabular-nums text-slate-900"
               data-testid="text-total-caisse"
             >
               {formatNumber(totalCaisse)}
             </td>
             <td
-              className="px-1 py-1 text-right font-mono text-xs tabular-nums bg-blue-100/70"
+              className="px-1 py-1 text-right font-mono text-[11px] tabular-nums text-slate-900"
               data-testid="text-total-coffre"
             >
               {formatNumber(totalCoffre)}
             </td>
           </tr>
           
-          <tr className="border-t-2 border-primary/40 bg-gradient-to-r from-primary/15 to-primary/8 font-bold">
-            <td className="px-1 py-1 text-sm">
-              Total
+          <tr className="border-t border-slate-300 bg-gradient-to-r from-primary/90 to-primary/80 font-bold">
+            <td className="px-1 py-1.5 text-[11px] text-white">
+              TOTAL
             </td>
             <td
-              className="px-1 py-1 text-right font-mono text-sm tabular-nums bg-primary/25"
+              className="px-1 py-1.5 text-right font-mono text-sm tabular-nums text-white"
               colSpan={2}
               data-testid="text-grand-total"
             >
-              {formatNumber(grandTotal)}
+              {formatNumber(grandTotal)} DH
             </td>
           </tr>
         </tbody>

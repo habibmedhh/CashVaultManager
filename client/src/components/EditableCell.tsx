@@ -82,10 +82,10 @@ export default function EditableCell({
     });
   };
 
-  const baseClasses = "h-7 px-1 border text-right font-mono tabular-nums text-xs";
+  const baseClasses = "h-6 px-1 border-0 text-right font-mono tabular-nums text-[11px]";
   const editableClasses = editable
-    ? "bg-editable hover-elevate active-elevate-2 focus:ring-2 focus:ring-primary focus:outline-none"
-    : "bg-muted/30";
+    ? "bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary/50 focus:outline-none focus:bg-blue-50/30"
+    : "bg-slate-100/50 cursor-not-allowed";
 
   return (
     <input

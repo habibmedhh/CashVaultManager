@@ -11,20 +11,20 @@
   --opaque-button-border-intensity: -8; /* In terms of percentages */
 
   /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(0,0,0, .02);
+  --elevate-2: rgba(0,0,0, .05);
 
-  --background: 0 0% 100%;
+  --background: 210 20% 98%;
 
-  --foreground: 220 13% 13%;
+  --foreground: 215 25% 15%;
 
-  --border: 220 9% 88%;
+  --border: 215 15% 88%;
 
-  --card: 0 0% 98%;
+  --card: 0 0% 100%;
 
-  --card-foreground: 220 13% 13%;
+  --card-foreground: 215 25% 15%;
 
-  --card-border: 220 9% 92%;
+  --card-border: 215 15% 92%;
 
   --sidebar: 220 9% 96%;
 
@@ -48,21 +48,21 @@
 
   --popover-border: 220 9% 86%;
 
-  --primary: 217 91% 35%;
+  --primary: 215 100% 40%;
 
-  --primary-foreground: 0 0% 98%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 220 9% 90%;
+  --secondary: 215 20% 92%;
 
-  --secondary-foreground: 220 13% 13%;
+  --secondary-foreground: 215 25% 15%;
 
-  --muted: 220 9% 93%;
+  --muted: 215 20% 95%;
 
-  --muted-foreground: 220 10% 45%;
+  --muted-foreground: 215 15% 50%;
 
-  --accent: 220 13% 91%;
+  --accent: 215 20% 94%;
 
-  --accent-foreground: 220 13% 13%;
+  --accent-foreground: 215 25% 15%;
 
   --destructive: 0 84% 42%;
 
@@ -231,6 +231,15 @@
   /* Fallback for older browsers */
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+/* Custom colors for financial app */
+:root {
+  --editable: 214 100% 97%;
+  --editable-border: 214 90% 88%;
+  --warning-light: 38 92% 95%;
+  --success: 142 76% 36%;
+  --success-light: 142 76% 95%;
 }
 
 @layer base {
