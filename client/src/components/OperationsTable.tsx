@@ -3,6 +3,7 @@ import EditableCell from "./EditableCell";
 import { Plus, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OperationDetailsDialog, { type DetailedOperation } from "./OperationDetailsDialog";
+import AddOperationDialog from "./AddOperationDialog";
 
 export interface Operation {
   id: string;
@@ -32,6 +33,7 @@ export default function OperationsTable({
 }: OperationsTableProps) {
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const filteredOperations = hideZeroRows
     ? operations.filter(op => op.number !== 0 || op.amount !== 0)
@@ -63,6 +65,24 @@ export default function OperationsTable({
     onOperationChange(selectedOperationId, "details", details as any);
   };
 
+  const handleAddOperationClick = () => {
+    setAddDialogOpen(true);
+  };
+
+  const handleAddFromDialog = (label: string, type: "IN" | "OUT") => {
+    // Appeler la fonction onAddOperation du parent qui créera la nouvelle opération
+    // Le type IN/OUT sera ignoré pour l'instant, mais le label sera utilisé
+    onAddOperation();
+    // Après avoir créé l'opération, mettre à jour son nom
+    // On doit attendre que l'opération soit créée dans le state
+    setTimeout(() => {
+      const newOp = operations[operations.length - 1];
+      if (newOp && newOp.name === "") {
+        onOperationChange(newOp.id, "name", label);
+      }
+    }, 0);
+  };
+
   const selectedOperation = operations.find(op => op.id === selectedOperationId);
 
   return (
@@ -74,7 +94,7 @@ export default function OperationsTable({
           </h3>
           <Button
             size="sm"
-            onClick={onAddOperation}
+            onClick={handleAddOperationClick}
             data-testid="button-add-operation"
             className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
           >
@@ -201,6 +221,12 @@ export default function OperationsTable({
           onDetailsChange={handleDetailsChange}
         />
       )}
+      
+      <AddOperationDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onAdd={handleAddFromDialog}
+      />
     </>
   );
 }
