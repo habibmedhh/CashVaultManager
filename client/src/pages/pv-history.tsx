@@ -369,13 +369,29 @@ export default function PVHistory() {
                     {isConsolidatedView ? (
                       // Display consolidated PVs by agency
                       Object.entries(agencyGroups).map(([agencyKey, agencyPvs]) => {
-                        const latestPvs = showAllPVs ? agencyPvs : [agencyPvs.sort((a, b) => {
-                          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                          return timeB - timeA;
-                        })[0]];
+                        // Group PVs by userId to get the latest PV per agent
+                        const pvsByUser: Record<string, CashRegister[]> = {};
+                        agencyPvs.forEach(pv => {
+                          const userKey = pv.userId || 'no-user';
+                          if (!pvsByUser[userKey]) {
+                            pvsByUser[userKey] = [];
+                          }
+                          pvsByUser[userKey].push(pv);
+                        });
 
-                        const consolidatedTotals = calculateConsolidatedTotals(latestPvs);
+                        // Get the latest PV for each agent
+                        const latestPvsPerAgent = Object.values(pvsByUser).map(userPvs => {
+                          return userPvs.sort((a, b) => {
+                            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                            return timeB - timeA;
+                          })[0];
+                        });
+
+                        // If showAllPVs is true, include all versions
+                        const latestPvs = showAllPVs ? agencyPvs : latestPvsPerAgent;
+
+                        const consolidatedTotals = calculateConsolidatedTotals(latestPvsPerAgent);
                         const pvAgency = agencies.find(a => a.id === agencyKey);
 
                         return (

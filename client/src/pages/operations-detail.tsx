@@ -88,18 +88,18 @@ export default function OperationsDetail() {
   const allOperations = useMemo(() => {
     if (!allPVs) return [];
 
-    // Grouper par date et prendre seulement le dernier PV pour chaque date
-    const groupedByDate = allPVs.reduce((acc, pv) => {
-      const dateKey = pv.date;
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
+    // Grouper par date et userId pour prendre le dernier PV de chaque agent pour chaque date
+    const groupedByDateAndUser = allPVs.reduce((acc, pv) => {
+      const key = `${pv.date}-${pv.userId || 'no-user'}`;
+      if (!acc[key]) {
+        acc[key] = [];
       }
-      acc[dateKey].push(pv);
+      acc[key].push(pv);
       return acc;
     }, {} as Record<string, CashRegister[]>);
 
-    // Pour chaque date, ne garder que le PV le plus récent
-    const latestPVs: CashRegister[] = Object.values(groupedByDate).map((pvs) => {
+    // Pour chaque date/user, ne garder que le PV le plus récent
+    const latestPVs: CashRegister[] = Object.values(groupedByDateAndUser).map((pvs) => {
       return pvs.sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
