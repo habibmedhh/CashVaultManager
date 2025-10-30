@@ -8,13 +8,14 @@ export interface Transaction {
   id: string;
   type: "versement" | "retrait";
   label: string;
+  description?: string;
   amount: number;
 }
 
 interface BalanceSectionProps {
   transactions: Transaction[];
   onTransactionChange: (id: string, field: keyof Transaction, value: string | number) => void;
-  onAddTransaction: (type: "versement" | "retrait", label: string, amount: number) => void;
+  onAddTransaction: (type: "versement" | "retrait", label: string, description: string, amount: number) => void;
   onRemoveTransaction: (id: string) => void;
   soldeDepart: number;
   onSoldeChange: (value: number) => void;
@@ -59,8 +60,8 @@ export default function BalanceSection({
     setDialogOpen(true);
   };
 
-  const handleAddFromDialog = (category: string, amount: number) => {
-    onAddTransaction(dialogType, category, amount);
+  const handleAddFromDialog = (category: string, description: string, amount: number) => {
+    onAddTransaction(dialogType, category, description, amount);
   };
 
   return (
@@ -104,7 +105,10 @@ export default function BalanceSection({
               {versements.map((t, index) => (
                 <tr key={t.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                   <td className="border-r border-slate-200 px-2 py-0.5 text-[11px] text-slate-700">
-                    {t.label}
+                    <div className="font-medium">{t.label}</div>
+                    {t.description && (
+                      <div className="text-[10px] text-slate-500 mt-0.5">{t.description}</div>
+                    )}
                   </td>
                   <td className="border-r border-slate-200 px-1 py-0.5 text-right font-mono text-[11px] tabular-nums text-emerald-600" data-testid={`text-versement-amount-${t.id}`}>
                     {formatNumber(t.amount)}
@@ -169,7 +173,10 @@ export default function BalanceSection({
               {retraits.map((t, index) => (
                 <tr key={t.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                   <td className="border-r border-slate-200 px-2 py-0.5 text-[11px] text-slate-700">
-                    {t.label}
+                    <div className="font-medium">{t.label}</div>
+                    {t.description && (
+                      <div className="text-[10px] text-slate-500 mt-0.5">{t.description}</div>
+                    )}
                   </td>
                   <td className="border-r border-slate-200 px-1 py-0.5 text-right font-mono text-[11px] tabular-nums text-rose-600" data-testid={`text-retrait-amount-${t.id}`}>
                     {formatNumber(t.amount)}

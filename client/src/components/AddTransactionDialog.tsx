@@ -20,7 +20,7 @@ interface AddTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   type: "versement" | "retrait";
-  onAdd: (category: string, amount: number) => void;
+  onAdd: (category: string, description: string, amount: number) => void;
 }
 
 const VERSEMENT_CATEGORIES = [
@@ -50,6 +50,7 @@ export default function AddTransactionDialog({
   onAdd,
 }: AddTransactionDialogProps) {
   const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
 
   const categories = type === "versement" ? VERSEMENT_CATEGORIES : RETRAIT_CATEGORIES;
@@ -60,8 +61,9 @@ export default function AddTransactionDialog({
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount)) return;
 
-    onAdd(category, numAmount);
+    onAdd(category, description, numAmount);
     setCategory("");
+    setDescription("");
     setAmount("");
     onOpenChange(false);
   };
@@ -98,6 +100,22 @@ export default function AddTransactionDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="transaction-description" className="text-sm font-semibold">
+              Description
+            </Label>
+            <Input
+              id="transaction-description"
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Description optionnelle"
+              className="h-9 text-sm"
+              data-testid="input-transaction-description"
+            />
           </div>
 
           <div className="space-y-2">

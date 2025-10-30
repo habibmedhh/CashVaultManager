@@ -130,11 +130,12 @@ export default function CashRegister() {
     );
   };
 
-  const handleAddTransaction = (type: "versement" | "retrait", label: string, amount: number) => {
+  const handleAddTransaction = (type: "versement" | "retrait", label: string, description: string, amount: number) => {
     const newTransaction: Transaction = {
       id: Date.now().toString(),
       type,
       label,
+      description,
       amount,
     };
     setTransactions([...transactions, newTransaction]);
