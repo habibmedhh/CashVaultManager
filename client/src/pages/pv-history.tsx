@@ -91,12 +91,15 @@ export default function PVHistory() {
     let totalCash = 0;
     let totalOperations = 0;
     let soldeDepart = 0;
+    let totalVersements = 0;
+    let totalRetraits = 0;
 
     pvs.forEach((pv) => {
       try {
         const billsData: CashItem[] = JSON.parse(pv.billsData);
         const coinsData: CashItem[] = JSON.parse(pv.coinsData);
         const operations: Operation[] = JSON.parse(pv.operationsData);
+        const transactions: { type: "versement" | "retrait"; amount: number }[] = JSON.parse(pv.transactionsData || "[]");
 
         totalCash += [...billsData, ...coinsData].reduce(
           (sum, item) => sum + item.caisseAmount + item.coffreAmount,
@@ -104,11 +107,16 @@ export default function PVHistory() {
         );
 
         totalOperations += operations.reduce((sum, op) => {
-          if (op.type === "OUT") {
-            return sum - op.amount;
-          }
           return sum + op.amount;
         }, 0);
+
+        totalVersements += transactions
+          .filter((t) => t.type === "versement")
+          .reduce((sum, t) => sum + t.amount, 0);
+        
+        totalRetraits += transactions
+          .filter((t) => t.type === "retrait")
+          .reduce((sum, t) => sum + t.amount, 0);
 
         soldeDepart += pv.soldeDepart;
       } catch (e) {
@@ -116,7 +124,9 @@ export default function PVHistory() {
       }
     });
 
-    const ecartCaisse = totalCash - (soldeDepart + totalOperations);
+    // Same calculation as PV Agence page
+    const soldeFinal = soldeDepart + totalOperations + totalVersements - totalRetraits;
+    const ecartCaisse = totalCash - soldeFinal;
 
     return { totalCash, totalOperations, ecartCaisse, soldeDepart };
   };
@@ -388,22 +398,10 @@ export default function PVHistory() {
                           })[0];
                         });
 
-                        console.log(`[DEBUG] Agency ${agencyKey} - Date ${dateKey}:`, {
-                          totalPVs: agencyPvs.length,
-                          uniqueUsers: Object.keys(pvsByUser).length,
-                          latestPvsPerAgent: latestPvsPerAgent.map(pv => ({
-                            userId: pv.userId,
-                            createdAt: pv.createdAt,
-                            soldeDepart: pv.soldeDepart
-                          }))
-                        });
-
                         // If showAllPVs is true, include all versions
                         const latestPvs = showAllPVs ? agencyPvs : latestPvsPerAgent;
 
                         const consolidatedTotals = calculateConsolidatedTotals(latestPvsPerAgent);
-                        
-                        console.log(`[DEBUG] Consolidated totals for ${agencyKey}:`, consolidatedTotals);
                         const pvAgency = agencies.find(a => a.id === agencyKey);
 
                         return (
