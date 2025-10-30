@@ -11,6 +11,9 @@ import BalanceSection, { type Transaction } from "@/components/BalanceSection";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
+import { type User } from "@shared/schema";
+import { Card } from "@/components/ui/card";
 
 interface CashItem {
   value: number;
@@ -23,8 +26,20 @@ interface CashItem {
 
 export default function CashRegister() {
   const { toast } = useToast();
+  const { selectedUserId } = useUser();
   const [date, setDate] = useState<Date>(new Date());
   const [hideZeroRows, setHideZeroRows] = useState(false);
+
+  // Get the selected user's info
+  const { data: currentUser } = useQuery<User>({
+    queryKey: ["/api/users", selectedUserId],
+    enabled: !!selectedUserId,
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${selectedUserId}`);
+      if (!response.ok) throw new Error("Failed to load user");
+      return response.json();
+    },
+  });
 
   const [items, setItems] = useState<CashItem[]>([
     { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "", type: "billet" },
@@ -169,8 +184,8 @@ export default function CashRegister() {
     transactionsData: string;
     soldeDepart: number;
   }>({
-    queryKey: [`/api/cash-register/${dateKey}`],
-    enabled: true,
+    queryKey: [`/api/cash-register/${dateKey}/user/${selectedUserId}`],
+    enabled: !!selectedUserId,
   });
 
   // Mettre à jour l'état quand les données sont chargées
@@ -193,10 +208,19 @@ export default function CashRegister() {
 
   // Invalider le cache quand la date change pour recharger les données
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: [`/api/cash-register/${dateKey}`] });
-  }, [dateKey]);
+    queryClient.invalidateQueries({ queryKey: [`/api/cash-register/${dateKey}/user/${selectedUserId}`] });
+  }, [dateKey, selectedUserId]);
 
   const handleSave = async () => {
+    if (!selectedUserId || !currentUser?.agencyId) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un agent avant d'enregistrer.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const billsData = items.filter(item => item.type === "billet");
       const coinsData = items.filter(item => item.type === "piece");
@@ -204,6 +228,8 @@ export default function CashRegister() {
       console.log("[DEBUG] handleSave - operations before save:", operations.slice(0, 3));
 
       const data = {
+        userId: selectedUserId,
+        agencyId: currentUser.agencyId,
         date: dateKey,
         billsData: JSON.stringify(billsData),
         coinsData: JSON.stringify(coinsData),
@@ -228,7 +254,7 @@ export default function CashRegister() {
       console.log("[DEBUG] handleSave - savedResult operations:", JSON.parse(savedResult.operationsData).slice(0, 3));
 
       // Mettre à jour le cache avec les données sauvegardées
-      queryClient.setQueryData([`/api/cash-register/${dateKey}`], savedResult);
+      queryClient.setQueryData([`/api/cash-register/${dateKey}/user/${selectedUserId}`], savedResult);
 
       toast({
         title: "Enregistré",
@@ -263,6 +289,19 @@ export default function CashRegister() {
     console.log("Printing...");
     window.print();
   };
+
+  if (!selectedUserId) {
+    return (
+      <div className="min-h-screen bg-slate-50 p-6 flex items-center justify-center">
+        <Card className="p-8 max-w-md text-center">
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Aucun agent sélectionné</h2>
+          <p className="text-slate-600">
+            Veuillez sélectionner un agent dans le menu en haut de la page pour commencer à saisir un PV.
+          </p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-3">

@@ -1,9 +1,79 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCashRegisterSchema } from "@shared/schema";
+import { insertCashRegisterSchema, insertAgencySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Agency routes
+  app.get("/api/agencies", async (req, res) => {
+    try {
+      const agencies = await storage.getAllAgencies();
+      res.json(agencies);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/agencies", async (req, res) => {
+    try {
+      const data = insertAgencySchema.parse(req.body);
+      const agency = await storage.createAgency(data);
+      res.json(agency);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/agencies/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const agency = await storage.getAgency(id);
+      if (!agency) {
+        return res.status(404).json({ error: "Agency not found" });
+      }
+      res.json(agency);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // User routes
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/users/agency/:agencyId", async (req, res) => {
+    try {
+      const { agencyId } = req.params;
+      const users = await storage.getUsersByAgency(agencyId);
+      res.json(users);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.updateUser(id, req.body);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Save cash register data
   app.post("/api/cash-register", async (req, res) => {
     try {
@@ -44,6 +114,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { startDate, endDate } = req.params;
       const data = await storage.getCashRegistersByDateRange(startDate, endDate);
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get cash registers by user
+  app.get("/api/cash-registers/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const data = await storage.getCashRegistersByUser(userId);
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get cash registers by agency
+  app.get("/api/cash-registers/agency/:agencyId", async (req, res) => {
+    try {
+      const { agencyId } = req.params;
+      const data = await storage.getCashRegistersByAgency(agencyId);
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get latest cash register by date and user
+  app.get("/api/cash-register/:date/user/:userId", async (req, res) => {
+    try {
+      const { date, userId } = req.params;
+      const data = await storage.getLatestCashRegisterByDateAndUser(date, userId);
+      if (!data) {
+        return res.status(404).json({ error: "Not found" });
+      }
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

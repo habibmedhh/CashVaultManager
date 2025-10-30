@@ -1,4 +1,4 @@
-import { FileText, History, ListChecks, Home } from "lucide-react";
+import { FileText, History, ListChecks, Home, Building2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -16,6 +16,11 @@ const menuItems = [
     title: "PV du Jour",
     url: "/",
     icon: FileText,
+  },
+  {
+    title: "PV Agence",
+    url: "/pv-agence",
+    icon: Building2,
   },
   {
     title: "Historique des PVs",

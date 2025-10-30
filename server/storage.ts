@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type CashRegister, type InsertCashRegister, users, cashRegisters } from "@shared/schema";
+import { type User, type InsertUser, type CashRegister, type InsertCashRegister, type Agency, type InsertAgency, users, cashRegisters, agencies } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -7,21 +7,32 @@ import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUsersByAgency(agencyId: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined>;
+  
+  getAgency(id: string): Promise<Agency | undefined>;
+  getAllAgencies(): Promise<Agency[]>;
+  createAgency(agency: InsertAgency): Promise<Agency>;
   
   getCashRegisterByDate(date: string): Promise<CashRegister | undefined>;
   getLatestCashRegisterByDate(date: string): Promise<CashRegister | undefined>;
+  getLatestCashRegisterByDateAndUser(date: string, userId: string): Promise<CashRegister | undefined>;
   getAllCashRegisters(): Promise<CashRegister[]>;
+  getCashRegistersByUser(userId: string): Promise<CashRegister[]>;
+  getCashRegistersByAgency(agencyId: string): Promise<CashRegister[]>;
   getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]>;
   saveCashRegister(data: InsertCashRegister): Promise<CashRegister>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private agencies: Map<string, Agency>;
   private cashRegisters: Map<string, CashRegister>;
 
   constructor() {
     this.users = new Map();
+    this.agencies = new Map();
     this.cashRegisters = new Map();
   }
 
@@ -35,11 +46,52 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUsersByAgency(agencyId: string): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      (user) => user.agencyId === agencyId,
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      id,
+      username: insertUser.username,
+      password: insertUser.password,
+      role: insertUser.role || "agent",
+      agencyId: insertUser.agencyId || null,
+      fullName: insertUser.fullName || null,
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser: User = {
+      ...user,
+      ...data,
+      id: user.id,
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async getAgency(id: string): Promise<Agency | undefined> {
+    return this.agencies.get(id);
+  }
+
+  async getAllAgencies(): Promise<Agency[]> {
+    return Array.from(this.agencies.values());
+  }
+
+  async createAgency(insertAgency: InsertAgency): Promise<Agency> {
+    const id = randomUUID();
+    const agency: Agency = { id, ...insertAgency };
+    this.agencies.set(id, agency);
+    return agency;
   }
 
   async getCashRegisterByDate(date: string): Promise<CashRegister | undefined> {
@@ -59,8 +111,39 @@ export class MemStorage implements IStorage {
     return registers[0];
   }
 
+  async getLatestCashRegisterByDateAndUser(date: string, userId: string): Promise<CashRegister | undefined> {
+    const registers = Array.from(this.cashRegisters.values())
+      .filter(register => register.date === date && register.userId === userId)
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+    return registers[0];
+  }
+
   async getAllCashRegisters(): Promise<CashRegister[]> {
     return Array.from(this.cashRegisters.values())
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+  }
+
+  async getCashRegistersByUser(userId: string): Promise<CashRegister[]> {
+    return Array.from(this.cashRegisters.values())
+      .filter(register => register.userId === userId)
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+  }
+
+  async getCashRegistersByAgency(agencyId: string): Promise<CashRegister[]> {
+    return Array.from(this.cashRegisters.values())
+      .filter(register => register.agencyId === agencyId)
       .sort((a, b) => {
         const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
         const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
@@ -82,7 +165,13 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newRegister: CashRegister = {
       id,
-      ...data,
+      userId: data.userId || null,
+      agencyId: data.agencyId || null,
+      date: data.date,
+      billsData: data.billsData,
+      coinsData: data.coinsData,
+      operationsData: data.operationsData,
+      transactionsData: data.transactionsData,
       soldeDepart: data.soldeDepart ?? 0,
       createdAt: new Date(),
     };
@@ -109,8 +198,33 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
+  async getUsersByAgency(agencyId: string): Promise<User[]> {
+    const result = await this.db.select().from(users).where(eq(users.agencyId, agencyId));
+    return result;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await this.db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  async updateUser(id: string, data: Partial<InsertUser>): Promise<User | undefined> {
+    const result = await this.db.update(users).set(data).where(eq(users.id, id)).returning();
+    return result[0];
+  }
+
+  async getAgency(id: string): Promise<Agency | undefined> {
+    const result = await this.db.select().from(agencies).where(eq(agencies.id, id));
+    return result[0];
+  }
+
+  async getAllAgencies(): Promise<Agency[]> {
+    const result = await this.db.select().from(agencies);
+    return result;
+  }
+
+  async createAgency(insertAgency: InsertAgency): Promise<Agency> {
+    const result = await this.db.insert(agencies).values(insertAgency).returning();
     return result[0];
   }
 
@@ -129,10 +243,38 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
+  async getLatestCashRegisterByDateAndUser(date: string, userId: string): Promise<CashRegister | undefined> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .where(and(eq(cashRegisters.date, date), eq(cashRegisters.userId, userId)))
+      .orderBy(desc(cashRegisters.createdAt))
+      .limit(1);
+    return result[0];
+  }
+
   async getAllCashRegisters(): Promise<CashRegister[]> {
     const result = await this.db
       .select()
       .from(cashRegisters)
+      .orderBy(desc(cashRegisters.createdAt));
+    return result;
+  }
+
+  async getCashRegistersByUser(userId: string): Promise<CashRegister[]> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .where(eq(cashRegisters.userId, userId))
+      .orderBy(desc(cashRegisters.createdAt));
+    return result;
+  }
+
+  async getCashRegistersByAgency(agencyId: string): Promise<CashRegister[]> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .where(eq(cashRegisters.agencyId, agencyId))
       .orderBy(desc(cashRegisters.createdAt));
     return result;
   }
