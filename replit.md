@@ -41,7 +41,14 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-**October 30, 2025**: Implemented multi-user and multi-agency support
+**October 30, 2025 (Latest)**: Enhanced multi-user/multi-agency filtering and display
+- Added agency and agent filters to PV History page with agent/agency columns
+- Added agency and agent filters to Operations Detail page with agent attribution column
+- Added detailed "Versements et Retraits" section to PV Agence page
+- Fixed transaction aggregation to display each transaction line individually (not aggregated)
+- All filtering pages now support comprehensive multi-agency and multi-user views
+
+**October 30, 2025 (Earlier)**: Implemented multi-user and multi-agency support
 - Extended database schema with agencies table and user roles
 - Added foreign key relationships linking users and cash registers to agencies
 - Created UserContext and UserSelector for simulated authentication
