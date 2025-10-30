@@ -1,7 +1,17 @@
 import { useState } from "react";
 import EditableCell from "./EditableCell";
-import { Plus, X, FileText } from "lucide-react";
+import { Plus, X, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import OperationDetailsDialog, { type DetailedOperation } from "./OperationDetailsDialog";
 import AddOperationDialog from "./AddOperationDialog";
 
@@ -20,6 +30,7 @@ interface OperationsTableProps {
   onOperationChange: (id: string, field: keyof Operation, value: string | number) => void;
   onAddOperation: (label: string, type: "IN" | "OUT") => void;
   onRemoveOperation: (id: string) => void;
+  onClearOperations: () => void;
   date: Date;
   hideZeroRows?: boolean;
 }
@@ -29,12 +40,14 @@ export default function OperationsTable({
   onOperationChange,
   onAddOperation,
   onRemoveOperation,
+  onClearOperations,
   date,
   hideZeroRows = false,
 }: OperationsTableProps) {
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   const filteredOperations = hideZeroRows
     ? operations.filter(op => op.number !== 0 || op.amount !== 0)
@@ -74,6 +87,15 @@ export default function OperationsTable({
     onAddOperation(label, type);
   };
 
+  const handleClearClick = () => {
+    setClearDialogOpen(true);
+  };
+
+  const handleConfirmClear = () => {
+    onClearOperations();
+    setClearDialogOpen(false);
+  };
+
   const selectedOperation = operations.find(op => op.id === selectedOperationId);
 
   return (
@@ -83,15 +105,27 @@ export default function OperationsTable({
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
             Opérations
           </h3>
-          <Button
-            size="sm"
-            onClick={handleAddOperationClick}
-            data-testid="button-add-operation"
-            className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Ajouter
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClearClick}
+              data-testid="button-clear-operations"
+              className="shadow-sm h-7 text-xs border-rose-200 text-rose-700 hover:bg-rose-50"
+            >
+              <Trash2 className="w-3 h-3 mr-1" />
+              Vider
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleAddOperationClick}
+              data-testid="button-add-operation"
+              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Ajouter
+            </Button>
+          </div>
         </div>
         <table className="border-collapse">
           <thead>
@@ -229,6 +263,27 @@ export default function OperationsTable({
         onOpenChange={setAddDialogOpen}
         onAdd={handleAddFromDialog}
       />
+
+      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Vider les données des opérations</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer toutes les opérations ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-clear">Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmClear}
+              data-testid="button-confirm-clear"
+              className="bg-rose-600 hover:bg-rose-700"
+            >
+              Vider
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

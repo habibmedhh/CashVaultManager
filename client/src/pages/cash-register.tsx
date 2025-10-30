@@ -116,6 +116,10 @@ export default function CashRegister() {
     setOperations(operations.filter((op) => op.id !== id));
   };
 
+  const handleClearOperations = () => {
+    setOperations([]);
+  };
+
   const handleTransactionChange = (
     id: string,
     field: keyof Transaction,
@@ -337,6 +341,7 @@ export default function CashRegister() {
             onOperationChange={handleOperationChange}
             onAddOperation={handleAddOperation}
             onRemoveOperation={handleRemoveOperation}
+            onClearOperations={handleClearOperations}
             date={date}
             hideZeroRows={hideZeroRows}
           />
