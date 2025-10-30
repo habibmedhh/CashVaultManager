@@ -145,7 +145,14 @@ export default function CashRegister() {
   };
 
   const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
-  const totalOperations = operations.reduce((sum, op) => sum + op.amount, 0);
+  // Total des opérations = IN - OUT
+  const totalOperations = operations.reduce((sum, op) => {
+    if (op.type === "OUT") {
+      return sum - op.amount;
+    }
+    // Pour IN ou opérations sans type (compatibilité avec anciennes données)
+    return sum + op.amount;
+  }, 0);
 
   const dateKey = format(date, "yyyy-MM-dd");
 
