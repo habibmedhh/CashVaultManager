@@ -169,7 +169,7 @@ export default function CashRegister() {
     transactionsData: string;
     soldeDepart: number;
   }>({
-    queryKey: ["/api/cash-register", dateKey],
+    queryKey: [`/api/cash-register/${dateKey}`],
     enabled: true,
   });
 
@@ -193,13 +193,15 @@ export default function CashRegister() {
 
   // Invalider le cache quand la date change pour recharger les données
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["/api/cash-register", dateKey] });
+    queryClient.invalidateQueries({ queryKey: [`/api/cash-register/${dateKey}`] });
   }, [dateKey]);
 
   const handleSave = async () => {
     try {
       const billsData = items.filter(item => item.type === "billet");
       const coinsData = items.filter(item => item.type === "piece");
+
+      console.log("[DEBUG] handleSave - operations before save:", operations.slice(0, 3));
 
       const data = {
         date: dateKey,
@@ -223,9 +225,10 @@ export default function CashRegister() {
       }
 
       const savedResult = await response.json();
+      console.log("[DEBUG] handleSave - savedResult operations:", JSON.parse(savedResult.operationsData).slice(0, 3));
 
       // Mettre à jour le cache avec les données sauvegardées
-      queryClient.setQueryData(["/api/cash-register", dateKey], savedResult);
+      queryClient.setQueryData([`/api/cash-register/${dateKey}`], savedResult);
 
       toast({
         title: "Enregistré",
@@ -263,7 +266,7 @@ export default function CashRegister() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-3">
-      <div className="max-w-6xl mx-auto space-y-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-800 to-slate-700 shadow-lg print:hidden rounded-lg px-4 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap">
@@ -341,22 +344,24 @@ export default function CashRegister() {
           </div>
         </div>
 
-        <IntegratedCashTable
-          items={items}
-          onItemChange={handleItemChange}
-          hideZeroRows={hideZeroRows}
-        />
-
-        <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
-          <OperationsTable
-            operations={operations}
-            onOperationChange={handleOperationChange}
-            onAddOperation={handleAddOperation}
-            onRemoveOperation={handleRemoveOperation}
-            onClearOperations={handleClearOperations}
-            date={date}
+        <div className="flex flex-col lg:flex-row gap-4 items-start justify-center">
+          <IntegratedCashTable
+            items={items}
+            onItemChange={handleItemChange}
             hideZeroRows={hideZeroRows}
           />
+
+          <div className="w-full lg:max-w-md mx-auto border border-border rounded-lg overflow-hidden shadow-sm bg-card">
+            <OperationsTable
+              operations={operations}
+              onOperationChange={handleOperationChange}
+              onAddOperation={handleAddOperation}
+              onRemoveOperation={handleRemoveOperation}
+              onClearOperations={handleClearOperations}
+              date={date}
+              hideZeroRows={hideZeroRows}
+            />
+          </div>
         </div>
 
         <div className="border border-border rounded-lg p-3 shadow-sm bg-card">

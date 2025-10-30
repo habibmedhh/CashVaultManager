@@ -54,7 +54,9 @@ export default function EditableCell({
         console.error("Invalid formula", error);
       }
     } else {
-      const numValue = parseFloat(displayValue.replace(/,/g, ".")) || 0;
+      const cleanedValue = displayValue.replace(/,/g, ".");
+      const numValue = parseFloat(cleanedValue) || 0;
+      console.log("[DEBUG] EditableCell blur - displayValue:", displayValue, "cleanedValue:", cleanedValue, "numValue:", numValue);
       onChange(numValue);
     }
   };
