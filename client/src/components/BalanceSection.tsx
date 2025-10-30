@@ -74,15 +74,15 @@ export default function BalanceSection({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className="space-y-4">
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
-          <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 border-b border-emerald-700">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+          <div className="flex items-center justify-between mb-2 px-3 pt-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
               Versement Banque
             </h3>
             <Button
               size="sm"
               onClick={() => handleOpenDialog("versement")}
               data-testid="button-add-versement"
-              className="shadow-sm h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -90,23 +90,23 @@ export default function BalanceSection({
           </div>
           <table className="border-collapse w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="border-r border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-left text-slate-700">
+              <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
+                <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white">
                   Libellé
                 </th>
-                <th className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-slate-700">
+                <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white">
                   Montant
                 </th>
-                <th className="px-1 py-1 w-10"></th>
+                <th className="px-1 py-1.5 w-12 text-white"></th>
               </tr>
             </thead>
             <tbody>
               {versements.map((t, index) => (
-                <tr key={t.id} className={`hover:bg-emerald-50/30 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                  <td className="border-r border-slate-200 px-2 py-1.5 text-[11px] text-slate-700">
+                <tr key={t.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                  <td className="border-r border-slate-200 px-2 py-0.5 text-[11px] text-slate-700">
                     {t.label}
                   </td>
-                  <td className="border-r border-slate-200 px-2 py-1.5 text-right font-mono text-[11px] tabular-nums text-emerald-700" data-testid={`text-versement-amount-${t.id}`}>
+                  <td className="border-r border-slate-200 px-1 py-0.5 text-right font-mono text-[11px] tabular-nums text-emerald-600" data-testid={`text-versement-amount-${t.id}`}>
                     {formatNumber(t.amount)}
                   </td>
                   <td className="p-0 text-center">
@@ -122,20 +122,32 @@ export default function BalanceSection({
                   </td>
                 </tr>
               ))}
+              <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
+                <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700">
+                  TOTAL
+                </td>
+                <td
+                  className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-emerald-700"
+                  data-testid="text-versement-total"
+                >
+                  {formatNumber(totalVersements)} DH
+                </td>
+                <td></td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
-          <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-rose-600 to-rose-500 border-b border-rose-700">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+          <div className="flex items-center justify-between mb-2 px-3 pt-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
               Retrait Banque
             </h3>
             <Button
               size="sm"
               onClick={() => handleOpenDialog("retrait")}
               data-testid="button-add-retrait"
-              className="shadow-sm h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -143,23 +155,23 @@ export default function BalanceSection({
           </div>
           <table className="border-collapse w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="border-r border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-left text-slate-700">
+              <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
+                <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white">
                   Libellé
                 </th>
-                <th className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-slate-700">
+                <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white">
                   Montant
                 </th>
-                <th className="px-1 py-1 w-10"></th>
+                <th className="px-1 py-1.5 w-12 text-white"></th>
               </tr>
             </thead>
             <tbody>
               {retraits.map((t, index) => (
-                <tr key={t.id} className={`hover:bg-rose-50/30 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                  <td className="border-r border-slate-200 px-2 py-1.5 text-[11px] text-slate-700">
+                <tr key={t.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                  <td className="border-r border-slate-200 px-2 py-0.5 text-[11px] text-slate-700">
                     {t.label}
                   </td>
-                  <td className="border-r border-slate-200 px-2 py-1.5 text-right font-mono text-[11px] tabular-nums text-rose-700" data-testid={`text-retrait-amount-${t.id}`}>
+                  <td className="border-r border-slate-200 px-1 py-0.5 text-right font-mono text-[11px] tabular-nums text-rose-600" data-testid={`text-retrait-amount-${t.id}`}>
                     {formatNumber(t.amount)}
                   </td>
                   <td className="p-0 text-center">
@@ -175,6 +187,18 @@ export default function BalanceSection({
                   </td>
                 </tr>
               ))}
+              <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
+                <td className="border-r border-slate-300 px-2 py-1.5 text-[11px] text-slate-700">
+                  TOTAL
+                </td>
+                <td
+                  className="border-r border-slate-300 px-1 py-1.5 text-right font-mono text-sm tabular-nums text-rose-700"
+                  data-testid="text-retrait-total"
+                >
+                  {formatNumber(totalRetraits)} DH
+                </td>
+                <td></td>
+              </tr>
             </tbody>
           </table>
         </div>
