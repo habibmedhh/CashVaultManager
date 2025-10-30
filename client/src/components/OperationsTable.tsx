@@ -10,6 +10,7 @@ export interface Operation {
   number: number;
   amount: number;
   details?: DetailedOperation[];
+  isNew?: boolean;
 }
 
 interface OperationsTableProps {
@@ -18,6 +19,7 @@ interface OperationsTableProps {
   onAddOperation: () => void;
   onRemoveOperation: (id: string) => void;
   date: Date;
+  hideZeroRows?: boolean;
 }
 
 export default function OperationsTable({
@@ -26,9 +28,14 @@ export default function OperationsTable({
   onAddOperation,
   onRemoveOperation,
   date,
+  hideZeroRows = false,
 }: OperationsTableProps) {
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const filteredOperations = hideZeroRows
+    ? operations.filter(op => op.number !== 0 || op.amount !== 0)
+    : operations;
 
   const total = operations.reduce((sum, op) => sum + op.amount, 0);
 
@@ -49,8 +56,9 @@ export default function OperationsTable({
     
     const total = details.reduce((sum, d) => sum + d.amount, 0);
     
-    // Update both amount and details
+    // Update amount, number, and details
     onOperationChange(selectedOperationId, "amount", total);
+    onOperationChange(selectedOperationId, "number", details.length);
     onOperationChange(selectedOperationId, "details", details as any);
   };
 
@@ -89,7 +97,7 @@ export default function OperationsTable({
             </tr>
           </thead>
           <tbody>
-            {operations.map((op, index) => (
+            {filteredOperations.map((op, index) => (
               <tr key={op.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                 <td className="border-r border-slate-200 p-0">
                   <input
@@ -98,15 +106,25 @@ export default function OperationsTable({
                     onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
                     className="h-7 px-1.5 w-full bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary focus:outline-none text-[11px]"
                     data-testid={`input-operation-name-${op.id}`}
+                    disabled={op.name !== "" && !op.isNew}
+                    style={op.name !== "" && !op.isNew ? { cursor: 'not-allowed', opacity: 0.8 } : {}}
                   />
                 </td>
                 <td className="border-r border-slate-200 p-0">
-                  <EditableCell
-                    value={op.number}
-                    onChange={(val) => onOperationChange(op.id, "number", val)}
-                    className="border-0 w-full rounded-none text-center h-7 text-[11px] px-0.5"
-                    dataTestId={`input-operation-number-${op.id}`}
-                  />
+                  <div className="flex items-center">
+                    <EditableCell
+                      value={op.number}
+                      onChange={(val) => onOperationChange(op.id, "number", val)}
+                      className="border-0 flex-1 rounded-none text-center h-7 text-[11px] px-0.5"
+                      dataTestId={`input-operation-number-${op.id}`}
+                      editable={!op.details || op.details.length === 0}
+                    />
+                    {op.details && op.details.length > 0 && (
+                      <div className="px-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir de l'historique" />
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="border-r border-slate-200 p-0">
                   <div className="flex items-center">

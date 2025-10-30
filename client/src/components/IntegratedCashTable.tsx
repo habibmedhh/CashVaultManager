@@ -12,12 +12,18 @@ interface CashItem {
 interface IntegratedCashTableProps {
   items: CashItem[];
   onItemChange: (index: number, field: "caisseAmount" | "coffreAmount", value: number) => void;
+  hideZeroRows?: boolean;
 }
 
 export default function IntegratedCashTable({
   items,
   onItemChange,
+  hideZeroRows = false,
 }: IntegratedCashTableProps) {
+  const filteredItems = hideZeroRows
+    ? items.filter(item => item.caisseAmount !== 0 || item.coffreAmount !== 0)
+    : items;
+
   const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
   const totalCoffre = items.reduce((sum, item) => sum + item.coffreAmount, 0);
   const grandTotal = totalCaisse + totalCoffre;
@@ -46,7 +52,9 @@ export default function IntegratedCashTable({
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => (
+          {filteredItems.map((item, index) => {
+            const originalIndex = items.findIndex(i => i.value === item.value);
+            return (
             <tr key={index} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
               <td className="border-r border-slate-200 px-1 py-0.5 text-center bg-slate-50/30">
                 <div className="flex items-center justify-center gap-0.5">
@@ -61,21 +69,22 @@ export default function IntegratedCashTable({
               <td className="border-r border-slate-200 p-0">
                 <EditableCell
                   value={item.caisseAmount}
-                  onChange={(val) => onItemChange(index, "caisseAmount", val)}
+                  onChange={(val) => onItemChange(originalIndex, "caisseAmount", val)}
                   className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
-                  dataTestId={`input-item-caisse-${index}`}
+                  dataTestId={`input-item-caisse-${originalIndex}`}
                 />
               </td>
               <td className="p-0">
                 <EditableCell
                   value={item.coffreAmount}
-                  onChange={(val) => onItemChange(index, "coffreAmount", val)}
+                  onChange={(val) => onItemChange(originalIndex, "coffreAmount", val)}
                   className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
-                  dataTestId={`input-item-coffre-${index}`}
+                  dataTestId={`input-item-coffre-${originalIndex}`}
                 />
               </td>
             </tr>
-          ))}
+          );
+          })}
           
           <tr className="border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50 font-semibold">
             <td className="border-r border-slate-300 px-1 py-1 text-[10px] text-slate-700">

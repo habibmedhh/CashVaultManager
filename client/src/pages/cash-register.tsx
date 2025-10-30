@@ -24,6 +24,7 @@ interface CashItem {
 export default function CashRegister() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
+  const [hideZeroRows, setHideZeroRows] = useState(false);
 
   const [items, setItems] = useState<CashItem[]>([
     { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "💵", type: "billet" },
@@ -85,7 +86,17 @@ export default function CashRegister() {
     value: string | number | any
   ) => {
     setOperations((ops) =>
-      ops.map((op) => (op.id === id ? { ...op, [field]: value } : op))
+      ops.map((op) => {
+        if (op.id === id) {
+          const updated: any = { ...op, [field]: value };
+          // Si le nom est rempli, ce n'est plus une nouvelle opération
+          if (field === "name" && value !== "") {
+            updated.isNew = false;
+          }
+          return updated;
+        }
+        return op;
+      })
     );
   };
 
@@ -95,6 +106,7 @@ export default function CashRegister() {
       name: "",
       number: 0,
       amount: 0,
+      isNew: true,
     };
     setOperations([...operations, newOp]);
   };
@@ -237,7 +249,7 @@ export default function CashRegister() {
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-800 to-slate-700 shadow-lg print:hidden rounded-lg px-4 py-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-lg font-bold tracking-tight text-white">
                 PV D'ARRÊTÉ DE CAISSE
               </h1>
@@ -262,6 +274,16 @@ export default function CashRegister() {
                   />
                 </PopoverContent>
               </Popover>
+              <label className="flex items-center gap-2 cursor-pointer bg-slate-600 px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={hideZeroRows}
+                  onChange={(e) => setHideZeroRows(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
+                  data-testid="checkbox-hide-zero"
+                />
+                <span className="text-xs text-white font-medium">Masquer les lignes à zéro</span>
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleSave} size="sm" data-testid="button-save" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
@@ -305,6 +327,7 @@ export default function CashRegister() {
         <IntegratedCashTable
           items={items}
           onItemChange={handleItemChange}
+          hideZeroRows={hideZeroRows}
         />
 
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
@@ -314,6 +337,7 @@ export default function CashRegister() {
             onAddOperation={handleAddOperation}
             onRemoveOperation={handleRemoveOperation}
             date={date}
+            hideZeroRows={hideZeroRows}
           />
         </div>
 
