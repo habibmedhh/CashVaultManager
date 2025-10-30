@@ -1,4 +1,4 @@
-import { FileText, History, ListChecks, Home, Building2 } from "lucide-react";
+import { FileText, History, ListChecks, Home, Building2, Shield } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -31,6 +31,11 @@ const menuItems = [
     title: "Détails des Opérations",
     url: "/operations",
     icon: ListChecks,
+  },
+  {
+    title: "Administration",
+    url: "/admin",
+    icon: Shield,
   },
 ];
 
