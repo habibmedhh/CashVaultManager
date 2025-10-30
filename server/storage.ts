@@ -2,7 +2,7 @@ import { type User, type InsertUser, type CashRegister, type InsertCashRegister,
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -10,6 +10,9 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   getCashRegisterByDate(date: string): Promise<CashRegister | undefined>;
+  getLatestCashRegisterByDate(date: string): Promise<CashRegister | undefined>;
+  getAllCashRegisters(): Promise<CashRegister[]>;
+  getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]>;
   saveCashRegister(data: InsertCashRegister): Promise<CashRegister>;
 }
 
@@ -45,28 +48,46 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getLatestCashRegisterByDate(date: string): Promise<CashRegister | undefined> {
+    const registers = Array.from(this.cashRegisters.values())
+      .filter(register => register.date === date)
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+    return registers[0];
+  }
+
+  async getAllCashRegisters(): Promise<CashRegister[]> {
+    return Array.from(this.cashRegisters.values())
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+  }
+
+  async getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]> {
+    return Array.from(this.cashRegisters.values())
+      .filter(register => register.date >= startDate && register.date <= endDate)
+      .sort((a, b) => {
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeB - timeA;
+      });
+  }
+
   async saveCashRegister(data: InsertCashRegister): Promise<CashRegister> {
-    const existing = await this.getCashRegisterByDate(data.date);
-    
-    if (existing) {
-      const updated: CashRegister = {
-        ...existing,
-        ...data,
-        soldeDepart: data.soldeDepart ?? 0,
-      };
-      this.cashRegisters.set(existing.id, updated);
-      return updated;
-    } else {
-      const id = randomUUID();
-      const newRegister: CashRegister = {
-        id,
-        ...data,
-        soldeDepart: data.soldeDepart ?? 0,
-        createdAt: new Date(),
-      };
-      this.cashRegisters.set(id, newRegister);
-      return newRegister;
-    }
+    const id = randomUUID();
+    const newRegister: CashRegister = {
+      id,
+      ...data,
+      soldeDepart: data.soldeDepart ?? 0,
+      createdAt: new Date(),
+    };
+    this.cashRegisters.set(id, newRegister);
+    return newRegister;
   }
 }
 
@@ -98,26 +119,41 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
+  async getLatestCashRegisterByDate(date: string): Promise<CashRegister | undefined> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .where(eq(cashRegisters.date, date))
+      .orderBy(desc(cashRegisters.createdAt))
+      .limit(1);
+    return result[0];
+  }
+
+  async getAllCashRegisters(): Promise<CashRegister[]> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .orderBy(desc(cashRegisters.createdAt));
+    return result;
+  }
+
+  async getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]> {
+    const result = await this.db
+      .select()
+      .from(cashRegisters)
+      .where(
+        and(
+          gte(cashRegisters.date, startDate),
+          lte(cashRegisters.date, endDate)
+        )
+      )
+      .orderBy(desc(cashRegisters.createdAt));
+    return result;
+  }
+
   async saveCashRegister(data: InsertCashRegister): Promise<CashRegister> {
-    const existing = await this.getCashRegisterByDate(data.date);
-    
-    if (existing) {
-      const result = await this.db
-        .update(cashRegisters)
-        .set({
-          billsData: data.billsData,
-          coinsData: data.coinsData,
-          operationsData: data.operationsData,
-          transactionsData: data.transactionsData,
-          soldeDepart: data.soldeDepart ?? 0,
-        })
-        .where(eq(cashRegisters.id, existing.id))
-        .returning();
-      return result[0];
-    } else {
-      const result = await this.db.insert(cashRegisters).values(data).returning();
-      return result[0];
-    }
+    const result = await this.db.insert(cashRegisters).values(data).returning();
+    return result[0];
   }
 }
 

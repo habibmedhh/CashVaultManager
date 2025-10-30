@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, real, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, real, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -25,8 +25,11 @@ export const cashRegisters = pgTable("cash_registers", {
   operationsData: text("operations_data").notNull(),
   transactionsData: text("transactions_data").notNull(),
   soldeDepart: real("solde_depart").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  dateIdx: index("date_idx").on(table.date),
+  createdAtIdx: index("created_at_idx").on(table.createdAt),
+}));
 
 export const insertCashRegisterSchema = createInsertSchema(cashRegisters).omit({
   id: true,
