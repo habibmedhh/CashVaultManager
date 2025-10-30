@@ -84,7 +84,7 @@ export default function EditableCell({
     });
   };
 
-  const baseClasses = "h-6 px-1 border-0 text-right font-mono tabular-nums text-[11px]";
+  const baseClasses = "h-6 px-0.5 border-0 text-right font-mono tabular-nums text-[11px] w-full";
   const editableClasses = editable
     ? "bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary/50 focus:outline-none focus:bg-blue-50/30"
     : "bg-slate-100/50 cursor-not-allowed";

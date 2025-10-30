@@ -175,34 +175,34 @@ export default function OperationsTable({
                   </div>
                 </td>
                 <td className="border-r border-slate-200 p-0">
-                  <div className="flex items-center">
+                  <div className="flex items-center h-7">
                     <EditableCell
                       value={op.number}
                       onChange={(val) => onOperationChange(op.id, "number", val)}
-                      className="border-0 flex-1 rounded-none text-center h-7 text-[11px] px-0.5"
+                      className="border-0 rounded-none text-center h-7 text-[11px]"
                       dataTestId={`input-operation-number-${op.id}`}
                       editable={!op.details || op.details.length === 0}
                     />
                     {op.details && op.details.length > 0 && (
-                      <div className="px-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir de l'historique" />
+                      <div className="px-0.5 flex-shrink-0">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir de l'historique" />
                       </div>
                     )}
                   </div>
                 </td>
                 <td className="border-r border-slate-200 p-0">
-                  <div className="flex items-center">
+                  <div className="flex items-center h-7">
                     <EditableCell
                       value={op.amount}
                       onChange={(val) => onOperationChange(op.id, "amount", val)}
                       allowFormula={true}
-                      className="border-0 flex-1 rounded-none h-7 text-[11px] px-0.5"
+                      className="border-0 rounded-none h-7 text-[11px]"
                       dataTestId={`input-operation-amount-${op.id}`}
                       editable={!op.details || op.details.length === 0}
                     />
                     {op.details && op.details.length > 0 && (
-                      <div className="px-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir des détails" />
+                      <div className="px-0.5 flex-shrink-0">
+                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" title="Calculé à partir des détails" />
                       </div>
                     )}
                   </div>
