@@ -87,6 +87,40 @@ export default function PVHistory() {
     }
   };
 
+  const calculateConsolidatedTotals = (pvs: CashRegister[]) => {
+    let totalCash = 0;
+    let totalOperations = 0;
+    let soldeDepart = 0;
+
+    pvs.forEach((pv) => {
+      try {
+        const billsData: CashItem[] = JSON.parse(pv.billsData);
+        const coinsData: CashItem[] = JSON.parse(pv.coinsData);
+        const operations: Operation[] = JSON.parse(pv.operationsData);
+
+        totalCash += [...billsData, ...coinsData].reduce(
+          (sum, item) => sum + item.caisseAmount + item.coffreAmount,
+          0
+        );
+
+        totalOperations += operations.reduce((sum, op) => {
+          if (op.type === "OUT") {
+            return sum - op.amount;
+          }
+          return sum + op.amount;
+        }, 0);
+
+        soldeDepart += pv.soldeDepart;
+      } catch (e) {
+        console.error("Error calculating consolidated totals:", e);
+      }
+    });
+
+    const ecartCaisse = totalCash - (soldeDepart + totalOperations);
+
+    return { totalCash, totalOperations, ecartCaisse, soldeDepart };
+  };
+
   const filteredPVs = allPVs?.filter((pv) => {
     if (!startDate && !endDate) {
       const dateMatch = true;
@@ -113,6 +147,7 @@ export default function PVHistory() {
     return true;
   });
 
+  // Group PVs by date and potentially by agency if "All agents" is selected
   const groupedByDate = filteredPVs?.reduce((acc, pv) => {
     const dateKey = pv.date;
     if (!acc[dateKey]) {
@@ -122,8 +157,30 @@ export default function PVHistory() {
     return acc;
   }, {} as Record<string, CashRegister[]>);
 
-  const sortedDates = groupedByDate
-    ? Object.keys(groupedByDate).sort((a, b) => b.localeCompare(a))
+  // If "All agents" is selected, further group by agency within each date
+  const groupedByDateAndAgency = groupedByDate
+    ? Object.entries(groupedByDate).reduce((acc, [date, pvs]) => {
+        if (selectedUserId === "all") {
+          // Group by agency
+          const byAgency: Record<string, CashRegister[]> = {};
+          pvs.forEach(pv => {
+            const agencyKey = pv.agencyId || "no-agency";
+            if (!byAgency[agencyKey]) {
+              byAgency[agencyKey] = [];
+            }
+            byAgency[agencyKey].push(pv);
+          });
+          acc[date] = byAgency;
+        } else {
+          // Single group for specific user
+          acc[date] = { "single": pvs };
+        }
+        return acc;
+      }, {} as Record<string, Record<string, CashRegister[]>>)
+    : {};
+
+  const sortedDates = groupedByDateAndAgency
+    ? Object.keys(groupedByDateAndAgency).sort((a, b) => b.localeCompare(a))
     : [];
 
   return (
@@ -290,13 +347,8 @@ export default function PVHistory() {
 
         <div className="space-y-6">
           {sortedDates.map((dateKey) => {
-            const allPvsForDate = groupedByDate![dateKey].sort((a, b) => {
-              const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-              const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-              return timeB - timeA;
-            });
-
-            const pvs = showAllPVs ? allPvsForDate : [allPvsForDate[0]];
+            const agencyGroups = groupedByDateAndAgency![dateKey];
+            const isConsolidatedView = selectedUserId === "all";
 
             return (
               <Card key={dateKey}>
@@ -305,14 +357,120 @@ export default function PVHistory() {
                     <span data-testid={`text-date-${dateKey}`}>
                       {format(parseISO(dateKey), "EEEE d MMMM yyyy", { locale: fr })}
                     </span>
-                    <Badge variant="secondary" data-testid={`badge-count-${dateKey}`}>
-                      {showAllPVs ? `${pvs.length} PV${pvs.length > 1 ? "s" : ""}` : `1/${allPvsForDate.length} PV`}
-                    </Badge>
+                    {!isConsolidatedView && (
+                      <Badge variant="secondary" data-testid={`badge-count-${dateKey}`}>
+                        {showAllPVs ? `${agencyGroups.single.length} PV${agencyGroups.single.length > 1 ? "s" : ""}` : `1/${agencyGroups.single.length} PV`}
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {pvs.map((pv, index) => {
+                    {isConsolidatedView ? (
+                      // Display consolidated PVs by agency
+                      Object.entries(agencyGroups).map(([agencyKey, agencyPvs]) => {
+                        const latestPvs = showAllPVs ? agencyPvs : [agencyPvs.sort((a, b) => {
+                          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                          return timeB - timeA;
+                        })[0]];
+
+                        const consolidatedTotals = calculateConsolidatedTotals(latestPvs);
+                        const pvAgency = agencies.find(a => a.id === agencyKey);
+
+                        return (
+                          <Link
+                            key={agencyKey}
+                            href={`/pv-agence?date=${dateKey}&agencyId=${agencyKey}`}
+                            data-testid={`link-pv-agency-${agencyKey}`}
+                          >
+                            <Card className="hover-elevate active-elevate-2 transition-all cursor-pointer">
+                              <CardContent className="py-4">
+                                <div className="flex items-center justify-between gap-4">
+                                  <div className="flex items-center gap-4 flex-1">
+                                    <Badge variant="default" className="text-xs">
+                                      PV Agence
+                                    </Badge>
+                                    {pvAgency && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {pvAgency.name}
+                                      </Badge>
+                                    )}
+                                    <span className="text-sm text-muted-foreground">
+                                      {latestPvs.length} agent{latestPvs.length > 1 ? "s" : ""}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex gap-4 items-center flex-wrap">
+                                    <div className="text-right">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        Solde Départ
+                                      </div>
+                                      <div className="font-mono font-semibold" data-testid={`text-solde-${agencyKey}`}>
+                                        {formatNumber(consolidatedTotals.soldeDepart)} MAD
+                                      </div>
+                                    </div>
+
+                                    <div className="text-right">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        Total Caisse
+                                      </div>
+                                      <div className="font-mono font-semibold" data-testid={`text-total-cash-${agencyKey}`}>
+                                        {formatNumber(consolidatedTotals.totalCash)} MAD
+                                      </div>
+                                    </div>
+
+                                    <div className="text-right">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        Opérations
+                                      </div>
+                                      <div
+                                        className={`font-mono font-semibold ${
+                                          consolidatedTotals.totalOperations >= 0 ? "text-emerald-600" : "text-rose-600"
+                                        }`}
+                                        data-testid={`text-operations-${agencyKey}`}
+                                      >
+                                        {formatNumber(consolidatedTotals.totalOperations)} MAD
+                                      </div>
+                                    </div>
+
+                                    <div className="text-right min-w-[120px]">
+                                      <div className="text-xs text-muted-foreground mb-1">
+                                        Écart Caisse
+                                      </div>
+                                      <div
+                                        className={`font-mono font-bold ${
+                                          consolidatedTotals.ecartCaisse > 0
+                                            ? "text-emerald-600"
+                                            : consolidatedTotals.ecartCaisse < 0
+                                            ? "text-rose-600"
+                                            : "text-foreground"
+                                        }`}
+                                        data-testid={`text-ecart-${agencyKey}`}
+                                      >
+                                        {consolidatedTotals.ecartCaisse >= 0 ? "+" : ""}
+                                        {formatNumber(consolidatedTotals.ecartCaisse)} MAD
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        );
+                      })
+                    ) : (
+                      // Display individual PVs
+                      (() => {
+                        const allPvsForDate = agencyGroups.single.sort((a, b) => {
+                          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                          return timeB - timeA;
+                        });
+
+                        const pvs = showAllPVs ? allPvsForDate : [allPvsForDate[0]];
+
+                        return pvs.map((pv, index) => {
                       const { totalCash, totalOperations, ecartCaisse } = calculatePVTotals(pv);
                       const createdTime = pv.createdAt
                         ? format(new Date(pv.createdAt), "HH:mm:ss")
@@ -417,7 +575,9 @@ export default function PVHistory() {
                           </Card>
                         </Link>
                       );
-                    })}
+                        });
+                      })()
+                    )}
                   </div>
                 </CardContent>
               </Card>
