@@ -351,23 +351,20 @@ export default function CashRegister() {
         agencyName: currentUser?.agencyId || undefined,
       };
       
-      // Stocker les données dans localStorage
-      localStorage.setItem('printPVData', JSON.stringify(printData));
+      // Encoder les données en base64 pour les passer via l'URL
+      const encodedData = btoa(encodeURIComponent(JSON.stringify(printData)));
       
-      // Attendre un peu pour s'assurer que localStorage est écrit
-      // puis ouvrir la page d'impression
-      setTimeout(() => {
-        const printWindow = window.open('/imprimer-pv', '_blank');
-        
-        // Si le popup est bloqué
-        if (!printWindow) {
-          toast({
-            title: "Popup bloqué",
-            description: "Veuillez autoriser les popups pour cette page.",
-            variant: "destructive",
-          });
-        }
-      }, 100);
+      // Ouvrir la page d'impression avec les données encodées dans l'URL
+      const printWindow = window.open(`/imprimer-pv?data=${encodedData}`, '_blank');
+      
+      // Si le popup est bloqué
+      if (!printWindow) {
+        toast({
+          title: "Popup bloqué",
+          description: "Veuillez autoriser les popups pour cette page.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('[ERROR] handlePrint:', error);
       toast({

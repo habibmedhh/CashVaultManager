@@ -32,17 +32,22 @@ export default function PrintPV() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Récupérer les données du localStorage
-    const data = localStorage.getItem('printPVData');
-    
-    console.log('[DEBUG] PrintPV - raw data from localStorage:', data);
-    
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
+    try {
+      // Récupérer les données depuis l'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedData = urlParams.get('data');
+      
+      console.log('[DEBUG] PrintPV - encodedData from URL:', encodedData?.substring(0, 50) + '...');
+      
+      if (encodedData) {
+        // Décoder les données
+        const decodedData = decodeURIComponent(atob(encodedData));
+        const parsed = JSON.parse(decodedData);
+        
         console.log('[DEBUG] PrintPV - parsed data:', parsed);
         console.log('[DEBUG] PrintPV - billsData:', parsed.billsData);
         console.log('[DEBUG] PrintPV - coinsData:', parsed.coinsData);
+        
         setPvData(parsed);
         setLoading(false);
         
@@ -50,12 +55,12 @@ export default function PrintPV() {
         setTimeout(() => {
           window.print();
         }, 500);
-      } catch (error) {
-        console.error('[ERROR] PrintPV - Failed to parse data:', error);
+      } else {
+        console.log('[DEBUG] PrintPV - NO data in URL');
         setLocation("/");
       }
-    } else {
-      console.log('[DEBUG] PrintPV - NO data in localStorage');
+    } catch (error) {
+      console.error('[ERROR] PrintPV - Failed to parse data:', error);
       setLocation("/");
     }
   }, [setLocation]);
