@@ -372,7 +372,7 @@ export default function Admin() {
 
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Balance Initiale</span>
+                    <span className="text-muted-foreground">Solde départ</span>
                     <span className="font-semibold">{formatNumber(day.balanceInitiale)} DH</span>
                   </div>
                   <div className="flex justify-between">
@@ -424,13 +424,13 @@ export default function Admin() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Versement</span>
+                    <span className="text-muted-foreground">Versements</span>
                     <span className={day.versement !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
                       {formatNumber(day.versement)} DH
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-semibold">Balance finale</span>
+                    <span className="font-semibold">Solde final</span>
                     <span className="font-bold text-primary">
                       {formatNumber(day.balanceFinale)} DH
                     </span>
