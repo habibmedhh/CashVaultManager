@@ -80,7 +80,7 @@ export default function CashRegister() {
   const handleOperationChange = (
     id: string,
     field: keyof Operation,
-    value: string | number
+    value: string | number | any
   ) => {
     setOperations((ops) =>
       ops.map((op) => (op.id === id ? { ...op, [field]: value } : op))

@@ -49,23 +49,9 @@ export default function OperationsTable({
     
     const total = details.reduce((sum, d) => sum + d.amount, 0);
     
-    // Update the operation with the new details and calculated total
-    const updatedOperations = operations.map(op => 
-      op.id === selectedOperationId 
-        ? { ...op, details, amount: total }
-        : op
-    );
-    
-    // Find the operation and update it
-    const operation = updatedOperations.find(op => op.id === selectedOperationId);
-    if (operation) {
-      onOperationChange(selectedOperationId, "amount", total);
-      // Store details separately (we'll need to modify the parent component to handle this)
-      const currentOp = operations.find(op => op.id === selectedOperationId);
-      if (currentOp) {
-        currentOp.details = details;
-      }
-    }
+    // Update both amount and details
+    onOperationChange(selectedOperationId, "amount", total);
+    onOperationChange(selectedOperationId, "details", details as any);
   };
 
   const selectedOperation = operations.find(op => op.id === selectedOperationId);
