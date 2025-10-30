@@ -77,8 +77,9 @@ export default function BalanceSection({
         type={dialogType}
         onAdd={handleAddFromDialog}
       />
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="space-y-4">
+      <div className="flex flex-col items-center gap-4 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full max-w-5xl">
+        <div>
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
           <div className="flex items-center justify-between mb-2 px-3 pt-3">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
@@ -146,7 +147,9 @@ export default function BalanceSection({
             </tbody>
           </table>
         </div>
-
+        </div>
+        
+        <div>
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
           <div className="flex items-center justify-between mb-2 px-3 pt-3">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
@@ -214,9 +217,10 @@ export default function BalanceSection({
             </tbody>
           </table>
         </div>
+        </div>
       </div>
 
-      <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
+      <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card w-full max-w-5xl">
         <div className="px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-500">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             Soldes et Écart
@@ -281,7 +285,7 @@ export default function BalanceSection({
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
     </>
   );
 }
