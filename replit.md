@@ -36,7 +36,15 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 **October 30, 2025 (Latest)**: Added Admin section for multi-agency oversight
 - **Admin Dashboard**: Three-level drill-down navigation for comprehensive agency monitoring with consistent French terminology
   - **Level 1**: Agency overview showing all agencies with key metrics (Agents, PVs enregistrés, Jours avec PV)
-  - **Level 2**: Date-based view displaying daily financial aggregates for selected agency (Solde départ, Transactions, Change, Recharge, PayExpress, SpeedBox, CTM, Connexions, Alimentation, Versements, Solde final)
+  - **Level 2**: Simplified date-based view displaying essential daily financial aggregates for selected agency:
+    - Solde départ (starting balance for all agents combined)
+    - Total opérations (aggregated sum of all operation types)
+    - Versements (deposits with + prefix, emerald highlight)
+    - Retraits (withdrawals with - prefix, red highlight)
+    - Solde final (theoretical final balance)
+    - Écart Caisse (cash discrepancy with color-coded background: green for positive, red for negative)
+    - Agents count
+    - Individual operation breakdowns (Change, Recharge, PayExpress, etc.) removed for cleaner view
   - **Level 3**: Agent detail view showing individual PVs for each agent on selected date with complete breakdown (Solde de départ, Total opérations, Versements, Retraits, Solde final théorique, Caisse, Coffre, Total cash réel, Écart Caisse)
   - Clean card-based interface with hover effects and intuitive back navigation
   - Full dark mode support with proper color contrast for all financial metrics

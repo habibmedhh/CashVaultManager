@@ -33,17 +33,14 @@ interface Transaction {
 
 interface DailyAggregate {
   date: string;
-  balanceInitiale: number;
-  transactions: number;
-  change: number;
-  recharge: number;
-  payExpress: number;
-  speedBox: number;
-  ctm: number;
-  connexions: number;
-  alimentation: number;
-  versement: number;
-  balanceFinale: number;
+  soldeDepart: number;
+  totalOperations: number;
+  versements: number;
+  retraits: number;
+  soldeFinal: number;
+  totalCaisse: number;
+  totalCoffre: number;
+  ecartCaisse: number;
   userCount: number;
 }
 
@@ -89,73 +86,54 @@ export default function Admin() {
 
       const userPVs = Array.from(latestPVsByUser.values());
 
-      let totalBalanceInitiale = 0;
-      let totalTransactions = 0;
-      let totalChange = 0;
-      let totalRecharge = 0;
-      let totalPayExpress = 0;
-      let totalSpeedBox = 0;
-      let totalCTM = 0;
-      let totalConnexions = 0;
-      let totalAlimentation = 0;
-      let totalVersement = 0;
+      let totalSoldeDepart = 0;
+      let totalOperationsAmount = 0;
+      let totalVersements = 0;
       let totalRetraits = 0;
+      let totalCaisseAmount = 0;
+      let totalCoffreAmount = 0;
 
       userPVs.forEach(pv => {
-        totalBalanceInitiale += pv.soldeDepart;
+        totalSoldeDepart += pv.soldeDepart;
 
         try {
           const operations: Operation[] = JSON.parse(pv.operationsData);
-          operations.forEach(op => {
-            const amount = op.amount || 0;
-            
-            if (op.name.toLowerCase().includes('change')) {
-              totalChange += amount;
-            } else if (op.name.toLowerCase().includes('recharge')) {
-              totalRecharge += amount;
-            } else if (op.name.toLowerCase().includes('payexpress')) {
-              totalPayExpress += amount;
-            } else if (op.name.toLowerCase().includes('speedbox')) {
-              totalSpeedBox += amount;
-            } else if (op.name.toLowerCase().includes('ctm')) {
-              totalCTM += amount;
-            } else if (op.name.toLowerCase().includes('connexion')) {
-              totalConnexions += amount;
-            } else if (op.name.toLowerCase().includes('alimentation')) {
-              totalAlimentation += amount;
-            }
-          });
+          totalOperationsAmount += operations.reduce((sum, op) => sum + (op.amount || 0), 0);
 
           const transactions: Transaction[] = JSON.parse(pv.transactionsData);
-          totalTransactions += transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-          totalVersement += transactions
+          totalVersements += transactions
             .filter(t => t.type === 'versement')
             .reduce((sum, t) => sum + t.amount, 0);
           totalRetraits += transactions
             .filter(t => t.type === 'retrait')
             .reduce((sum, t) => sum + t.amount, 0);
+
+          const bills: CashItem[] = JSON.parse(pv.billsData);
+          const coins: CashItem[] = JSON.parse(pv.coinsData);
+          
+          [...bills, ...coins].forEach(item => {
+            totalCaisseAmount += item.caisseAmount * item.value;
+            totalCoffreAmount += item.coffreAmount * item.value;
+          });
         } catch (e) {
           console.error('Error parsing PV data:', e);
         }
       });
 
-      const totalOperations = totalChange + totalRecharge + totalPayExpress + 
-                             totalSpeedBox + totalCTM + totalConnexions + totalAlimentation;
-      const balanceFinale = totalBalanceInitiale + totalOperations + totalVersement - totalRetraits;
+      const soldeFinalTheorique = totalSoldeDepart + totalOperationsAmount + totalVersements - totalRetraits;
+      const totalCashReel = totalCaisseAmount + totalCoffreAmount;
+      const ecartCaisse = totalCashReel - soldeFinalTheorique;
 
       return {
         date,
-        balanceInitiale: totalBalanceInitiale,
-        transactions: totalTransactions,
-        change: totalChange,
-        recharge: totalRecharge,
-        payExpress: totalPayExpress,
-        speedBox: totalSpeedBox,
-        ctm: totalCTM,
-        connexions: totalConnexions,
-        alimentation: totalAlimentation,
-        versement: totalVersement,
-        balanceFinale,
+        soldeDepart: totalSoldeDepart,
+        totalOperations: totalOperationsAmount,
+        versements: totalVersements,
+        retraits: totalRetraits,
+        soldeFinal: soldeFinalTheorique,
+        totalCaisse: totalCaisseAmount,
+        totalCoffre: totalCoffreAmount,
+        ecartCaisse,
         userCount: userPVs.length,
       };
     });
@@ -373,68 +351,52 @@ export default function Admin() {
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Solde départ</span>
-                    <span className="font-semibold">{formatNumber(day.balanceInitiale)} DH</span>
+                    <span className="font-semibold">{formatNumber(day.soldeDepart)} DH</span>
                   </div>
+                  
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Transactions</span>
-                    <span className={day.transactions !== 0 ? "text-blue-600 dark:text-blue-400 font-semibold" : ""}>
-                      {formatNumber(day.transactions)} DH
+                    <span className="text-muted-foreground">Total opérations</span>
+                    <span className={day.totalOperations !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
+                      {formatNumber(day.totalOperations)} DH
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Change</span>
-                    <span className={day.change !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.change)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Recharge</span>
-                    <span className={day.recharge !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.recharge)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">PayExpress</span>
-                    <span className={day.payExpress !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.payExpress)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">SpeedBox</span>
-                    <span className={day.speedBox !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.speedBox)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">CTM</span>
-                    <span className={day.ctm !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.ctm)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Connexions</span>
-                    <span className={day.connexions !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.connexions)} DH
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Alimentation</span>
-                    <span className={day.alimentation !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.alimentation)} DH
-                    </span>
-                  </div>
+
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Versements</span>
-                    <span className={day.versement !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
-                      {formatNumber(day.versement)} DH
+                    <span className={day.versements !== 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : ""}>
+                      +{formatNumber(day.versements)} DH
                     </span>
                   </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Retraits</span>
+                    <span className={day.retraits !== 0 ? "text-red-600 dark:text-red-400 font-semibold" : ""}>
+                      -{formatNumber(day.retraits)} DH
+                    </span>
+                  </div>
+                  
                   <div className="flex justify-between pt-2 border-t">
                     <span className="font-semibold">Solde final</span>
                     <span className="font-bold text-primary">
-                      {formatNumber(day.balanceFinale)} DH
+                      {formatNumber(day.soldeFinal)} DH
                     </span>
                   </div>
+
+                  <div className={`flex justify-between items-center py-2 px-2 rounded mt-2 ${
+                    day.ecartCaisse > 0 ? 'bg-emerald-100 dark:bg-emerald-950/30' :
+                    day.ecartCaisse < 0 ? 'bg-red-100 dark:bg-red-950/30' :
+                    'bg-muted/50'
+                  }`}>
+                    <span className="font-semibold text-xs">Écart Caisse</span>
+                    <span className={`font-bold text-sm ${
+                      day.ecartCaisse > 0 ? 'text-emerald-600 dark:text-emerald-400' :
+                      day.ecartCaisse < 0 ? 'text-red-600 dark:text-red-400' :
+                      ''
+                    }`}>
+                      {day.ecartCaisse >= 0 ? '+' : ''}{formatNumber(day.ecartCaisse)} DH
+                    </span>
+                  </div>
+
                   <div className="flex justify-between pt-1">
                     <span className="text-muted-foreground text-xs">Agents</span>
                     <Badge variant="outline" className="text-xs">{day.userCount}</Badge>
