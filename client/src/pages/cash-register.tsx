@@ -16,6 +16,7 @@ import { type User } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { exportToPDF } from "@/lib/exportPDF";
 import { exportToExcel } from "@/lib/exportExcel";
+import { useLocation } from "wouter";
 
 interface CashItem {
   value: number;
@@ -29,6 +30,7 @@ interface CashItem {
 export default function CashRegister() {
   const { toast } = useToast();
   const { selectedUserId } = useUser();
+  const [, setLocation] = useLocation();
   const [date, setDate] = useState<Date>(new Date());
   const [hideZeroRows, setHideZeroRows] = useState(false);
 
@@ -334,8 +336,33 @@ export default function CashRegister() {
   };
 
   const handlePrint = () => {
-    console.log("Printing...");
-    window.print();
+    try {
+      const billsData = items.filter(item => item.type === "billet");
+      const coinsData = items.filter(item => item.type === "piece");
+      
+      const printData = {
+        date: format(date, "dd/MM/yyyy", { locale: fr }),
+        billsData,
+        coinsData,
+        operationsData: operations,
+        transactionsData: transactions,
+        soldeDepart,
+        userName: currentUser?.fullName || currentUser?.username,
+        agencyName: currentUser?.agencyId || undefined,
+      };
+      
+      // Stocker les données dans localStorage pour la page d'impression
+      localStorage.setItem('printPVData', JSON.stringify(printData));
+      
+      // Ouvrir la page d'impression dans une nouvelle fenêtre
+      window.open('/imprimer-pv', '_blank');
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ouvrir la page d'impression.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!selectedUserId) {
