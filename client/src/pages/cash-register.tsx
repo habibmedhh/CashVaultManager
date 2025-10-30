@@ -146,6 +146,7 @@ export default function CashRegister() {
   };
 
   const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
+  const totalCoffre = items.reduce((sum, item) => sum + item.coffreAmount, 0);
   // Total des opérations = IN - OUT
   const totalOperations = operations.reduce((sum, op) => {
     if (op.type === "OUT") {
@@ -364,6 +365,7 @@ export default function CashRegister() {
             soldeDepart={soldeDepart}
             onSoldeChange={setSoldeDepart}
             totalCaisse={totalCaisse}
+            totalCoffre={totalCoffre}
             totalOperations={totalOperations}
           />
         </div>

@@ -20,6 +20,7 @@ interface BalanceSectionProps {
   soldeDepart: number;
   onSoldeChange: (value: number) => void;
   totalCaisse: number;
+  totalCoffre: number;
   totalOperations: number;
 }
 
@@ -31,6 +32,7 @@ export default function BalanceSection({
   soldeDepart,
   onSoldeChange,
   totalCaisse,
+  totalCoffre,
   totalOperations,
 }: BalanceSectionProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,7 +48,10 @@ export default function BalanceSection({
   const retraitBanque = totalRetraits;
 
   const soldeFinal = soldeDepart + totalSansRemise + versementBanque - retraitBanque;
-  const ecartCaisse = totalCaisse - soldeFinal;
+  // Écart caisse = Total caisse + coffre - solde final
+  const ecartCaisse = (totalCaisse + totalCoffre) - soldeFinal;
+  // Écart logique si entre -20 et +20
+  const isEcartLogique = ecartCaisse >= -20 && ecartCaisse <= 20;
 
   const formatNumber = (num: number) => {
     return num.toLocaleString("fr-FR", {
@@ -264,10 +269,10 @@ export default function BalanceSection({
                 {formatNumber(soldeFinal)} DH
               </td>
             </tr>
-            <tr className="font-bold bg-gradient-to-r from-amber-100 to-amber-50">
-              <td className="border-r border-amber-300 px-2 py-2 text-sm text-amber-900">Écart de la caisse</td>
+            <tr className={`font-bold ${isEcartLogique ? 'bg-gradient-to-r from-emerald-100 to-emerald-50' : 'bg-gradient-to-r from-amber-100 to-amber-50'}`}>
+              <td className={`px-2 py-2 text-sm ${isEcartLogique ? 'border-r border-emerald-300 text-emerald-900' : 'border-r border-amber-300 text-amber-900'}`}>Écart de la caisse</td>
               <td
-                className="px-2 py-2 text-right font-mono text-lg tabular-nums text-amber-900"
+                className={`px-2 py-2 text-right font-mono text-lg tabular-nums ${isEcartLogique ? 'text-emerald-900' : 'text-amber-900'}`}
                 data-testid="text-ecart-caisse"
               >
                 {formatNumber(ecartCaisse)} DH
