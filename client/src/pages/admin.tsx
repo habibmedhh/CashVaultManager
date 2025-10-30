@@ -92,51 +92,37 @@ export default function Admin() {
       let totalRetraits = 0;
       let totalCaisseAmount = 0;
       let totalCoffreAmount = 0;
-      let totalEcartCaisse = 0;
 
       userPVs.forEach(pv => {
         totalSoldeDepart += pv.soldeDepart;
 
         try {
           const operations: Operation[] = JSON.parse(pv.operationsData);
-          const operationsSum = operations.reduce((sum, op) => sum + (op.amount || 0), 0);
-          totalOperationsAmount += operationsSum;
+          totalOperationsAmount += operations.reduce((sum, op) => sum + (op.amount || 0), 0);
 
           const transactions: Transaction[] = JSON.parse(pv.transactionsData);
-          const versementsSum = transactions
+          totalVersements += transactions
             .filter(t => t.type === 'versement')
             .reduce((sum, t) => sum + t.amount, 0);
-          const retraitsSum = transactions
+          totalRetraits += transactions
             .filter(t => t.type === 'retrait')
             .reduce((sum, t) => sum + t.amount, 0);
-          
-          totalVersements += versementsSum;
-          totalRetraits += retraitsSum;
 
           const bills: CashItem[] = JSON.parse(pv.billsData);
           const coins: CashItem[] = JSON.parse(pv.coinsData);
           
-          let agentCaisse = 0;
-          let agentCoffre = 0;
           [...bills, ...coins].forEach(item => {
-            agentCaisse += item.caisseAmount * item.value;
-            agentCoffre += item.coffreAmount * item.value;
+            totalCaisseAmount += item.caisseAmount * item.value;
+            totalCoffreAmount += item.coffreAmount * item.value;
           });
-
-          totalCaisseAmount += agentCaisse;
-          totalCoffreAmount += agentCoffre;
-
-          // Calculer l'écart de cet agent et l'ajouter au total
-          const agentSoldeFinal = pv.soldeDepart + operationsSum + versementsSum - retraitsSum;
-          const agentCashReel = agentCaisse + agentCoffre;
-          const agentEcart = agentCashReel - agentSoldeFinal;
-          totalEcartCaisse += agentEcart;
         } catch (e) {
           console.error('Error parsing PV data:', e);
         }
       });
 
       const soldeFinalTheorique = totalSoldeDepart + totalOperationsAmount + totalVersements - totalRetraits;
+      const totalCashReel = totalCaisseAmount + totalCoffreAmount;
+      const ecartCaisse = totalCashReel - soldeFinalTheorique;
 
       return {
         date,
@@ -147,7 +133,7 @@ export default function Admin() {
         soldeFinal: soldeFinalTheorique,
         totalCaisse: totalCaisseAmount,
         totalCoffre: totalCoffreAmount,
-        ecartCaisse: totalEcartCaisse,
+        ecartCaisse,
         userCount: userPVs.length,
       };
     });
@@ -195,8 +181,8 @@ export default function Admin() {
         const bills: CashItem[] = JSON.parse(pv.billsData);
         const coins: CashItem[] = JSON.parse(pv.coinsData);
         [...bills, ...coins].forEach(item => {
-          totalCaisse += item.caisseAmount * item.value;
-          totalCoffre += item.coffreAmount * item.value;
+          totalCaisse += item.caisseAmount;
+          totalCoffre += item.coffreAmount;
         });
       } catch (e) {
         console.error('Error parsing PV data:', e);
