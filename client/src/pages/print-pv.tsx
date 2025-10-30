@@ -34,14 +34,28 @@ export default function PrintPV() {
   useEffect(() => {
     // Récupérer les données du localStorage
     const data = localStorage.getItem('printPVData');
+    
+    console.log('[DEBUG] PrintPV - raw data from localStorage:', data);
+    
     if (data) {
-      setPvData(JSON.parse(data));
-      setLoading(false);
-      // Déclencher l'impression automatiquement après le chargement
-      setTimeout(() => {
-        window.print();
-      }, 500);
+      try {
+        const parsed = JSON.parse(data);
+        console.log('[DEBUG] PrintPV - parsed data:', parsed);
+        console.log('[DEBUG] PrintPV - billsData:', parsed.billsData);
+        console.log('[DEBUG] PrintPV - coinsData:', parsed.coinsData);
+        setPvData(parsed);
+        setLoading(false);
+        
+        // Déclencher l'impression automatiquement après le chargement
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      } catch (error) {
+        console.error('[ERROR] PrintPV - Failed to parse data:', error);
+        setLocation("/");
+      }
     } else {
+      console.log('[DEBUG] PrintPV - NO data in localStorage');
       setLocation("/");
     }
   }, [setLocation]);

@@ -351,12 +351,25 @@ export default function CashRegister() {
         agencyName: currentUser?.agencyId || undefined,
       };
       
-      // Stocker les données dans localStorage pour la page d'impression
+      // Stocker les données dans localStorage
       localStorage.setItem('printPVData', JSON.stringify(printData));
       
-      // Ouvrir la page d'impression dans une nouvelle fenêtre
-      window.open('/imprimer-pv', '_blank');
+      // Attendre un peu pour s'assurer que localStorage est écrit
+      // puis ouvrir la page d'impression
+      setTimeout(() => {
+        const printWindow = window.open('/imprimer-pv', '_blank');
+        
+        // Si le popup est bloqué
+        if (!printWindow) {
+          toast({
+            title: "Popup bloqué",
+            description: "Veuillez autoriser les popups pour cette page.",
+            variant: "destructive",
+          });
+        }
+      }, 100);
     } catch (error) {
+      console.error('[ERROR] handlePrint:', error);
       toast({
         title: "Erreur",
         description: "Impossible d'ouvrir la page d'impression.",
