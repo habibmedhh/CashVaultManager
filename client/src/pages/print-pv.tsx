@@ -72,10 +72,15 @@ export default function PrintPV() {
   const operations: Operation[] = pvData.operationsData;
   const transactions: Transaction[] = pvData.transactionsData;
 
+  console.log('[DEBUG] PrintPV - items constructed:', items);
+  console.log('[DEBUG] PrintPV - Sample item[0]:', items[0]);
+  console.log('[DEBUG] PrintPV - Sample item[0] caisseAmount:', items[0]?.caisseAmount);
+
   // Calculs
   const denominationOrder = [200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.01];
   const denominationMap = new Map<number, CashItem>();
   items.forEach(item => {
+    console.log(`[DEBUG] PrintPV - Adding to map: ${item.value} MAD, caisse: ${item.caisseAmount}, coffre: ${item.coffreAmount}`);
     denominationMap.set(item.value, item);
   });
 
