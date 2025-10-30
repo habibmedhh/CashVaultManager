@@ -27,18 +27,18 @@ export default function CashRegister() {
   const [hideZeroRows, setHideZeroRows] = useState(false);
 
   const [items, setItems] = useState<CashItem[]>([
-    { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "💵", type: "billet" },
-    { value: 100, caisseAmount: 200, coffreAmount: 100, color: "#92400E", icon: "💵", type: "billet" },
-    { value: 50, caisseAmount: 0, coffreAmount: 0, color: "#059669", icon: "💵", type: "billet" },
-    { value: 20, caisseAmount: 20, coffreAmount: 0, color: "#7C3AED", icon: "💵", type: "billet" },
-    { value: 10, caisseAmount: 0, coffreAmount: 0, color: "#DC2626", icon: "💵", type: "billet" },
-    { value: 5, caisseAmount: 0, coffreAmount: 0, color: "#EA580C", icon: "💵", type: "billet" },
-    { value: 2, caisseAmount: 2, coffreAmount: 0, color: "#64748B", icon: "🪙", type: "piece" },
-    { value: 1, caisseAmount: 0, coffreAmount: 0, color: "#71717A", icon: "🪙", type: "piece" },
-    { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "🪙", type: "piece" },
-    { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "🪙", type: "piece" },
-    { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "🪙", type: "piece" },
-    { value: 0.01, caisseAmount: 0.01, coffreAmount: 0, color: "#FEFEFE", icon: "🪙", type: "piece" },
+    { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "", type: "billet" },
+    { value: 100, caisseAmount: 200, coffreAmount: 100, color: "#92400E", icon: "", type: "billet" },
+    { value: 50, caisseAmount: 0, coffreAmount: 0, color: "#059669", icon: "", type: "billet" },
+    { value: 20, caisseAmount: 20, coffreAmount: 0, color: "#7C3AED", icon: "", type: "billet" },
+    { value: 10, caisseAmount: 0, coffreAmount: 0, color: "#DC2626", icon: "", type: "billet" },
+    { value: 5, caisseAmount: 0, coffreAmount: 0, color: "#EA580C", icon: "", type: "billet" },
+    { value: 2, caisseAmount: 2, coffreAmount: 0, color: "#64748B", icon: "", type: "piece" },
+    { value: 1, caisseAmount: 0, coffreAmount: 0, color: "#71717A", icon: "", type: "piece" },
+    { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "", type: "piece" },
+    { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "", type: "piece" },
+    { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "", type: "piece" },
+    { value: 0.01, caisseAmount: 0.01, coffreAmount: 0, color: "#FEFEFE", icon: "", type: "piece" },
   ]);
 
   const [operations, setOperations] = useState<Operation[]>([
@@ -100,13 +100,14 @@ export default function CashRegister() {
     );
   };
 
-  const handleAddOperation = () => {
+  const handleAddOperation = (label: string, type: "IN" | "OUT") => {
     const newOp: Operation = {
       id: Date.now().toString(),
-      name: "",
+      name: label,
       number: 0,
       amount: 0,
-      isNew: true,
+      type: type,
+      isNew: false,
     };
     setOperations([...operations, newOp]);
   };

@@ -12,12 +12,13 @@ export interface Operation {
   amount: number;
   details?: DetailedOperation[];
   isNew?: boolean;
+  type?: "IN" | "OUT";
 }
 
 interface OperationsTableProps {
   operations: Operation[];
   onOperationChange: (id: string, field: keyof Operation, value: string | number) => void;
-  onAddOperation: () => void;
+  onAddOperation: (label: string, type: "IN" | "OUT") => void;
   onRemoveOperation: (id: string) => void;
   date: Date;
   hideZeroRows?: boolean;
@@ -70,17 +71,7 @@ export default function OperationsTable({
   };
 
   const handleAddFromDialog = (label: string, type: "IN" | "OUT") => {
-    // Appeler la fonction onAddOperation du parent qui créera la nouvelle opération
-    // Le type IN/OUT sera ignoré pour l'instant, mais le label sera utilisé
-    onAddOperation();
-    // Après avoir créé l'opération, mettre à jour son nom
-    // On doit attendre que l'opération soit créée dans le state
-    setTimeout(() => {
-      const newOp = operations[operations.length - 1];
-      if (newOp && newOp.name === "") {
-        onOperationChange(newOp.id, "name", label);
-      }
-    }, 0);
+    onAddOperation(label, type);
   };
 
   const selectedOperation = operations.find(op => op.id === selectedOperationId);
@@ -121,15 +112,26 @@ export default function OperationsTable({
             {filteredOperations.map((op, index) => (
               <tr key={op.id} className={`hover:bg-slate-50/50 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                 <td className="border-r border-slate-200 p-0">
-                  <input
-                    type="text"
-                    value={op.name}
-                    onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
-                    className="h-7 px-1.5 w-full bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary focus:outline-none text-[11px]"
-                    data-testid={`input-operation-name-${op.id}`}
-                    disabled={op.name !== "" && !op.isNew}
-                    style={op.name !== "" && !op.isNew ? { cursor: 'not-allowed', opacity: 0.8 } : {}}
-                  />
+                  <div className="flex items-center gap-1 h-7 px-1.5">
+                    {op.type && (
+                      <span className={`text-[9px] font-bold px-1 py-0.5 rounded ${
+                        op.type === "IN" 
+                          ? "bg-emerald-100 text-emerald-700" 
+                          : "bg-rose-100 text-rose-700"
+                      }`}>
+                        {op.type}
+                      </span>
+                    )}
+                    <input
+                      type="text"
+                      value={op.name}
+                      onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
+                      className="flex-1 bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary focus:outline-none text-[11px] border-0 p-0"
+                      data-testid={`input-operation-name-${op.id}`}
+                      disabled={op.name !== "" && !op.isNew}
+                      style={op.name !== "" && !op.isNew ? { cursor: 'not-allowed', opacity: 0.8 } : {}}
+                    />
+                  </div>
                 </td>
                 <td className="border-r border-slate-200 p-0">
                   <div className="flex items-center">

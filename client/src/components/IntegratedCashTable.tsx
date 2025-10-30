@@ -58,9 +58,6 @@ export default function IntegratedCashTable({
             <tr key={index} className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
               <td className="border-r border-slate-200 px-1 py-0.5 text-center bg-slate-50/30">
                 <div className="flex items-center justify-center gap-0.5">
-                  <span className="text-xs" style={{ color: item.color }}>
-                    {item.icon}
-                  </span>
                   <span className="text-[10px] font-semibold text-slate-700">
                     {formatNumber(item.value)}
                   </span>
