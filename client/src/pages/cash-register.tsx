@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,6 +9,8 @@ import IntegratedCashTable from "@/components/IntegratedCashTable";
 import OperationsTable, { type Operation } from "@/components/OperationsTable";
 import BalanceSection, { type Transaction } from "@/components/BalanceSection";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface CashItem {
   value: number;
@@ -128,18 +130,85 @@ export default function CashRegister() {
   const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
   const totalOperations = operations.reduce((sum, op) => sum + op.amount, 0);
 
-  const handleSave = () => {
-    console.log("Saving cash register data...", {
-      date,
-      items,
-      operations,
-      transactions,
-      soldeDepart,
-    });
-    toast({
-      title: "Enregistré",
-      description: "Les données ont été enregistrées avec succès.",
-    });
+  const dateKey = format(date, "yyyy-MM-dd");
+
+  // Charger les données pour la date sélectionnée
+  const { data: savedData, isLoading } = useQuery<{
+    id: string;
+    date: string;
+    billsData: string;
+    coinsData: string;
+    operationsData: string;
+    transactionsData: string;
+    soldeDepart: number;
+  }>({
+    queryKey: ["/api/cash-register", dateKey],
+    enabled: true,
+  });
+
+  // Mettre à jour l'état quand les données sont chargées
+  useEffect(() => {
+    if (savedData) {
+      try {
+        const billsData = JSON.parse(savedData.billsData);
+        const coinsData = JSON.parse(savedData.coinsData);
+        const combinedItems = [...billsData, ...coinsData];
+        setItems(combinedItems);
+        
+        setOperations(JSON.parse(savedData.operationsData));
+        setTransactions(JSON.parse(savedData.transactionsData));
+        setSoldeDepart(savedData.soldeDepart);
+      } catch (e) {
+        console.error("Erreur lors du chargement des données:", e);
+      }
+    }
+  }, [savedData]);
+
+  // Invalider le cache quand la date change pour recharger les données
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["/api/cash-register", dateKey] });
+  }, [dateKey]);
+
+  const handleSave = async () => {
+    try {
+      const billsData = items.filter(item => item.type === "billet");
+      const coinsData = items.filter(item => item.type === "piece");
+
+      const data = {
+        date: dateKey,
+        billsData: JSON.stringify(billsData),
+        coinsData: JSON.stringify(coinsData),
+        operationsData: JSON.stringify(operations),
+        transactionsData: JSON.stringify(transactions),
+        soldeDepart,
+      };
+
+      const response = await fetch("/api/cash-register", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'enregistrement");
+      }
+
+      // Invalider le cache pour recharger les données
+      queryClient.invalidateQueries({ queryKey: ["/api/cash-register", dateKey] });
+
+      toast({
+        title: "Enregistré",
+        description: "Les données ont été enregistrées avec succès.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer les données.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDownloadExcel = () => {

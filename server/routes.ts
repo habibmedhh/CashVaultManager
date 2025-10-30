@@ -1,13 +1,33 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { insertCashRegisterSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  // Save cash register data
+  app.post("/api/cash-register", async (req, res) => {
+    try {
+      const data = insertCashRegisterSchema.parse(req.body);
+      const saved = await storage.saveCashRegister(data);
+      res.json(saved);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Get cash register data by date
+  app.get("/api/cash-register/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const data = await storage.getCashRegisterByDate(date);
+      if (!data) {
+        return res.status(404).json({ error: "Not found" });
+      }
+      res.json(data);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   const httpServer = createServer(app);
 
