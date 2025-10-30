@@ -4,6 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Download, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { type CashRegister, type User, type Agency } from "@shared/schema";
@@ -37,6 +38,7 @@ interface Transaction {
   id: string;
   type: "versement" | "retrait";
   label: string;
+  description?: string;
   amount: number;
 }
 
@@ -158,26 +160,18 @@ export default function PVAgence() {
 
     const operations = Array.from(operationsMap.values());
 
-    // Aggregate transactions
-    const transactionsMap = new Map<string, Transaction>();
+    // Collect all transactions (not aggregated, to show each line)
+    const allTransactions: Transaction[] = [];
     pvs.forEach((pv: CashRegister) => {
       try {
         const trans: Transaction[] = JSON.parse(pv.transactionsData);
-        trans.forEach((t) => {
-          const key = `${t.type}-${t.label}`;
-          const existing = transactionsMap.get(key);
-          if (existing) {
-            existing.amount += t.amount;
-          } else {
-            transactionsMap.set(key, { ...t });
-          }
-        });
+        allTransactions.push(...trans);
       } catch (e) {
         console.error("Error parsing transactions data:", e);
       }
     });
 
-    const transactions = Array.from(transactionsMap.values());
+    const transactions = allTransactions;
 
     // Calculate totals
     const totalCaisse = items.reduce((sum, item) => sum + item.caisseAmount, 0);
@@ -426,6 +420,95 @@ export default function PVAgence() {
                       {formatNumber(consolidatedData.totalOperations)} DH
                     </td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-4">Versements et Retraits</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 border-b">
+                    <th className="px-4 py-2 text-left text-sm font-semibold text-slate-700">
+                      Type
+                    </th>
+                    <th className="px-4 py-2 text-left text-sm font-semibold text-slate-700">
+                      Description
+                    </th>
+                    <th className="px-4 py-2 text-right text-sm font-semibold text-slate-700">
+                      Montant
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consolidatedData.transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-4 text-center text-slate-500">
+                        Aucun versement ou retrait
+                      </td>
+                    </tr>
+                  ) : (
+                    <>
+                      {consolidatedData.transactions
+                        .filter((t) => t.type === "versement" && t.amount !== 0)
+                        .map((t, idx) => (
+                          <tr key={`v-${idx}`} className="border-b hover:bg-slate-50">
+                            <td className="px-4 py-2">
+                              <Badge variant="default" className="bg-emerald-600">
+                                Versement
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-2 text-slate-700">
+                              {t.label}
+                              {t.description && (
+                                <span className="text-sm text-slate-500 ml-2">
+                                  - {t.description}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 text-right font-mono font-semibold text-emerald-600">
+                              +{formatNumber(t.amount)} DH
+                            </td>
+                          </tr>
+                        ))}
+                      {consolidatedData.transactions
+                        .filter((t) => t.type === "retrait" && t.amount !== 0)
+                        .map((t, idx) => (
+                          <tr key={`r-${idx}`} className="border-b hover:bg-slate-50">
+                            <td className="px-4 py-2">
+                              <Badge variant="default" className="bg-red-600">
+                                Retrait
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-2 text-slate-700">
+                              {t.label}
+                              {t.description && (
+                                <span className="text-sm text-slate-500 ml-2">
+                                  - {t.description}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 text-right font-mono font-semibold text-red-600">
+                              -{formatNumber(t.amount)} DH
+                            </td>
+                          </tr>
+                        ))}
+                      <tr className="bg-slate-100 font-bold">
+                        <td className="px-4 py-2" colSpan={2}>TOTAL VERSEMENTS</td>
+                        <td className="px-4 py-2 text-right font-mono text-emerald-600">
+                          +{formatNumber(consolidatedData.totalVersements || 0)} DH
+                        </td>
+                      </tr>
+                      <tr className="bg-slate-100 font-bold">
+                        <td className="px-4 py-2" colSpan={2}>TOTAL RETRAITS</td>
+                        <td className="px-4 py-2 text-right font-mono text-red-600">
+                          -{formatNumber(consolidatedData.totalRetraits || 0)} DH
+                        </td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>

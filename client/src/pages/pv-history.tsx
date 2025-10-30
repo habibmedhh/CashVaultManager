@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, Filter, FileText, Clock } from "lucide-react";
+import { Calendar, Filter, FileText, Clock, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -11,7 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import type { CashRegister } from "@shared/schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { CashRegister, User as UserType, Agency } from "@shared/schema";
 
 interface Operation {
   id: string;
@@ -32,9 +39,19 @@ export default function PVHistory() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [showAllPVs, setShowAllPVs] = useState(false);
+  const [selectedAgencyId, setSelectedAgencyId] = useState<string>("all");
+  const [selectedUserId, setSelectedUserId] = useState<string>("all");
 
   const { data: allPVs, isLoading } = useQuery<CashRegister[]>({
     queryKey: ["/api/cash-registers"],
+  });
+
+  const { data: agencies = [] } = useQuery<Agency[]>({
+    queryKey: ["/api/agencies"],
+  });
+
+  const { data: allUsers = [] } = useQuery<UserType[]>({
+    queryKey: ["/api/users/all"],
   });
 
   const formatNumber = (num: number) => {
@@ -71,20 +88,26 @@ export default function PVHistory() {
   };
 
   const filteredPVs = allPVs?.filter((pv) => {
-    if (!startDate && !endDate) return true;
-    
-    const pvDate = parseISO(pv.date);
-    
-    if (startDate && endDate) {
-      return pvDate >= startDate && pvDate <= endDate;
+    if (!startDate && !endDate) {
+      const dateMatch = true;
+    } else {
+      const pvDate = parseISO(pv.date);
+      
+      if (startDate && endDate) {
+        if (pvDate < startDate || pvDate > endDate) return false;
+      } else if (startDate) {
+        if (pvDate < startDate) return false;
+      } else if (endDate) {
+        if (pvDate > endDate) return false;
+      }
     }
-    
-    if (startDate) {
-      return pvDate >= startDate;
+
+    if (selectedAgencyId !== "all" && pv.agencyId !== selectedAgencyId) {
+      return false;
     }
-    
-    if (endDate) {
-      return pvDate <= endDate;
+
+    if (selectedUserId !== "all" && pv.userId !== selectedUserId) {
+      return false;
     }
     
     return true;
@@ -138,7 +161,7 @@ export default function PVHistory() {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-[240px] justify-start"
+                      className="w-[200px] justify-start"
                       data-testid="button-start-date"
                     >
                       <Calendar className="mr-2 h-4 w-4" />
@@ -163,7 +186,7 @@ export default function PVHistory() {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-[240px] justify-start"
+                      className="w-[200px] justify-start"
                       data-testid="button-end-date"
                     >
                       <Calendar className="mr-2 h-4 w-4" />
@@ -182,13 +205,49 @@ export default function PVHistory() {
                 </Popover>
               </div>
 
-              {(startDate || endDate) && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Agence</label>
+                <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
+                  <SelectTrigger className="w-[200px]" data-testid="select-agency-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les agences</SelectItem>
+                    {agencies.map((agency) => (
+                      <SelectItem key={agency.id} value={agency.id}>
+                        {agency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Agent</label>
+                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                  <SelectTrigger className="w-[200px]" data-testid="select-user-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les agents</SelectItem>
+                    {allUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.fullName || user.username}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(startDate || endDate || selectedAgencyId !== "all" || selectedUserId !== "all") && (
                 <div className="flex items-end">
                   <Button
                     variant="ghost"
                     onClick={() => {
                       setStartDate(undefined);
                       setEndDate(undefined);
+                      setSelectedAgencyId("all");
+                      setSelectedUserId("all");
                     }}
                     data-testid="button-clear-filters"
                   >
@@ -258,6 +317,9 @@ export default function PVHistory() {
                       const createdTime = pv.createdAt
                         ? format(new Date(pv.createdAt), "HH:mm:ss")
                         : "N/A";
+                      
+                      const pvUser = allUsers.find(u => u.id === pv.userId);
+                      const pvAgency = agencies.find(a => a.id === pv.agencyId);
 
                       return (
                         <Link
@@ -275,6 +337,21 @@ export default function PVHistory() {
                                       {createdTime}
                                     </span>
                                   </div>
+                                  
+                                  {pvUser && (
+                                    <div className="flex items-center gap-2">
+                                      <User className="w-4 h-4 text-muted-foreground" />
+                                      <span className="text-sm font-medium" data-testid={`text-agent-${pv.id}`}>
+                                        {pvUser.fullName || pvUser.username}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {pvAgency && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {pvAgency.name}
+                                    </Badge>
+                                  )}
                                   
                                   {index === 0 && (
                                     <Badge variant="default" className="text-xs">

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CashRegister } from "@shared/schema";
+import type { CashRegister, User as UserType, Agency } from "@shared/schema";
 
 interface Operation {
   id: string;
@@ -44,6 +44,8 @@ interface Transaction {
 
 interface OperationRow {
   pvId: string;
+  userId?: string | null;
+  agencyId?: string | null;
   date: string;
   time: string;
   operationName: string;
@@ -61,9 +63,19 @@ export default function OperationsDetail() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [amountFilter, setAmountFilter] = useState<string>("all");
+  const [selectedAgencyId, setSelectedAgencyId] = useState<string>("all");
+  const [selectedUserId, setSelectedUserId] = useState<string>("all");
 
   const { data: allPVs, isLoading } = useQuery<CashRegister[]>({
     queryKey: ["/api/cash-registers"],
+  });
+
+  const { data: agencies = [] } = useQuery<Agency[]>({
+    queryKey: ["/api/agencies"],
+  });
+
+  const { data: allUsers = [] } = useQuery<UserType[]>({
+    queryKey: ["/api/users/all"],
   });
 
   const formatNumber = (num: number) => {
@@ -116,6 +128,8 @@ export default function OperationsDetail() {
               if (detail.amount !== 0) {
                 rows.push({
                   pvId: pv.id,
+                  userId: pv.userId,
+                  agencyId: pv.agencyId,
                   date: pv.date,
                   time,
                   operationName: op.name,
@@ -130,6 +144,8 @@ export default function OperationsDetail() {
           } else if (op.amount !== 0 || op.number !== 0) {
             rows.push({
               pvId: pv.id,
+              userId: pv.userId,
+              agencyId: pv.agencyId,
               date: pv.date,
               time,
               operationName: op.name,
@@ -145,6 +161,8 @@ export default function OperationsDetail() {
           if (trans.amount !== 0) {
             rows.push({
               pvId: pv.id,
+              userId: pv.userId,
+              agencyId: pv.agencyId,
               date: pv.date,
               time,
               operationName: trans.label + (trans.description ? ` - ${trans.description}` : ""),
@@ -199,9 +217,17 @@ export default function OperationsDetail() {
         if (amountFilter === "negative" && row.amount >= 0) return false;
       }
 
+      if (selectedAgencyId !== "all" && row.agencyId !== selectedAgencyId) {
+        return false;
+      }
+
+      if (selectedUserId !== "all" && row.userId !== selectedUserId) {
+        return false;
+      }
+
       return true;
     });
-  }, [allOperations, startDate, endDate, searchQuery, typeFilter, amountFilter]);
+  }, [allOperations, startDate, endDate, searchQuery, typeFilter, amountFilter, selectedAgencyId, selectedUserId]);
 
   const totalAmount = filteredOperations.reduce((sum, row) => sum + row.amount, 0);
 
@@ -312,6 +338,40 @@ export default function OperationsDetail() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Agence</label>
+                <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
+                  <SelectTrigger className="w-[200px]" data-testid="select-agency-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    {agencies.map((agency) => (
+                      <SelectItem key={agency.id} value={agency.id}>
+                        {agency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Agent</label>
+                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                  <SelectTrigger className="w-[200px]" data-testid="select-user-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous</SelectItem>
+                    {allUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.fullName || user.username}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex gap-4 flex-wrap items-end">
@@ -329,7 +389,7 @@ export default function OperationsDetail() {
                 </div>
               </div>
 
-              {(startDate || endDate || searchQuery || typeFilter !== "all" || amountFilter !== "all") && (
+              {(startDate || endDate || searchQuery || typeFilter !== "all" || amountFilter !== "all" || selectedAgencyId !== "all" || selectedUserId !== "all") && (
                 <Button
                   variant="ghost"
                   onClick={() => {
@@ -338,6 +398,8 @@ export default function OperationsDetail() {
                     setSearchQuery("");
                     setTypeFilter("all");
                     setAmountFilter("all");
+                    setSelectedAgencyId("all");
+                    setSelectedUserId("all");
                   }}
                   data-testid="button-clear-filters"
                 >
@@ -390,6 +452,7 @@ export default function OperationsDetail() {
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Heure</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold">Agent</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Opération</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Description</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold">Type</th>
@@ -398,21 +461,27 @@ export default function OperationsDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {filteredOperations.map((row, index) => (
-                      <tr
-                        key={`${row.pvId}-${row.operationName}-${index}`}
-                        className="hover-elevate"
-                        data-testid={`row-operation-${index}`}
-                      >
-                        <td className="px-4 py-3 text-sm" data-testid={`text-date-${index}`}>
-                          {format(parseISO(row.date), "dd/MM/yyyy", { locale: fr })}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-mono" data-testid={`text-time-${index}`}>
-                          {row.time}
-                        </td>
-                        <td className="px-4 py-3 text-sm" data-testid={`text-name-${index}`}>
-                          {row.operationName}
-                        </td>
+                    {filteredOperations.map((row, index) => {
+                      const rowUser = allUsers.find(u => u.id === row.userId);
+                      
+                      return (
+                        <tr
+                          key={`${row.pvId}-${row.operationName}-${index}`}
+                          className="hover-elevate"
+                          data-testid={`row-operation-${index}`}
+                        >
+                          <td className="px-4 py-3 text-sm" data-testid={`text-date-${index}`}>
+                            {format(parseISO(row.date), "dd/MM/yyyy", { locale: fr })}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-mono" data-testid={`text-time-${index}`}>
+                            {row.time}
+                          </td>
+                          <td className="px-4 py-3 text-sm" data-testid={`text-agent-${index}`}>
+                            {rowUser ? (rowUser.fullName || rowUser.username) : "-"}
+                          </td>
+                          <td className="px-4 py-3 text-sm" data-testid={`text-name-${index}`}>
+                            {row.operationName}
+                          </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground" data-testid={`text-detail-${index}`}>
                           {row.detailLabel || "-"}
                         </td>
@@ -436,17 +505,18 @@ export default function OperationsDetail() {
                         <td className="px-4 py-3 text-sm text-right font-mono" data-testid={`text-number-${index}`}>
                           {row.number}
                         </td>
-                        <td
-                          className={`px-4 py-3 text-sm text-right font-mono font-semibold ${
-                            row.amount >= 0 ? "text-emerald-600" : "text-rose-600"
-                          }`}
-                          data-testid={`text-amount-${index}`}
-                        >
-                          {row.amount >= 0 ? "+" : ""}
-                          {formatNumber(row.amount)} MAD
-                        </td>
-                      </tr>
-                    ))}
+                          <td
+                            className={`px-4 py-3 text-sm text-right font-mono font-semibold ${
+                              row.amount >= 0 ? "text-emerald-600" : "text-rose-600"
+                            }`}
+                            data-testid={`text-amount-${index}`}
+                          >
+                            {row.amount >= 0 ? "+" : ""}
+                            {formatNumber(row.amount)} MAD
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
