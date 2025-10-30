@@ -117,7 +117,8 @@ export default function CashRegister() {
   };
 
   const handleClearOperations = () => {
-    setOperations([]);
+    // Remettre tous les montants à zéro sans supprimer les lignes
+    setOperations(operations.map(op => ({ ...op, amount: 0 })));
   };
 
   const handleTransactionChange = (
