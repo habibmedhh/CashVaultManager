@@ -33,16 +33,17 @@ interface TransactionData {
 
 export function exportToExcel(data: CashData) {
   // Parse des données
-  const billsData: BillData = data.billsData ? JSON.parse(data.billsData) : {};
-  const coinsData: BillData = data.coinsData ? JSON.parse(data.coinsData) : {};
+  const billsArray: any[] = data.billsData ? JSON.parse(data.billsData) : [];
+  const coinsArray: any[] = data.coinsData ? JSON.parse(data.coinsData) : [];
   const operations: OperationData[] = data.operationsData ? JSON.parse(data.operationsData) : [];
   const transactions: TransactionData[] = data.transactionsData ? JSON.parse(data.transactionsData) : [];
   
-  // Combine bills and coins
-  const allDenominations = {
-    ...billsData,
-    ...coinsData
-  };
+  // Combine bills and coins into a map by denomination
+  const allItems = [...billsArray, ...coinsArray];
+  const denominationMap = new Map();
+  allItems.forEach(item => {
+    denominationMap.set(item.value, item);
+  });
   
   const denominationOrder = [200, 100, 50, 20, 10, 5, 2, 1, 0.5, 0.2, 0.1, 0.01];
   
@@ -58,10 +59,21 @@ export function exportToExcel(data: CashData) {
   
   let totalCash = 0;
   denominationOrder.forEach(denom => {
-    const count = allDenominations[denom.toString()] || 0;
-    const amount = count * denom;
-    totalCash += amount;
-    excelData.push([denom, count, amount]);
+    const item = denominationMap.get(denom);
+    if (!item) {
+      excelData.push([denom, 0, 0]);
+      return;
+    }
+    
+    const caisseAmount = item.caisseAmount || 0;
+    const coffreAmount = item.coffreAmount || 0;
+    const totalAmount = caisseAmount + coffreAmount;
+    
+    // Calculate count (NBB) by dividing total amount by denomination value
+    const count = Math.round(totalAmount / denom);
+    
+    totalCash += totalAmount;
+    excelData.push([denom, count, totalAmount]);
   });
   
   excelData.push(['Total', '', totalCash]);
@@ -133,16 +145,23 @@ export function exportToExcel(data: CashData) {
   let totalCoffreDetail = 0;
   
   denominationOrder.forEach(denom => {
-    const count = allDenominations[denom.toString()] || 0;
-    const amount = count * denom;
+    const item = denominationMap.get(denom);
+    if (!item) {
+      excelData.push([denom, '', '']);
+      return;
+    }
+    
+    const caisseAmount = item.caisseAmount || 0;
+    const coffreAmount = item.coffreAmount || 0;
+    
+    totalCaisseDetail += caisseAmount;
+    totalCoffreDetail += coffreAmount;
     
     excelData.push([
       denom,
-      amount > 0 ? amount : '',
-      ''
+      caisseAmount > 0 ? caisseAmount : '',
+      coffreAmount > 0 ? coffreAmount : ''
     ]);
-    
-    totalCaisseDetail += amount;
   });
   
   excelData.push(['Total', totalCaisseDetail, totalCoffreDetail]);

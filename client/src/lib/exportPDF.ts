@@ -49,16 +49,17 @@ export function exportToPDF(data: CashData) {
   let yPos = 25;
   
   // Parse des données
-  const billsData: BillData = data.billsData ? JSON.parse(data.billsData) : {};
-  const coinsData: BillData = data.coinsData ? JSON.parse(data.coinsData) : {};
+  const billsArray: any[] = data.billsData ? JSON.parse(data.billsData) : [];
+  const coinsArray: any[] = data.coinsData ? JSON.parse(data.coinsData) : [];
   const operations: OperationData[] = data.operationsData ? JSON.parse(data.operationsData) : [];
   const transactions: TransactionData[] = data.transactionsData ? JSON.parse(data.transactionsData) : [];
   
-  // Combine bills and coins
-  const allDenominations = {
-    ...billsData,
-    ...coinsData
-  };
+  // Combine bills and coins into a map by denomination
+  const allItems = [...billsArray, ...coinsArray];
+  const denominationMap = new Map();
+  allItems.forEach(item => {
+    denominationMap.set(item.value, item);
+  });
   
   // Section 1: Billets (caisse + coffre combinés)
   const billsRows: any[] = [];
@@ -66,13 +67,24 @@ export function exportToPDF(data: CashData) {
   
   let totalCash = 0;
   denominationOrder.forEach(denom => {
-    const count = allDenominations[denom.toString()] || 0;
-    const amount = count * denom;
-    totalCash += amount;
+    const item = denominationMap.get(denom);
+    if (!item) {
+      billsRows.push([denom.toString().replace('.', ','), '0', '0,00']);
+      return;
+    }
+    
+    const caisseAmount = item.caisseAmount || 0;
+    const coffreAmount = item.coffreAmount || 0;
+    const totalAmount = caisseAmount + coffreAmount;
+    
+    // Calculate count (NBB) by dividing total amount by denomination value
+    const count = Math.round(totalAmount / denom);
+    
+    totalCash += totalAmount;
     billsRows.push([
       denom.toString().replace('.', ','),
       count.toString(),
-      amount.toFixed(2).replace('.', ',')
+      totalAmount.toFixed(2).replace('.', ',')
     ]);
   });
   
@@ -240,24 +252,28 @@ export function exportToPDF(data: CashData) {
   yPos = (doc as any).lastAutoTable.finalY + 10;
   
   // Section 5: Détail caisse/coffre
-  // Note: Pour l'instant, on affiche tout dans "caisse", mais cette logique peut être affinée
   const detailRows: any[] = [];
   let totalCaisseDetail = 0;
   let totalCoffreDetail = 0;
   
   denominationOrder.forEach(denom => {
-    const count = allDenominations[denom.toString()] || 0;
-    const amount = count * denom;
+    const item = denominationMap.get(denom);
+    if (!item) {
+      detailRows.push([denom.toString().replace('.', ','), '', '']);
+      return;
+    }
     
-    // Pour simplifier, on met tout dans la caisse pour le moment
-    // Dans une version future, on pourrait avoir une distinction caisse/coffre
+    const caisseAmount = item.caisseAmount || 0;
+    const coffreAmount = item.coffreAmount || 0;
+    
+    totalCaisseDetail += caisseAmount;
+    totalCoffreDetail += coffreAmount;
+    
     detailRows.push([
       denom.toString().replace('.', ','),
-      amount > 0 ? amount.toFixed(2).replace('.', ',') : '',
-      ''
+      caisseAmount > 0 ? caisseAmount.toFixed(2).replace('.', ',') : '',
+      coffreAmount > 0 ? coffreAmount.toFixed(2).replace('.', ',') : ''
     ]);
-    
-    totalCaisseDetail += amount;
   });
   
   detailRows.push([

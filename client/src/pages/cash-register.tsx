@@ -283,8 +283,8 @@ export default function CashRegister() {
         operationsData: JSON.stringify(operations),
         transactionsData: JSON.stringify(transactions),
         soldeDepart,
-        userName: currentUser?.name,
-        agencyName: currentUser?.agencyId,
+        userName: currentUser?.fullName || currentUser?.username,
+        agencyName: currentUser?.agencyId || undefined,
       };
       
       exportToExcel(exportData);
@@ -314,8 +314,8 @@ export default function CashRegister() {
         operationsData: JSON.stringify(operations),
         transactionsData: JSON.stringify(transactions),
         soldeDepart,
-        userName: currentUser?.name,
-        agencyName: currentUser?.agencyId,
+        userName: currentUser?.fullName || currentUser?.username,
+        agencyName: currentUser?.agencyId || undefined,
       };
       
       exportToPDF(exportData);
