@@ -1,6 +1,8 @@
-import EditableCell from "./EditableCell";
+import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TransactionDialog from "./TransactionDialog";
+import EditableCell from "./EditableCell";
 
 export interface Transaction {
   id: string;
@@ -12,7 +14,7 @@ export interface Transaction {
 interface BalanceSectionProps {
   transactions: Transaction[];
   onTransactionChange: (id: string, field: keyof Transaction, value: string | number) => void;
-  onAddTransaction: (type: "versement" | "retrait") => void;
+  onAddTransaction: (type: "versement" | "retrait", label: string, amount: number) => void;
   onRemoveTransaction: (id: string) => void;
   soldeDepart: number;
   onSoldeChange: (value: number) => void;
@@ -30,6 +32,8 @@ export default function BalanceSection({
   totalCaisse,
   totalOperations,
 }: BalanceSectionProps) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<"versement" | "retrait">("versement");
   const versements = transactions.filter((t) => t.type === "versement");
   const retraits = transactions.filter((t) => t.type === "retrait");
 
@@ -50,7 +54,23 @@ export default function BalanceSection({
     });
   };
 
+  const handleOpenDialog = (type: "versement" | "retrait") => {
+    setDialogType(type);
+    setDialogOpen(true);
+  };
+
+  const handleAddFromDialog = (label: string, amount: number) => {
+    onAddTransaction(dialogType, label, amount);
+  };
+
   return (
+    <>
+      <TransactionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        type={dialogType}
+        onAdd={handleAddFromDialog}
+      />
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className="space-y-4">
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
@@ -60,7 +80,7 @@ export default function BalanceSection({
             </h3>
             <Button
               size="sm"
-              onClick={() => onAddTransaction("versement")}
+              onClick={() => handleOpenDialog("versement")}
               data-testid="button-add-versement"
               className="shadow-sm h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
             >
@@ -83,25 +103,11 @@ export default function BalanceSection({
             <tbody>
               {versements.map((t, index) => (
                 <tr key={t.id} className={`hover:bg-emerald-50/30 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                  <td className="border-r border-slate-200 p-0">
-                    <input
-                      type="text"
-                      value={t.label}
-                      onChange={(e) =>
-                        onTransactionChange(t.id, "label", e.target.value)
-                      }
-                      className="h-7 px-1.5 w-full bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-[11px]"
-                      data-testid={`input-versement-label-${t.id}`}
-                    />
+                  <td className="border-r border-slate-200 px-2 py-1.5 text-[11px] text-slate-700">
+                    {t.label}
                   </td>
-                  <td className="border-r border-slate-200 p-0">
-                    <EditableCell
-                      value={t.amount}
-                      onChange={(val) => onTransactionChange(t.id, "amount", val)}
-                      allowFormula={true}
-                      className="border-0 w-full rounded-none h-7 text-[11px] px-0.5"
-                      dataTestId={`input-versement-amount-${t.id}`}
-                    />
+                  <td className="border-r border-slate-200 px-2 py-1.5 text-right font-mono text-[11px] tabular-nums text-emerald-700" data-testid={`text-versement-amount-${t.id}`}>
+                    {formatNumber(t.amount)}
                   </td>
                   <td className="p-0 text-center">
                     <Button
@@ -127,7 +133,7 @@ export default function BalanceSection({
             </h3>
             <Button
               size="sm"
-              onClick={() => onAddTransaction("retrait")}
+              onClick={() => handleOpenDialog("retrait")}
               data-testid="button-add-retrait"
               className="shadow-sm h-7 text-xs bg-white/20 hover:bg-white/30 text-white border-white/30"
             >
@@ -150,25 +156,11 @@ export default function BalanceSection({
             <tbody>
               {retraits.map((t, index) => (
                 <tr key={t.id} className={`hover:bg-rose-50/30 transition-colors border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                  <td className="border-r border-slate-200 p-0">
-                    <input
-                      type="text"
-                      value={t.label}
-                      onChange={(e) =>
-                        onTransactionChange(t.id, "label", e.target.value)
-                      }
-                      className="h-7 px-1.5 w-full bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-rose-500 focus:outline-none text-[11px]"
-                      data-testid={`input-retrait-label-${t.id}`}
-                    />
+                  <td className="border-r border-slate-200 px-2 py-1.5 text-[11px] text-slate-700">
+                    {t.label}
                   </td>
-                  <td className="border-r border-slate-200 p-0">
-                    <EditableCell
-                      value={t.amount}
-                      onChange={(val) => onTransactionChange(t.id, "amount", val)}
-                      allowFormula={true}
-                      className="border-0 w-full rounded-none h-7 text-[11px] px-0.5"
-                      dataTestId={`input-retrait-amount-${t.id}`}
-                    />
+                  <td className="border-r border-slate-200 px-2 py-1.5 text-right font-mono text-[11px] tabular-nums text-rose-700" data-testid={`text-retrait-amount-${t.id}`}>
+                    {formatNumber(t.amount)}
                   </td>
                   <td className="p-0 text-center">
                     <Button
@@ -254,5 +246,6 @@ export default function BalanceSection({
         </table>
       </div>
     </div>
+    </>
   );
 }
