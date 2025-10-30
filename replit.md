@@ -41,7 +41,18 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
-**October 30, 2025 (Latest)**: Enhanced multi-user/multi-agency filtering and display
+**October 30, 2025 (Latest)**: Fixed consolidated totals and multi-agent operation display
+- **PV History Page**: When "Tous les agents" is selected, now displays consolidated PV totals by agency
+  - Groups PVs by agency and takes the latest PV for each agent
+  - Calculates and displays consolidated totals (Solde Départ, Total Caisse, Opérations, Écart Caisse)
+  - Shows a single "PV Agence" card per agency/date with accurate consolidated metrics
+  - Links to PV Agence page for detailed view
+- **Operations Detail Page**: Fixed to display operations from all agents
+  - Changed grouping logic from (date) to (date, userId)
+  - Now shows the latest PV for each agent per date
+  - Ensures all agents' operations are visible (e.g., "FATI 200" from Fatima Zahra now appears)
+
+**October 30, 2025 (Earlier)**: Enhanced multi-user/multi-agency filtering and display
 - Added agency and agent filters to PV History page with agent/agency columns
 - Added agency and agent filters to Operations Detail page with agent attribution column
 - Added detailed "Versements et Retraits" section to PV Agence page
