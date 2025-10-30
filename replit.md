@@ -33,7 +33,16 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**October 30, 2025 (Latest)**: Added professional print view for direct PV printing
+**October 30, 2025 (Latest)**: Added Admin section for multi-agency oversight
+- **Admin Dashboard**: Three-level drill-down navigation for comprehensive agency monitoring
+  - **Level 1**: Agency overview showing all agencies with key metrics (number of agents, total PVs, days with PV)
+  - **Level 2**: Date-based view displaying daily financial aggregates for selected agency (Balance Initiale, Transactions, Change, Recharge, PayExpress, SpeedBox, CTM, Connexions, Alimentation, Versement, Balance finale)
+  - **Level 3**: Agent detail view showing individual PVs for each agent on selected date with complete breakdown (Solde de départ, Total opérations, Versements, Retraits, Solde final théorique, Caisse, Coffre, Total cash réel, Écart Caisse)
+  - Clean card-based interface with hover effects and intuitive back navigation
+  - Full dark mode support with proper color contrast for all financial metrics
+  - Accessible via sidebar menu with Shield icon
+
+**October 30, 2025 (Earlier)**: Added professional print view for direct PV printing
 - **Print View**: New dedicated print page optimized for A4 format (1-1.5 pages)
   - Clean, compact layout with two-column grid to maximize space utilization
   - All PV details included: Billets, Détail Caisse/Coffre, Opérations, Soldes, Transactions, Signatures
