@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/contexts/UserContext";
-import { type User } from "@shared/schema";
+import { type User, type PVConfiguration } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { exportToPDF } from "@/lib/exportPDF";
 import { exportToExcel } from "@/lib/exportExcel";
@@ -46,41 +46,21 @@ export default function CashRegister() {
   });
 
   const [items, setItems] = useState<CashItem[]>([
-    { value: 200, caisseAmount: 200, coffreAmount: 0, color: "#3B82F6", icon: "", type: "billet" },
-    { value: 100, caisseAmount: 200, coffreAmount: 100, color: "#92400E", icon: "", type: "billet" },
+    { value: 200, caisseAmount: 0, coffreAmount: 0, color: "#3B82F6", icon: "", type: "billet" },
+    { value: 100, caisseAmount: 0, coffreAmount: 0, color: "#92400E", icon: "", type: "billet" },
     { value: 50, caisseAmount: 0, coffreAmount: 0, color: "#059669", icon: "", type: "billet" },
-    { value: 20, caisseAmount: 20, coffreAmount: 0, color: "#7C3AED", icon: "", type: "billet" },
+    { value: 20, caisseAmount: 0, coffreAmount: 0, color: "#7C3AED", icon: "", type: "billet" },
     { value: 10, caisseAmount: 0, coffreAmount: 0, color: "#DC2626", icon: "", type: "billet" },
     { value: 5, caisseAmount: 0, coffreAmount: 0, color: "#EA580C", icon: "", type: "billet" },
-    { value: 2, caisseAmount: 2, coffreAmount: 0, color: "#64748B", icon: "", type: "piece" },
+    { value: 2, caisseAmount: 0, coffreAmount: 0, color: "#64748B", icon: "", type: "piece" },
     { value: 1, caisseAmount: 0, coffreAmount: 0, color: "#71717A", icon: "", type: "piece" },
     { value: 0.5, caisseAmount: 0, coffreAmount: 0, color: "#A8A29E", icon: "", type: "piece" },
-    { value: 0.2, caisseAmount: 0.2, coffreAmount: 0.6, color: "#D4D4D8", icon: "", type: "piece" },
-    { value: 0.1, caisseAmount: 0.3, coffreAmount: 0, color: "#E5E5E5", icon: "", type: "piece" },
-    { value: 0.01, caisseAmount: 0.01, coffreAmount: 0, color: "#FEFEFE", icon: "", type: "piece" },
+    { value: 0.2, caisseAmount: 0, coffreAmount: 0, color: "#D4D4D8", icon: "", type: "piece" },
+    { value: 0.1, caisseAmount: 0, coffreAmount: 0, color: "#E5E5E5", icon: "", type: "piece" },
+    { value: 0.01, caisseAmount: 0, coffreAmount: 0, color: "#FEFEFE", icon: "", type: "piece" },
   ]);
 
-  const [operations, setOperations] = useState<Operation[]>([
-    { id: "1", name: "WESTERN UNION", number: 0, amount: 0 },
-    { id: "2", name: "MONEY GRAM", number: 0, amount: 10475.7 },
-    { id: "3", name: "remis/Invest/mony", number: 0, amount: 500 },
-    { id: "4", name: "l'adaptapenda-smallworld set", number: 0, amount: 0 },
-    { id: "5", name: "RIA-zoombbql danse", number: 0, amount: 4000 },
-    { id: "6", name: "PAIEMENT GAZ", number: 0, amount: 0 },
-    { id: "7", name: "money l-chtene zerowword remis", number: 0, amount: 0 },
-    { id: "8", name: "EXPISSION CASHPLUS", number: 0, amount: 1373.69 },
-    { id: "9", name: "RECHARGE IAMM/orange/IAVI", number: 0, amount: 0 },
-    { id: "10", name: "BECHARGE IAMM/orange/IAVI", number: 0, amount: 0 },
-    { id: "11", name: "ENVOI MG + VU", number: 0, amount: 0 },
-    { id: "12", name: "PAIEMENT MARCHAND", number: 0, amount: -23012 },
-    { id: "13", name: "TAXES / IMPOTS", number: 0, amount: 0 },
-    { id: "14", name: "ASSURANCE AXA SAHAM", number: 0, amount: 0 },
-    { id: "15", name: "MIZAT MALL PAY EXPRESSE", number: 0, amount: 0 },
-    { id: "16", name: "RECHARGE DETAILLANT", number: 0, amount: 100 },
-    { id: "17", name: "RECHARGE COMPTE", number: 0, amount: 0 },
-    { id: "18", name: "RETRAIT COMPTE", number: 0, amount: 0 },
-    { id: "19", name: "Factures IAM ORANGE IAVI", number: 75, amount: -6662.61 },
-  ]);
+  const [operations, setOperations] = useState<Operation[]>([]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: "1", type: "versement", label: "Versement banque", amount: 0 },
@@ -178,6 +158,14 @@ export default function CashRegister() {
 
   const dateKey = format(date, "yyyy-MM-dd");
 
+  // Charger la configuration PV pour initialiser les opérations
+  const { data: pvConfig } = useQuery<PVConfiguration>({
+    queryKey: ["/api/pv-configuration"],
+  });
+
+  // Flag pour savoir si on a déjà initialisé les opérations depuis la config
+  const operationsInitialized = useRef(false);
+
   // Charger les données pour la date sélectionnée
   const { data: savedData, isLoading } = useQuery<{
     id: string;
@@ -204,15 +192,55 @@ export default function CashRegister() {
         setOperations(JSON.parse(savedData.operationsData));
         setTransactions(JSON.parse(savedData.transactionsData));
         setSoldeDepart(savedData.soldeDepart);
+        operationsInitialized.current = true;
       } catch (e) {
         console.error("Erreur lors du chargement des données:", e);
       }
     }
   }, [savedData]);
 
+  // Initialiser les opérations depuis la configuration si pas de données sauvegardées
+  useEffect(() => {
+    if (!isLoading && !savedData && pvConfig && !operationsInitialized.current) {
+      try {
+        interface OperationConfig {
+          name: string;
+          defaultNumber: number;
+        }
+        
+        const opsIn = JSON.parse(pvConfig.operationsInData) as OperationConfig[];
+        const opsOut = JSON.parse(pvConfig.operationsOutData) as OperationConfig[];
+        
+        const initialOperations: Operation[] = [
+          ...opsIn.map((op, idx) => ({
+            id: `in-${idx}`,
+            name: op.name,
+            number: op.defaultNumber,
+            amount: 0,
+            type: "IN" as const,
+          })),
+          ...opsOut.map((op, idx) => ({
+            id: `out-${idx}`,
+            name: op.name,
+            number: op.defaultNumber,
+            amount: 0,
+            type: "OUT" as const,
+          })),
+        ];
+        
+        setOperations(initialOperations);
+        operationsInitialized.current = true;
+      } catch (e) {
+        console.error("Erreur lors de l'initialisation des opérations:", e);
+      }
+    }
+  }, [pvConfig, savedData, isLoading]);
+
   // Invalider le cache quand la date change pour recharger les données
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: [`/api/cash-register/${dateKey}/user/${selectedUserId}`] });
+    // Réinitialiser le flag quand on change de date pour permettre une nouvelle initialisation
+    operationsInitialized.current = false;
   }, [dateKey, selectedUserId]);
 
   const handleSave = async () => {
