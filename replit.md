@@ -33,7 +33,20 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**October 30, 2025 (Latest)**: Added Admin section for multi-agency oversight
+**October 31, 2025 (Latest)**: Enhanced Admin features and PV configuration system
+- **Admin Filtering**: Added month/year selector in Admin section (Level 2) to filter PVs by period
+  - Dropdown selectors for month (French names) and year (last 5 years)
+  - Filters apply to agency daily aggregates view
+  - Improves navigation through large datasets
+- **PV Configuration System**: Added admin capability to configure operation names
+  - New database table `pv_configurations` to store operation templates
+  - REST API endpoints `/api/pv-configuration` for GET/POST/PATCH
+  - New configuration page `/configuration` with dual-panel interface (IN/OUT operations)
+  - Admin can add/remove/rename operations visible to all agents
+  - Configuration changes apply system-wide immediately
+  - **Note**: Frontend PV pages (cash-register, pv-agence, etc.) still use hardcoded operations - integration pending
+
+**October 30, 2025**: Added Admin section for multi-agency oversight
 - **Admin Dashboard**: Three-level drill-down navigation for comprehensive agency monitoring with consistent French terminology
   - **Level 1**: Agency overview showing all agencies with key metrics (Agents, PVs enregistrés, Jours avec PV)
   - **Level 2**: Simplified date-based view displaying essential daily financial aggregates for selected agency:
