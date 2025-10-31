@@ -44,17 +44,9 @@ export default function PVConfigurationPage() {
       };
 
       if (config?.id) {
-        return apiRequest(`/api/pv-configuration/${config.id}`, {
-          method: "PATCH",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        });
+        return apiRequest("PATCH", `/api/pv-configuration/${config.id}`, data);
       } else {
-        return apiRequest("/api/pv-configuration", {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" },
-        });
+        return apiRequest("POST", "/api/pv-configuration", data);
       }
     },
     onSuccess: () => {

@@ -71,9 +71,10 @@ export default function Admin() {
     const agencyPVs = cashRegisters.filter(cr => {
       if (cr.agencyId !== selectedAgencyId) return false;
       
-      const pvDate = new Date(cr.date.split('-').reverse().join('-'));
-      const pvMonth = pvDate.getMonth();
-      const pvYear = pvDate.getFullYear();
+      // Date format in DB is YYYY-MM-DD
+      const [year, month, day] = cr.date.split('-');
+      const pvMonth = parseInt(month) - 1; // JavaScript months are 0-indexed
+      const pvYear = parseInt(year);
       
       return pvMonth === parseInt(selectedMonth) && pvYear === parseInt(selectedYear);
     });
