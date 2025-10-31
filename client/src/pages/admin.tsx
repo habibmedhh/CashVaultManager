@@ -112,8 +112,8 @@ export default function Admin() {
           const coins: CashItem[] = JSON.parse(pv.coinsData);
           
           [...bills, ...coins].forEach(item => {
-            totalCaisseAmount += item.caisseAmount * item.value;
-            totalCoffreAmount += item.coffreAmount * item.value;
+            totalCaisseAmount += item.caisseAmount;
+            totalCoffreAmount += item.coffreAmount;
           });
         } catch (e) {
           console.error('Error parsing PV data:', e);
