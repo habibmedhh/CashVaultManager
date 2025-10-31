@@ -1,4 +1,4 @@
-import { FileText, History, ListChecks, Home, Building2, Shield } from "lucide-react";
+import { FileText, History, ListChecks, Home, Building2, Shield, Settings } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -36,6 +36,11 @@ const menuItems = [
     title: "Administration",
     url: "/admin",
     icon: Shield,
+  },
+  {
+    title: "Configuration PV",
+    url: "/configuration",
+    icon: Settings,
   },
 ];
 

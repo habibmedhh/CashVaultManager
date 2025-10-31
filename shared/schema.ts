@@ -61,3 +61,20 @@ export const insertCashRegisterSchema = createInsertSchema(cashRegisters).omit({
 
 export type InsertCashRegister = z.infer<typeof insertCashRegisterSchema>;
 export type CashRegister = typeof cashRegisters.$inferSelect;
+
+export const pvConfigurations = pgTable("pv_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  operationsInData: text("operations_in_data").notNull(),
+  operationsOutData: text("operations_out_data").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPVConfigurationSchema = createInsertSchema(pvConfigurations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPVConfiguration = z.infer<typeof insertPVConfigurationSchema>;
+export type PVConfiguration = typeof pvConfigurations.$inferSelect;

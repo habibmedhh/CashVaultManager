@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type CashRegister, type InsertCashRegister, type Agency, type InsertAgency, users, cashRegisters, agencies } from "@shared/schema";
+import { type User, type InsertUser, type CashRegister, type InsertCashRegister, type Agency, type InsertAgency, type PVConfiguration, type InsertPVConfiguration, users, cashRegisters, agencies, pvConfigurations } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -24,17 +24,23 @@ export interface IStorage {
   getCashRegistersByAgency(agencyId: string): Promise<CashRegister[]>;
   getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]>;
   saveCashRegister(data: InsertCashRegister): Promise<CashRegister>;
+  
+  getPVConfiguration(): Promise<PVConfiguration | undefined>;
+  savePVConfiguration(data: InsertPVConfiguration): Promise<PVConfiguration>;
+  updatePVConfiguration(id: string, data: InsertPVConfiguration): Promise<PVConfiguration | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private agencies: Map<string, Agency>;
   private cashRegisters: Map<string, CashRegister>;
+  private pvConfiguration: PVConfiguration | null;
 
   constructor() {
     this.users = new Map();
     this.agencies = new Map();
     this.cashRegisters = new Map();
+    this.pvConfiguration = null;
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -183,6 +189,37 @@ export class MemStorage implements IStorage {
     this.cashRegisters.set(id, newRegister);
     return newRegister;
   }
+
+  async getPVConfiguration(): Promise<PVConfiguration | undefined> {
+    return this.pvConfiguration || undefined;
+  }
+
+  async savePVConfiguration(data: InsertPVConfiguration): Promise<PVConfiguration> {
+    const id = randomUUID();
+    const config: PVConfiguration = {
+      id,
+      operationsInData: data.operationsInData,
+      operationsOutData: data.operationsOutData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.pvConfiguration = config;
+    return config;
+  }
+
+  async updatePVConfiguration(id: string, data: InsertPVConfiguration): Promise<PVConfiguration | undefined> {
+    if (!this.pvConfiguration || this.pvConfiguration.id !== id) {
+      return undefined;
+    }
+    const updated: PVConfiguration = {
+      ...this.pvConfiguration,
+      operationsInData: data.operationsInData,
+      operationsOutData: data.operationsOutData,
+      updatedAt: new Date(),
+    };
+    this.pvConfiguration = updated;
+    return updated;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -305,6 +342,28 @@ export class DbStorage implements IStorage {
 
   async saveCashRegister(data: InsertCashRegister): Promise<CashRegister> {
     const result = await this.db.insert(cashRegisters).values(data).returning();
+    return result[0];
+  }
+
+  async getPVConfiguration(): Promise<PVConfiguration | undefined> {
+    const result = await this.db.select().from(pvConfigurations).limit(1);
+    return result[0];
+  }
+
+  async savePVConfiguration(data: InsertPVConfiguration): Promise<PVConfiguration> {
+    const result = await this.db.insert(pvConfigurations).values(data).returning();
+    return result[0];
+  }
+
+  async updatePVConfiguration(id: string, data: InsertPVConfiguration): Promise<PVConfiguration | undefined> {
+    const result = await this.db
+      .update(pvConfigurations)
+      .set({
+        ...data,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(pvConfigurations.id, id))
+      .returning();
     return result[0];
   }
 }

@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, ChevronRight, Calendar, User, ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, ChevronRight, Calendar, User, ArrowLeft, Filter } from "lucide-react";
 import { type Agency, type CashRegister, type User as UserType } from "@shared/schema";
 
 interface CashItem {
@@ -47,6 +48,8 @@ interface DailyAggregate {
 export default function Admin() {
   const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>(new Date().getMonth().toString());
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
 
   const { data: agencies = [], isLoading: loadingAgencies } = useQuery<Agency[]>({
     queryKey: ["/api/agencies"],
@@ -65,7 +68,15 @@ export default function Admin() {
   const agencyDailyData = useMemo(() => {
     if (!selectedAgencyId || !cashRegisters.length) return [];
 
-    const agencyPVs = cashRegisters.filter(cr => cr.agencyId === selectedAgencyId);
+    const agencyPVs = cashRegisters.filter(cr => {
+      if (cr.agencyId !== selectedAgencyId) return false;
+      
+      const pvDate = new Date(cr.date.split('-').reverse().join('-'));
+      const pvMonth = pvDate.getMonth();
+      const pvYear = pvDate.getFullYear();
+      
+      return pvMonth === parseInt(selectedMonth) && pvYear === parseInt(selectedYear);
+    });
     
     const dateGroups = new Map<string, CashRegister[]>();
     agencyPVs.forEach(pv => {
@@ -139,7 +150,7 @@ export default function Admin() {
     });
 
     return dailyAggregates.sort((a, b) => b.date.localeCompare(a.date));
-  }, [selectedAgencyId, cashRegisters]);
+  }, [selectedAgencyId, cashRegisters, selectedMonth, selectedYear]);
 
   const selectedDateData = useMemo(() => {
     if (!selectedAgencyId || !selectedDate || !cashRegisters.length) return null;
@@ -303,22 +314,62 @@ export default function Admin() {
   if (selectedAgencyId && !selectedDate) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSelectedAgencyId(null)}
-            data-testid="button-back-to-agencies"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold" data-testid="text-agency-title">
-              {selectedAgency?.name}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Suivi journal - Code: {selectedAgency?.code}
-            </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedAgencyId(null)}
+              data-testid="button-back-to-agencies"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold" data-testid="text-agency-title">
+                {selectedAgency?.name}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Suivi journal - Code: {selectedAgency?.code}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[140px]" data-testid="select-month">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Janvier</SelectItem>
+                <SelectItem value="1">Février</SelectItem>
+                <SelectItem value="2">Mars</SelectItem>
+                <SelectItem value="3">Avril</SelectItem>
+                <SelectItem value="4">Mai</SelectItem>
+                <SelectItem value="5">Juin</SelectItem>
+                <SelectItem value="6">Juillet</SelectItem>
+                <SelectItem value="7">Août</SelectItem>
+                <SelectItem value="8">Septembre</SelectItem>
+                <SelectItem value="9">Octobre</SelectItem>
+                <SelectItem value="10">Novembre</SelectItem>
+                <SelectItem value="11">Décembre</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-[100px]" data-testid="select-year">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 5 }, (_, i) => {
+                  const year = new Date().getFullYear() - i;
+                  return (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

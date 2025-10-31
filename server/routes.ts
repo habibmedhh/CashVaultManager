@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCashRegisterSchema, insertAgencySchema } from "@shared/schema";
+import { insertCashRegisterSchema, insertAgencySchema, insertPVConfigurationSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Agency routes
@@ -162,6 +162,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // PV Configuration routes
+  app.get("/api/pv-configuration", async (req, res) => {
+    try {
+      const config = await storage.getPVConfiguration();
+      if (!config) {
+        // Return default configuration if none exists
+        return res.json({
+          operationsInData: JSON.stringify([
+            { name: "Change", defaultNumber: 0 },
+            { name: "Recharge", defaultNumber: 0 },
+            { name: "PayExpress", defaultNumber: 0 },
+            { name: "SpeedBox", defaultNumber: 0 },
+            { name: "CTM", defaultNumber: 0 },
+            { name: "Connexions", defaultNumber: 0 },
+            { name: "Alimentation", defaultNumber: 0 },
+          ]),
+          operationsOutData: JSON.stringify([]),
+        });
+      }
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/pv-configuration", async (req, res) => {
+    try {
+      const data = insertPVConfigurationSchema.parse(req.body);
+      const config = await storage.savePVConfiguration(data);
+      res.json(config);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/pv-configuration/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = insertPVConfigurationSchema.parse(req.body);
+      const config = await storage.updatePVConfiguration(id, data);
+      if (!config) {
+        return res.status(404).json({ error: "Configuration not found" });
+      }
+      res.json(config);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
     }
   });
 

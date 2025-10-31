@@ -12,6 +12,7 @@ import OperationsDetail from "@/pages/operations-detail";
 import PVAgence from "@/pages/pv-agence";
 import PrintPV from "@/pages/print-pv";
 import Admin from "@/pages/admin";
+import PVConfiguration from "@/pages/pv-configuration";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { UserSelector } from "@/components/UserSelector";
 
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/pv-agence" component={PVAgence} />
       <Route path="/imprimer-pv" component={PrintPV} />
       <Route path="/admin" component={Admin} />
+      <Route path="/configuration" component={PVConfiguration} />
       <Route component={NotFound} />
     </Switch>
   );
