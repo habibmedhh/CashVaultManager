@@ -33,7 +33,19 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**October 31, 2025 (Latest)**: Enhanced Admin features and PV configuration system
+**October 31, 2025 (Latest)**: Bug fixes for Admin filtering and PV configuration
+- **Admin Month/Year Filter Fix**: Corrected date parsing logic for YYYY-MM-DD format
+  - Fixed incorrect reverse() operation on date string
+  - Now properly extracts year and month directly from database format
+  - Correctly converts database month (1-12) to JavaScript month (0-11) for filtering
+  - Verified with e2e test showing October 2025 PVs correctly filtered
+- **PV Configuration Save Fix**: Corrected apiRequest function call signature
+  - Fixed from `apiRequest(url, { method, body, headers })` to `apiRequest(method, url, data)`
+  - PATCH and POST requests now execute successfully
+  - Configuration saves properly with "Configuration sauvegardée" toast confirmation
+  - Verified with automated testing
+
+**October 31, 2025 (Earlier)**: Enhanced Admin features and PV configuration system
 - **Admin Filtering**: Added month/year selector in Admin section (Level 2) to filter PVs by period
   - Dropdown selectors for month (French names) and year (last 5 years)
   - Filters apply to agency daily aggregates view
