@@ -33,7 +33,19 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**October 31, 2025 (Latest)**: Bug fixes for Admin filtering and PV configuration
+**November 1, 2025 (Latest)**: Automatic solde départ calculation from previous day
+- **Automatic Balance Continuity**: Implemented automatic calculation of starting balance (solde départ) from previous day's final balance
+  - Each agent's solde départ is automatically set to their soldeFinal from the previous working day
+  - System searches up to 30 days back to find the most recent PV, handling weekends and holidays
+  - Total solde départ of all agents equals the theoretical soldeFinal from the previous day
+  - New API endpoints: `/api/previous-solde-final/date/:date/user/:userId` and `/api/previous-solde-final/date/:date/agency/:agencyId`
+  - Backend helper functions `calculateSoldeFinal()` and `getPreviousDate()` to compute balances from stored PV data
+  - Frontend automatically fetches and applies previous day's soldeFinal when creating a new PV
+  - Default soldeDepart changed from hardcoded value (11366.75) to 0, with automatic loading from previous day
+  - Preserves manually saved soldeDepart values when loading existing PVs
+  - Formula: soldeFinal = soldeDepart + totalOperations + totalVersements - totalRetraits
+
+**October 31, 2025**: Bug fixes for Admin filtering and PV configuration
 - **Admin Month/Year Filter Fix**: Corrected date parsing logic for YYYY-MM-DD format
   - Fixed incorrect reverse() operation on date string
   - Now properly extracts year and month directly from database format
