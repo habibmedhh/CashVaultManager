@@ -67,7 +67,7 @@ export default function CashRegister() {
     { id: "2", type: "retrait", label: "Retrait STET", amount: 0 },
   ]);
 
-  const [soldeDepart, setSoldeDepart] = useState(11366.75);
+  const [soldeDepart, setSoldeDepart] = useState(0);
 
   const handleItemChange = (
     index: number,
@@ -163,6 +163,12 @@ export default function CashRegister() {
     queryKey: ["/api/pv-configuration"],
   });
 
+  // Charger le solde final du jour précédent pour cet agent
+  const { data: previousSoldeData } = useQuery<{ soldeFinal: number }>({
+    queryKey: ["/api/previous-solde-final/date", dateKey, "user", selectedUserId],
+    enabled: !!selectedUserId,
+  });
+
   // Flag pour savoir si on a déjà initialisé les opérations depuis la config
   const operationsInitialized = useRef(false);
 
@@ -196,8 +202,11 @@ export default function CashRegister() {
       } catch (e) {
         console.error("Erreur lors du chargement des données:", e);
       }
+    } else if (!isLoading && previousSoldeData) {
+      // Si pas de données sauvegardées, utiliser le solde final du jour précédent
+      setSoldeDepart(previousSoldeData.soldeFinal);
     }
-  }, [savedData]);
+  }, [savedData, isLoading, previousSoldeData]);
 
   // Initialiser les opérations depuis la configuration si pas de données sauvegardées
   useEffect(() => {
