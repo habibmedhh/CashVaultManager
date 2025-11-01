@@ -245,6 +245,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check all PVs for a specific user and date
+  app.get("/api/debug/pvs/:userId/:date", async (req, res) => {
+    try {
+      const { userId, date } = req.params;
+      const allPVs = await storage.getAllCashRegisters();
+      const matchingPVs = allPVs.filter(pv => pv.userId === userId && pv.date === date);
+      res.json({
+        count: matchingPVs.length,
+        pvs: matchingPVs.map(pv => ({
+          id: pv.id,
+          date: pv.date,
+          userId: pv.userId,
+          soldeDepart: pv.soldeDepart,
+          createdAt: pv.createdAt,
+        }))
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

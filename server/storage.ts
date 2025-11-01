@@ -345,11 +345,26 @@ export class MemStorage implements IStorage {
     
     // Process each user's registers in chronological order
     Array.from(registersByUser.entries()).forEach(([userId, registers]) => {
-      // Sort by date (oldest first)
-      registers.sort((a: CashRegister, b: CashRegister) => a.date.localeCompare(b.date));
+      // Sort by date (oldest first), then by createdAt
+      registers.sort((a: CashRegister, b: CashRegister) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        // If same date, sort by createdAt (oldest first)
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeA - timeB;
+      });
       
-      let previousSoldeFinal = 0;
-      for (const register of registers) {
+      // Skip if no registers
+      if (registers.length === 0) return;
+      
+      // For first register, keep its existing soldeDepart and calculate its soldeFinal
+      let previousSoldeFinal = calculateSoldeFinal(registers[0]);
+      
+      // Process remaining registers (starting from index 1)
+      for (let i = 1; i < registers.length; i++) {
+        const register = registers[i];
+        
         // Update soldeDepart with previous soldeFinal
         if (register.soldeDepart !== previousSoldeFinal) {
           register.soldeDepart = previousSoldeFinal;
@@ -600,11 +615,21 @@ export class DbStorage implements IStorage {
         return timeA - timeB;
       });
       
-      let previousSoldeFinal = 0;
-      for (const register of registers) {
-        // Update soldeDepart with previous soldeFinal
-        if (register.soldeDepart !== previousSoldeFinal) {
-          await this.updateCashRegister(register.id, { soldeDepart: previousSoldeFinal });
+      // Skip if no registers
+      if (registers.length === 0) continue;
+      
+      // For first register, keep its existing soldeDepart and calculate its soldeFinal
+      let previousSoldeFinal = calculateSoldeFinal(registers[0]);
+      
+      // Process remaining registers (starting from index 1)
+      for (let i = 1; i < registers.length; i++) {
+        const register = registers[i];
+        
+        // Always update soldeDepart with previous soldeFinal (force update to ensure consistency)
+        const needsUpdate = register.soldeDepart !== previousSoldeFinal;
+        await this.updateCashRegister(register.id, { soldeDepart: previousSoldeFinal });
+        register.soldeDepart = previousSoldeFinal; // Update local object too
+        if (needsUpdate) {
           updated++;
         }
         
