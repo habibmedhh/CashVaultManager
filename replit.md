@@ -33,7 +33,25 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**November 1, 2025 (Latest)**: Automatic solde départ calculation from previous day
+**November 1, 2025 (Latest)**: Non-modifiable solde départ and retroactive migration
+- **Read-Only Starting Balance**: Solde de départ is now permanently non-modifiable
+  - Replaced EditableCell with read-only display in BalanceSection.tsx
+  - Users can no longer manually override the starting balance
+  - Ensures data integrity and prevents manual adjustments that would break balance continuity
+- **Retroactive Migration Tool**: Added migration endpoint to update all existing PVs
+  - New endpoint: POST `/api/migrate-solde-depart` applies automatic calculation to all historical data
+  - Migration groups PVs by userId and processes them chronologically
+  - Updates soldeDepart to match previous day's soldeFinal for each agent
+  - Tested successfully: 21 PVs updated out of 46 total in database
+  - Preserves complete agency separation (each userId belongs to one agency)
+  - Added `updateCashRegister()` method in IStorage for partial updates
+- **Agency Isolation Verification**: Confirmed complete separation between agencies
+  - All calculations filter by userId (which belongs to a unique agency)
+  - `getPreviousDaySoldeFinal` and `getPreviousDayAgencySoldeFinal` respect agency boundaries
+  - Migration processes each user independently, ensuring no cross-agency data leakage
+  - Future agencies will be completely isolated from existing ones
+
+**November 1, 2025 (Earlier)**: Automatic solde départ calculation from previous day
 - **Automatic Balance Continuity**: Implemented automatic calculation of starting balance (solde départ) from previous day's final balance
   - Each agent's solde départ is automatically set to their soldeFinal from the previous working day
   - System searches up to 30 days back to find the most recent PV, handling weekends and holidays
@@ -42,7 +60,6 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
   - Backend helper functions `calculateSoldeFinal()` and `getPreviousDate()` to compute balances from stored PV data
   - Frontend automatically fetches and applies previous day's soldeFinal when creating a new PV
   - Default soldeDepart changed from hardcoded value (11366.75) to 0, with automatic loading from previous day
-  - Preserves manually saved soldeDepart values when loading existing PVs
   - Formula: soldeFinal = soldeDepart + totalOperations + totalVersements - totalRetraits
 
 **October 31, 2025**: Bug fixes for Admin filtering and PV configuration
