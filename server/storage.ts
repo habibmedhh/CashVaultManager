@@ -2,7 +2,49 @@ import { type User, type InsertUser, type CashRegister, type InsertCashRegister,
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, lt, sql } from "drizzle-orm";
+
+interface Operation {
+  type: "IN" | "OUT";
+  amount: number;
+}
+
+interface Transaction {
+  type: "versement" | "retrait";
+  amount: number;
+}
+
+function calculateSoldeFinal(register: CashRegister): number {
+  try {
+    const operations = JSON.parse(register.operationsData) as Operation[];
+    const transactions = JSON.parse(register.transactionsData) as Transaction[];
+    
+    const totalOperations = operations.reduce((sum, op) => {
+      if (op.type === "OUT") {
+        return sum - op.amount;
+      }
+      return sum + op.amount;
+    }, 0);
+    
+    const totalVersements = transactions
+      .filter(t => t.type === "versement")
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const totalRetraits = transactions
+      .filter(t => t.type === "retrait")
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    return register.soldeDepart + totalOperations + totalVersements - totalRetraits;
+  } catch (e) {
+    return register.soldeDepart;
+  }
+}
+
+function getPreviousDate(currentDate: string): string {
+  const date = new Date(currentDate);
+  date.setDate(date.getDate() - 1);
+  return date.toISOString().split('T')[0];
+}
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -28,6 +70,9 @@ export interface IStorage {
   getPVConfiguration(): Promise<PVConfiguration | undefined>;
   savePVConfiguration(data: InsertPVConfiguration): Promise<PVConfiguration>;
   updatePVConfiguration(id: string, data: InsertPVConfiguration): Promise<PVConfiguration | undefined>;
+  
+  getPreviousDaySoldeFinal(currentDate: string, userId: string): Promise<number>;
+  getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -220,6 +265,53 @@ export class MemStorage implements IStorage {
     this.pvConfiguration = updated;
     return updated;
   }
+
+  async getPreviousDaySoldeFinal(currentDate: string, userId: string): Promise<number> {
+    let searchDate = getPreviousDate(currentDate);
+    let daysSearched = 0;
+    const maxDaysToSearch = 30;
+    
+    while (daysSearched < maxDaysToSearch) {
+      const register = await this.getLatestCashRegisterByDateAndUser(searchDate, userId);
+      if (register) {
+        return calculateSoldeFinal(register);
+      }
+      searchDate = getPreviousDate(searchDate);
+      daysSearched++;
+    }
+    
+    return 0;
+  }
+
+  async getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number> {
+    let searchDate = getPreviousDate(currentDate);
+    let daysSearched = 0;
+    const maxDaysToSearch = 30;
+    
+    while (daysSearched < maxDaysToSearch) {
+      const registers = Array.from(this.cashRegisters.values())
+        .filter(r => r.date === searchDate && r.agencyId === agencyId);
+      
+      if (registers.length > 0) {
+        const userRegisters = new Map<string, CashRegister>();
+        registers.forEach(r => {
+          if (r.userId) {
+            const existing = userRegisters.get(r.userId);
+            if (!existing || (r.createdAt && existing.createdAt && r.createdAt > existing.createdAt)) {
+              userRegisters.set(r.userId, r);
+            }
+          }
+        });
+        
+        return Array.from(userRegisters.values()).reduce((sum, r) => sum + calculateSoldeFinal(r), 0);
+      }
+      
+      searchDate = getPreviousDate(searchDate);
+      daysSearched++;
+    }
+    
+    return 0;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -365,6 +457,59 @@ export class DbStorage implements IStorage {
       .where(eq(pvConfigurations.id, id))
       .returning();
     return result[0];
+  }
+
+  async getPreviousDaySoldeFinal(currentDate: string, userId: string): Promise<number> {
+    let searchDate = getPreviousDate(currentDate);
+    let daysSearched = 0;
+    const maxDaysToSearch = 30;
+    
+    while (daysSearched < maxDaysToSearch) {
+      const register = await this.getLatestCashRegisterByDateAndUser(searchDate, userId);
+      if (register) {
+        return calculateSoldeFinal(register);
+      }
+      searchDate = getPreviousDate(searchDate);
+      daysSearched++;
+    }
+    
+    return 0;
+  }
+
+  async getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number> {
+    let searchDate = getPreviousDate(currentDate);
+    let daysSearched = 0;
+    const maxDaysToSearch = 30;
+    
+    while (daysSearched < maxDaysToSearch) {
+      const registers = await this.db
+        .select()
+        .from(cashRegisters)
+        .where(and(
+          eq(cashRegisters.date, searchDate),
+          eq(cashRegisters.agencyId, agencyId)
+        ))
+        .orderBy(desc(cashRegisters.createdAt));
+      
+      if (registers.length > 0) {
+        const userRegisters = new Map<string, CashRegister>();
+        registers.forEach(r => {
+          if (r.userId) {
+            const existing = userRegisters.get(r.userId);
+            if (!existing || (r.createdAt && existing.createdAt && r.createdAt > existing.createdAt)) {
+              userRegisters.set(r.userId, r);
+            }
+          }
+        });
+        
+        return Array.from(userRegisters.values()).reduce((sum, r) => sum + calculateSoldeFinal(r), 0);
+      }
+      
+      searchDate = getPreviousDate(searchDate);
+      daysSearched++;
+    }
+    
+    return 0;
   }
 }
 
