@@ -165,6 +165,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get previous day's solde final for a user
+  app.get("/api/previous-solde-final/date/:date/user/:userId", async (req, res) => {
+    try {
+      const { date, userId } = req.params;
+      const soldeFinal = await storage.getPreviousDaySoldeFinal(date, userId);
+      res.json({ soldeFinal });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get previous day's total solde final for an agency
+  app.get("/api/previous-solde-final/date/:date/agency/:agencyId", async (req, res) => {
+    try {
+      const { date, agencyId } = req.params;
+      const soldeFinal = await storage.getPreviousDayAgencySoldeFinal(date, agencyId);
+      res.json({ soldeFinal });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // PV Configuration routes
   app.get("/api/pv-configuration", async (req, res) => {
     try {
