@@ -266,6 +266,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cleanup endpoint to remove duplicate PVs (keeps only most recent per agent/day)
+  app.post("/api/cleanup-duplicates", async (req, res) => {
+    try {
+      const result = await storage.cleanupDuplicatePVs();
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

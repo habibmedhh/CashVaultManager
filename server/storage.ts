@@ -75,6 +75,7 @@ export interface IStorage {
   getPreviousDaySoldeFinal(currentDate: string, userId: string): Promise<number>;
   getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number>;
   migrateAllSoldeDepartAutomatically(): Promise<{ updated: number; total: number }>;
+  cleanupDuplicatePVs(): Promise<{ deleted: number; kept: number }>;
 }
 
 export class MemStorage implements IStorage {
@@ -379,6 +380,48 @@ export class MemStorage implements IStorage {
     
     return { updated, total: allRegisters.length };
   }
+
+  async cleanupDuplicatePVs(): Promise<{ deleted: number; kept: number }> {
+    const allRegisters = await this.getAllCashRegisters();
+    const groupedByUserAndDate = new Map<string, CashRegister[]>();
+    
+    // Group PVs by userId + date
+    allRegisters.forEach(pv => {
+      if (pv.userId) {
+        const key = `${pv.userId}-${pv.date}`;
+        if (!groupedByUserAndDate.has(key)) {
+          groupedByUserAndDate.set(key, []);
+        }
+        groupedByUserAndDate.get(key)!.push(pv);
+      }
+    });
+    
+    let deleted = 0;
+    let kept = 0;
+    
+    // For each group, keep only the most recent PV
+    groupedByUserAndDate.forEach((pvs, key) => {
+      if (pvs.length > 1) {
+        // Sort by createdAt (most recent first)
+        pvs.sort((a, b) => {
+          const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+          const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+          return timeB - timeA;
+        });
+        
+        // Keep the first one (most recent), delete the rest
+        for (let i = 1; i < pvs.length; i++) {
+          this.cashRegisters.delete(pvs[i].id);
+          deleted++;
+        }
+        kept++;
+      } else {
+        kept++;
+      }
+    });
+    
+    return { deleted, kept };
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -639,6 +682,48 @@ export class DbStorage implements IStorage {
     }
     
     return { updated, total: allRegisters.length };
+  }
+
+  async cleanupDuplicatePVs(): Promise<{ deleted: number; kept: number }> {
+    const allRegisters = await this.getAllCashRegisters();
+    const groupedByUserAndDate = new Map<string, CashRegister[]>();
+    
+    // Group PVs by userId + date
+    allRegisters.forEach(pv => {
+      if (pv.userId) {
+        const key = `${pv.userId}-${pv.date}`;
+        if (!groupedByUserAndDate.has(key)) {
+          groupedByUserAndDate.set(key, []);
+        }
+        groupedByUserAndDate.get(key)!.push(pv);
+      }
+    });
+    
+    let deleted = 0;
+    let kept = 0;
+    
+    // For each group, keep only the most recent PV
+    for (const [key, pvs] of Array.from(groupedByUserAndDate.entries())) {
+      if (pvs.length > 1) {
+        // Sort by createdAt (most recent first)
+        pvs.sort((a, b) => {
+          const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+          const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+          return timeB - timeA;
+        });
+        
+        // Keep the first one (most recent), delete the rest
+        for (let i = 1; i < pvs.length; i++) {
+          await this.db.delete(cashRegisters).where(eq(cashRegisters.id, pvs[i].id));
+          deleted++;
+        }
+        kept++;
+      } else {
+        kept++;
+      }
+    }
+    
+    return { deleted, kept };
   }
 }
 
