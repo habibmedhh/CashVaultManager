@@ -66,6 +66,7 @@ export interface IStorage {
   getCashRegistersByAgency(agencyId: string): Promise<CashRegister[]>;
   getCashRegistersByDateRange(startDate: string, endDate: string): Promise<CashRegister[]>;
   saveCashRegister(data: InsertCashRegister): Promise<CashRegister>;
+  updateCashRegister(id: string, data: Partial<InsertCashRegister>): Promise<CashRegister | undefined>;
   
   getPVConfiguration(): Promise<PVConfiguration | undefined>;
   savePVConfiguration(data: InsertPVConfiguration): Promise<PVConfiguration>;
@@ -73,6 +74,7 @@ export interface IStorage {
   
   getPreviousDaySoldeFinal(currentDate: string, userId: string): Promise<number>;
   getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number>;
+  migrateAllSoldeDepartAutomatically(): Promise<{ updated: number; total: number }>;
 }
 
 export class MemStorage implements IStorage {
@@ -312,6 +314,56 @@ export class MemStorage implements IStorage {
     
     return 0;
   }
+
+  async updateCashRegister(id: string, data: Partial<InsertCashRegister>): Promise<CashRegister | undefined> {
+    const existing = this.cashRegisters.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated: CashRegister = {
+      ...existing,
+      ...data,
+    };
+    this.cashRegisters.set(id, updated);
+    return updated;
+  }
+
+  async migrateAllSoldeDepartAutomatically(): Promise<{ updated: number; total: number }> {
+    const allRegisters = await this.getAllCashRegisters();
+    let updated = 0;
+    
+    // Group by user and sort by date
+    const registersByUser = new Map<string, CashRegister[]>();
+    allRegisters.forEach(r => {
+      if (r.userId) {
+        if (!registersByUser.has(r.userId)) {
+          registersByUser.set(r.userId, []);
+        }
+        registersByUser.get(r.userId)!.push(r);
+      }
+    });
+    
+    // Process each user's registers in chronological order
+    Array.from(registersByUser.entries()).forEach(([userId, registers]) => {
+      // Sort by date (oldest first)
+      registers.sort((a: CashRegister, b: CashRegister) => a.date.localeCompare(b.date));
+      
+      let previousSoldeFinal = 0;
+      for (const register of registers) {
+        // Update soldeDepart with previous soldeFinal
+        if (register.soldeDepart !== previousSoldeFinal) {
+          register.soldeDepart = previousSoldeFinal;
+          this.cashRegisters.set(register.id, register);
+          updated++;
+        }
+        
+        // Calculate this register's soldeFinal for next iteration
+        previousSoldeFinal = calculateSoldeFinal(register);
+      }
+    });
+    
+    return { updated, total: allRegisters.length };
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -510,6 +562,58 @@ export class DbStorage implements IStorage {
     }
     
     return 0;
+  }
+
+  async updateCashRegister(id: string, data: Partial<InsertCashRegister>): Promise<CashRegister | undefined> {
+    const result = await this.db
+      .update(cashRegisters)
+      .set(data)
+      .where(eq(cashRegisters.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async migrateAllSoldeDepartAutomatically(): Promise<{ updated: number; total: number }> {
+    const allRegisters = await this.getAllCashRegisters();
+    let updated = 0;
+    
+    // Group by user and sort by date
+    const registersByUser = new Map<string, CashRegister[]>();
+    allRegisters.forEach(r => {
+      if (r.userId) {
+        if (!registersByUser.has(r.userId)) {
+          registersByUser.set(r.userId, []);
+        }
+        registersByUser.get(r.userId)!.push(r);
+      }
+    });
+    
+    // Process each user's registers in chronological order
+    for (const [userId, registers] of Array.from(registersByUser.entries())) {
+      // Sort by date (oldest first), then by createdAt
+      registers.sort((a: CashRegister, b: CashRegister) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        // If same date, sort by createdAt (oldest first)
+        const timeA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const timeB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return timeA - timeB;
+      });
+      
+      let previousSoldeFinal = 0;
+      for (const register of registers) {
+        // Update soldeDepart with previous soldeFinal
+        if (register.soldeDepart !== previousSoldeFinal) {
+          await this.updateCashRegister(register.id, { soldeDepart: previousSoldeFinal });
+          updated++;
+        }
+        
+        // Calculate this register's soldeFinal for next iteration
+        previousSoldeFinal = calculateSoldeFinal(register);
+      }
+    }
+    
+    return { updated, total: allRegisters.length };
   }
 }
 

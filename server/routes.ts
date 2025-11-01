@@ -236,6 +236,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/migrate-solde-depart", async (req, res) => {
+    try {
+      const result = await storage.migrateAllSoldeDepartAutomatically();
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

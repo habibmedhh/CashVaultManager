@@ -532,7 +532,6 @@ export default function CashRegister() {
             onAddTransaction={handleAddTransaction}
             onRemoveTransaction={handleRemoveTransaction}
             soldeDepart={soldeDepart}
-            onSoldeChange={setSoldeDepart}
             totalCaisse={totalCaisse}
             totalCoffre={totalCoffre}
             totalOperations={totalOperations}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddTransactionDialog from "./AddTransactionDialog";
-import EditableCell from "./EditableCell";
 
 export interface Transaction {
   id: string;
@@ -18,7 +17,6 @@ interface BalanceSectionProps {
   onAddTransaction: (type: "versement" | "retrait", label: string, description: string, amount: number) => void;
   onRemoveTransaction: (id: string) => void;
   soldeDepart: number;
-  onSoldeChange: (value: number) => void;
   totalCaisse: number;
   totalCoffre: number;
   totalOperations: number;
@@ -30,7 +28,6 @@ export default function BalanceSection({
   onAddTransaction,
   onRemoveTransaction,
   soldeDepart,
-  onSoldeChange,
   totalCaisse,
   totalCoffre,
   totalOperations,
@@ -232,14 +229,11 @@ export default function BalanceSection({
               <td className="border-r border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700">
                 Solde départ
               </td>
-              <td className="p-0">
-                <EditableCell
-                  value={soldeDepart}
-                  onChange={onSoldeChange}
-                  allowFormula={true}
-                  className="border-0 w-full rounded-none h-7 text-[11px] px-0.5"
-                  dataTestId="input-solde-depart"
-                />
+              <td
+                className="px-2 py-1 text-right font-mono text-[11px] tabular-nums text-slate-900 bg-slate-50/30"
+                data-testid="text-solde-depart"
+              >
+                {formatNumber(soldeDepart)} DH
               </td>
             </tr>
             <tr className="hover:bg-slate-50/50 border-b border-slate-100">
