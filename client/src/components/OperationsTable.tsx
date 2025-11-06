@@ -234,7 +234,7 @@ export default function OperationsTable({
                 {totalNumber}
               </td>
               <td
-                className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-slate-900 whitespace-nowrap"
+                className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-slate-900 whitespace-nowrap bg-[#d5eff4]"
                 data-testid="text-operations-total"
               >
                 {formatNumber(total)} DH
