@@ -123,15 +123,6 @@ export default function OperationsTable({
               <Trash2 className="w-3 h-3 mr-1" />
               Vider
             </Button>
-            <Button
-              size="sm"
-              onClick={handleAddOperationClick}
-              data-testid="button-add-operation"
-              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Ajouter
-            </Button>
           </div>
         </div>
         <table className="border-collapse w-full">
