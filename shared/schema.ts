@@ -78,3 +78,19 @@ export const insertPVConfigurationSchema = createInsertSchema(pvConfigurations).
 
 export type InsertPVConfiguration = z.infer<typeof insertPVConfigurationSchema>;
 export type PVConfiguration = typeof pvConfigurations.$inferSelect;
+
+export const transactionCategories = pgTable("transaction_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  label: text("label").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertTransactionCategorySchema = createInsertSchema(transactionCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertTransactionCategory = z.infer<typeof insertTransactionCategorySchema>;
+export type TransactionCategory = typeof transactionCategories.$inferSelect;

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type CashRegister, type InsertCashRegister, type Agency, type InsertAgency, type PVConfiguration, type InsertPVConfiguration, users, cashRegisters, agencies, pvConfigurations } from "@shared/schema";
+import { type User, type InsertUser, type CashRegister, type InsertCashRegister, type Agency, type InsertAgency, type PVConfiguration, type InsertPVConfiguration, type TransactionCategory, type InsertTransactionCategory, users, cashRegisters, agencies, pvConfigurations, transactionCategories } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -76,6 +76,12 @@ export interface IStorage {
   getPreviousDayAgencySoldeFinal(currentDate: string, agencyId: string): Promise<number>;
   migrateAllSoldeDepartAutomatically(): Promise<{ updated: number; total: number }>;
   cleanupDuplicatePVs(): Promise<{ deleted: number; kept: number }>;
+  
+  getAllTransactionCategories(): Promise<TransactionCategory[]>;
+  getTransactionCategoriesByType(type: string): Promise<TransactionCategory[]>;
+  createTransactionCategory(category: InsertTransactionCategory): Promise<TransactionCategory>;
+  updateTransactionCategory(id: string, data: Partial<InsertTransactionCategory>): Promise<TransactionCategory | undefined>;
+  deleteTransactionCategory(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -422,6 +428,34 @@ export class MemStorage implements IStorage {
     
     return { deleted, kept };
   }
+
+  async getAllTransactionCategories(): Promise<TransactionCategory[]> {
+    return [];
+  }
+
+  async getTransactionCategoriesByType(type: string): Promise<TransactionCategory[]> {
+    return [];
+  }
+
+  async createTransactionCategory(category: InsertTransactionCategory): Promise<TransactionCategory> {
+    const id = randomUUID();
+    const newCategory: TransactionCategory = {
+      id,
+      type: category.type,
+      label: category.label,
+      description: category.description || null,
+      createdAt: new Date(),
+    };
+    return newCategory;
+  }
+
+  async updateTransactionCategory(id: string, data: Partial<InsertTransactionCategory>): Promise<TransactionCategory | undefined> {
+    return undefined;
+  }
+
+  async deleteTransactionCategory(id: string): Promise<boolean> {
+    return false;
+  }
 }
 
 export class DbStorage implements IStorage {
@@ -724,6 +758,31 @@ export class DbStorage implements IStorage {
     }
     
     return { deleted, kept };
+  }
+
+  async getAllTransactionCategories(): Promise<TransactionCategory[]> {
+    const result = await this.db.select().from(transactionCategories);
+    return result;
+  }
+
+  async getTransactionCategoriesByType(type: string): Promise<TransactionCategory[]> {
+    const result = await this.db.select().from(transactionCategories).where(eq(transactionCategories.type, type));
+    return result;
+  }
+
+  async createTransactionCategory(category: InsertTransactionCategory): Promise<TransactionCategory> {
+    const result = await this.db.insert(transactionCategories).values(category).returning();
+    return result[0];
+  }
+
+  async updateTransactionCategory(id: string, data: Partial<InsertTransactionCategory>): Promise<TransactionCategory | undefined> {
+    const result = await this.db.update(transactionCategories).set(data).where(eq(transactionCategories.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteTransactionCategory(id: string): Promise<boolean> {
+    const result = await this.db.delete(transactionCategories).where(eq(transactionCategories.id, id)).returning();
+    return result.length > 0;
   }
 }
 
