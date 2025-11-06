@@ -84,7 +84,7 @@ export default function IntegratedCashTable({
           })}
           
           <tr className="border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50 font-semibold">
-            <td className="border-r border-slate-300 px-1 py-1 text-[10px] text-slate-700">
+            <td className="border-r border-slate-300 px-1 py-1 text-[10px] text-slate-700 bg-[#d5eff4]">
               Total
             </td>
             <td
