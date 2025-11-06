@@ -344,6 +344,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/initialize-default-categories", async (req, res) => {
+    try {
+      const existingCategories = await storage.getAllTransactionCategories();
+      if (existingCategories.length > 0) {
+        return res.json({ message: "Categories already exist", count: existingCategories.length });
+      }
+
+      const defaultCategories = [
+        { type: "versement", label: "Versement CIH", description: "Dépôt vers CIH Bank" },
+        { type: "versement", label: "Versement Attijariwafa Bank", description: "Dépôt vers Attijariwafa Bank" },
+        { type: "versement", label: "Versement BMCE", description: "Dépôt vers BMCE Bank" },
+        { type: "versement", label: "Versement Banque Populaire", description: "Dépôt vers Banque Populaire" },
+        { type: "versement", label: "Alimentation banque", description: "Alimentation du compte bancaire" },
+        { type: "versement", label: "Dépôt espèces", description: "Dépôt d'espèces à la banque" },
+        { type: "retrait", label: "Retrait vers CIH", description: "Retrait depuis CIH Bank" },
+        { type: "retrait", label: "Retrait vers Attijariwafa Bank", description: "Retrait depuis Attijariwafa Bank" },
+        { type: "retrait", label: "Retrait vers BMCE", description: "Retrait depuis BMCE Bank" },
+        { type: "retrait", label: "Retrait vers Banque Populaire", description: "Retrait depuis Banque Populaire" },
+        { type: "retrait", label: "Charges agence", description: "Dépenses de fonctionnement de l'agence" },
+        { type: "retrait", label: "Frais bancaires", description: "Frais et commissions bancaires" },
+        { type: "retrait", label: "Salaires", description: "Paiement des salaires" },
+        { type: "retrait", label: "Fournitures", description: "Achat de fournitures" },
+      ];
+
+      const created = [];
+      for (const category of defaultCategories) {
+        const result = await storage.createTransactionCategory(category);
+        created.push(result);
+      }
+
+      res.json({ message: "Default categories created successfully", count: created.length, categories: created });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

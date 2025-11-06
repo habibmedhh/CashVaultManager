@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { type TransactionCategory } from "@shared/schema";
 
 interface AddTransactionDialogProps {
   open: boolean;
@@ -22,26 +24,6 @@ interface AddTransactionDialogProps {
   type: "versement" | "retrait";
   onAdd: (category: string, description: string, amount: number) => void;
 }
-
-const VERSEMENT_CATEGORIES = [
-  "Versement CIH",
-  "Versement Attijariwafa Bank",
-  "Versement BMCE",
-  "Versement Banque Populaire",
-  "Alimentation banque",
-  "Dépôt espèces",
-];
-
-const RETRAIT_CATEGORIES = [
-  "Retrait vers CIH",
-  "Retrait vers Attijariwafa Bank",
-  "Retrait vers BMCE",
-  "Retrait vers Banque Populaire",
-  "Charges agence",
-  "Frais bancaires",
-  "Salaires",
-  "Fournitures",
-];
 
 export default function AddTransactionDialog({
   open,
@@ -53,7 +35,13 @@ export default function AddTransactionDialog({
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
 
-  const categories = type === "versement" ? VERSEMENT_CATEGORIES : RETRAIT_CATEGORIES;
+  const { data: transactionCategories = [] } = useQuery<TransactionCategory[]>({
+    queryKey: ["/api/transaction-categories"],
+  });
+
+  const categories = transactionCategories
+    .filter(cat => cat.type === type)
+    .map(cat => cat.label);
 
   const handleAdd = () => {
     if (!category || !amount.trim()) return;
