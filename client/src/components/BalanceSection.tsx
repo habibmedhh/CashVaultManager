@@ -262,7 +262,7 @@ export default function BalanceSection({
             <tr className={`font-bold ${isEcartLogique ? 'bg-gradient-to-r from-emerald-100 to-emerald-50' : 'bg-gradient-to-r from-amber-100 to-amber-50'}`}>
               <td className="px-2 py-2 text-sm border-r border-amber-300 bg-[#19a89a] text-[#ffffff]">Écart de la caisse</td>
               <td
-                className="px-2 py-2 text-right font-mono text-lg tabular-nums text-amber-900 bg-[#19a89a45]"
+                className={`px-2 py-2 text-right font-mono text-lg tabular-nums ${isEcartLogique ? 'text-emerald-900' : 'text-amber-900'}`}
                 data-testid="text-ecart-caisse"
               >
                 {formatNumber(ecartCaisse)} DH
