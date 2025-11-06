@@ -106,7 +106,7 @@ export default function IntegratedCashTable({
               TOTAL
             </td>
             <td
-              className="px-1 py-1.5 text-right font-mono text-sm tabular-nums text-white"
+              className="px-1 py-1.5 text-right font-mono text-sm tabular-nums text-white bg-[#19a89a]"
               colSpan={2}
               data-testid="text-grand-total"
             >
