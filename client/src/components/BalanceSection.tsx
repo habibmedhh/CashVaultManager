@@ -79,9 +79,7 @@ export default function BalanceSection({
         <div>
         <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card">
           <div className="flex items-center justify-between mb-2 px-3 pt-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
-              Versement Banque
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">VersementS</h3>
             <Button
               size="sm"
               onClick={() => handleOpenDialog("versement")}
