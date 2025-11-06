@@ -65,7 +65,7 @@ const userSchema = z.object({
   password: z.string().min(4, "Le mot de passe doit contenir au moins 4 caractères"),
   fullName: z.string().optional(),
   role: z.string().default("agent"),
-  agencyId: z.string().optional(),
+  agencyId: z.string(),
 });
 
 const transactionCategorySchema = z.object({
@@ -119,7 +119,7 @@ export default function Admin() {
       password: "",
       fullName: "",
       role: "agent",
-      agencyId: "",
+      agencyId: "none",
     },
   });
 
@@ -154,8 +154,13 @@ export default function Admin() {
   });
 
   const createUserMutation = useMutation({
-    mutationFn: (data: z.infer<typeof userSchema>) =>
-      apiRequest("POST", "/api/users", data),
+    mutationFn: (data: z.infer<typeof userSchema>) => {
+      const userData = {
+        ...data,
+        agencyId: data.agencyId === "none" ? undefined : data.agencyId,
+      };
+      return apiRequest("POST", "/api/users", userData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users/all"] });
       toast({
@@ -1065,7 +1070,7 @@ export default function Admin() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">Aucune (Admin)</SelectItem>
+                              <SelectItem value="none">Aucune (Admin)</SelectItem>
                               {agencies.map(agency => (
                                 <SelectItem key={agency.id} value={agency.id}>
                                   {agency.name}
