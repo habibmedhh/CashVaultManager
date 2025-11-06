@@ -131,7 +131,7 @@ export default function OperationsTable({
               <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white bg-[#ff9d05]">
                 Opération
               </th>
-              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-12 text-white">
+              <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-12 text-white bg-[#ff9d05]">
                 Nombre
               </th>
               <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white">
