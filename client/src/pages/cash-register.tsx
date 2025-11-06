@@ -455,7 +455,7 @@ export default function CashRegister() {
                   />
                 </PopoverContent>
               </Popover>
-              <label className="flex items-center gap-2 cursor-pointer bg-slate-600 px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors">
+              <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors bg-[#e8b338]">
                 <input
                   type="checkbox"
                   checked={hideZeroRows}
