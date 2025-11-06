@@ -99,7 +99,7 @@ export default function BalanceSection({
                 <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white bg-[#fc9b05]">
                   Montant
                 </th>
-                <th className="px-1 py-1.5 w-12 text-white"></th>
+                <th className="px-1 py-1.5 w-12 text-white bg-[#fc9b05]"></th>
               </tr>
             </thead>
             <tbody>
