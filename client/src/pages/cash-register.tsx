@@ -525,7 +525,7 @@ export default function CashRegister() {
           </div>
         </div>
 
-        <div className="border border-border rounded-lg p-3 shadow-sm bg-card">
+        <div className="border border-border rounded-lg p-3 shadow-sm bg-card pl-[120px] pr-[120px] pt-[0px] pb-[0px]">
           <BalanceSection
             transactions={transactions}
             onTransactionChange={handleTransactionChange}
