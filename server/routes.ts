@@ -83,7 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const user = await storage.updateUser(id, req.body);
+      const data = insertUserSchema.partial().parse(req.body);
+      const user = await storage.updateUser(id, data);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -319,7 +320,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/transaction-categories/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const category = await storage.updateTransactionCategory(id, req.body);
+      const data = insertTransactionCategorySchema.partial().parse(req.body);
+      const category = await storage.updateTransactionCategory(id, data);
       if (!category) {
         return res.status(404).json({ error: "Category not found" });
       }
