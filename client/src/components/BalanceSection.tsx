@@ -137,7 +137,7 @@ export default function BalanceSection({
                 >
                   {formatNumber(totalVersements)} DH
                 </td>
-                <td></td>
+                <td className="bg-[#d5eff4]"></td>
               </tr>
             </tbody>
           </table>
