@@ -33,7 +33,45 @@ Drizzle ORM provides type-safe database operations. The schema includes `agencie
 
 # Recent Changes
 
-**November 1, 2025 (Latest)**: Non-modifiable solde départ and retroactive migration
+**November 6, 2025 (Latest)**: Admin management system with transaction categories, agencies, and agents
+- **Transaction Categories Management**: Complete system to manage transaction types for versements and retraits
+  - New database table `transaction_categories` to store custom transaction categories
+  - REST API endpoints: GET/POST/PATCH/DELETE `/api/transaction-categories` with Zod validation
+  - Admin UI with dual-panel view for versements (green) and retraits (red) categories
+  - Create, edit, and delete categories with label and description fields
+  - Categories organized by type with visual indicators (green/red dots)
+  - Full CRUD operations with proper error handling and toast notifications
+- **Agency Management**: Enhanced admin capability to create and manage agencies
+  - Admin UI tab for creating new agencies with name and code
+  - Visual cards showing agency metrics (number of agents, number of PVs)
+  - POST `/api/agencies` endpoint for creating agencies (already existed, now integrated in UI)
+  - Complete agency overview with Building2 icons and professional styling
+- **Agent Management**: Complete system to create and manage agents
+  - New POST `/api/users` endpoint to create agents with Zod validation
+  - PATCH `/api/users/:id` with proper Zod validation using `.partial()` schema
+  - Admin UI tab for creating agents with username, password, full name, role, and agency assignment
+  - Visual cards showing agent details (role badge, agency code, number of PVs)
+  - Assign agents to specific agencies or keep them unassigned (for admins)
+  - Role selection: Agent or Administrator
+- **Tabbed Admin Interface**: Complete redesign of admin page with 4 main tabs
+  - **Tableau de bord**: Existing three-level drill-down navigation (agencies → dates → users)
+  - **Catégories**: Manage versements and retraits transaction categories
+  - **Agences**: Create and view all agencies with their metrics
+  - **Agents**: Create and manage agents, assign them to agencies
+  - Consistent design system using shadcn/ui Tabs component
+  - All tabs feature card-based layouts with hover effects
+  - Professional iconography (Settings, Tag, Building2, Users, etc.)
+- **Security & Data Validation**: All mutation endpoints properly validate with Zod schemas
+  - PATCH routes use `.partial()` to allow partial updates while maintaining type safety
+  - All forms use react-hook-form with zodResolver for client-side validation
+  - Proper error handling with toast notifications for success/failure states
+  - TanStack Query cache invalidation after all mutations
+- **Developer Experience**: Complete data-testid coverage for automated testing
+  - All interactive elements have unique, descriptive test IDs
+  - Dialogs, forms, buttons, and cards properly tagged for E2E testing
+  - Consistent naming pattern: `{action}-{target}` for interactive elements
+
+**November 1, 2025**: Non-modifiable solde départ and retroactive migration
 - **Read-Only Starting Balance**: Solde de départ is now permanently non-modifiable
   - Replaced EditableCell with read-only display in BalanceSection.tsx
   - Users can no longer manually override the starting balance
