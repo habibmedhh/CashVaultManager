@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCashRegisterSchema, insertAgencySchema, insertPVConfigurationSchema } from "@shared/schema";
+import { insertCashRegisterSchema, insertAgencySchema, insertPVConfigurationSchema, insertTransactionCategorySchema, insertUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Agency routes
@@ -67,6 +67,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(users);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const data = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(data);
+      res.json(user);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
     }
   });
 
@@ -271,6 +281,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const result = await storage.cleanupDuplicatePVs();
       res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Transaction category routes
+  app.get("/api/transaction-categories", async (req, res) => {
+    try {
+      const categories = await storage.getAllTransactionCategories();
+      res.json(categories);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/transaction-categories/type/:type", async (req, res) => {
+    try {
+      const { type } = req.params;
+      const categories = await storage.getTransactionCategoriesByType(type);
+      res.json(categories);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/transaction-categories", async (req, res) => {
+    try {
+      const data = insertTransactionCategorySchema.parse(req.body);
+      const category = await storage.createTransactionCategory(data);
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/transaction-categories/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const category = await storage.updateTransactionCategory(id, req.body);
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+      res.json(category);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/transaction-categories/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteTransactionCategory(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+      res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
