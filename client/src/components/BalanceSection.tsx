@@ -253,7 +253,7 @@ export default function BalanceSection({
             <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
               <td className="border-r border-slate-300 px-2 py-2 text-sm text-slate-700 bg-[#d5eff4]">Solde final</td>
               <td
-                className="px-2 py-2 text-right font-mono text-sm tabular-nums text-slate-900"
+                className="px-2 py-2 text-right font-mono text-sm tabular-nums text-slate-900 bg-[#d5eff4]"
                 data-testid="text-solde-final"
               >
                 {formatNumber(soldeFinal)} DH
