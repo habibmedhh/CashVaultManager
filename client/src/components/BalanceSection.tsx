@@ -196,7 +196,7 @@ export default function BalanceSection({
                 </tr>
               ))}
               <tr className="font-semibold border-t-2 border-slate-300 bg-gradient-to-r from-blue-50 to-blue-50/50">
-                <td className="border-r border-slate-300 px-1.5 py-1.5 text-[11px] text-slate-700">
+                <td className="border-r border-slate-300 px-1.5 py-1.5 text-[11px] text-slate-700 bg-[#d5eff4]">
                   TOTAL
                 </td>
                 <td
