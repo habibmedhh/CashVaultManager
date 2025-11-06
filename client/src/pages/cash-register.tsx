@@ -439,7 +439,7 @@ export default function CashRegister() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-slate-500 hover:bg-slate-500 text-white bg-[#059669]"
+                    className="gap-2 border-slate-500 hover:bg-slate-500 text-white bg-[#8b647b33]"
                     data-testid="button-date-picker"
                   >
                     <CalendarIcon className="w-3 h-3" />
