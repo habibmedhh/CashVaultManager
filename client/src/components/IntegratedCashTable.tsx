@@ -94,7 +94,7 @@ export default function IntegratedCashTable({
               {formatNumber(totalCaisse)}
             </td>
             <td
-              className="px-1 py-1 text-right font-mono text-[11px] tabular-nums text-slate-900"
+              className="px-1 py-1 text-right font-mono text-[11px] tabular-nums text-slate-900 bg-[#d5eff4]"
               data-testid="text-total-coffre"
             >
               {formatNumber(totalCoffre)}
