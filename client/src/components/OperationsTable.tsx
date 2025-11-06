@@ -137,7 +137,7 @@ export default function OperationsTable({
               <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-right w-24 text-white bg-[#ff9d05]">
                 Montant
               </th>
-              <th className="px-1 py-1.5 w-14 text-white"></th>
+              <th className="px-1 py-1.5 w-14 text-white bg-[#ff9d05]"></th>
             </tr>
           </thead>
           <tbody>
