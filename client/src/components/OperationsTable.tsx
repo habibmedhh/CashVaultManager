@@ -128,7 +128,7 @@ export default function OperationsTable({
         <table className="border-collapse w-full">
           <thead>
             <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
-              <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white">
+              <th className="border-r border-slate-500 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left text-white bg-[#ff9d05]">
                 Opération
               </th>
               <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-12 text-white">
