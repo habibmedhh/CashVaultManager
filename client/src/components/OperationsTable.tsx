@@ -107,7 +107,7 @@ export default function OperationsTable({
 
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col pl-[20px] pr-[20px]">
         <div className="flex items-center justify-between mb-2 px-3 pt-3">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
             Opérations
@@ -253,7 +253,6 @@ export default function OperationsTable({
           </tbody>
         </table>
       </div>
-
       {selectedOperation && (
         <OperationDetailsDialog
           open={dialogOpen}
@@ -264,13 +263,11 @@ export default function OperationsTable({
           onDetailsChange={handleDetailsChange}
         />
       )}
-      
       <AddOperationDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onAdd={handleAddFromDialog}
       />
-
       <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
