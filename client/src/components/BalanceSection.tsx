@@ -233,9 +233,7 @@ export default function BalanceSection({
               </td>
             </tr>
             <tr className="hover:bg-slate-50/50 border-b border-slate-100">
-              <td className="border-r border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700">
-                Versement banque
-              </td>
+              <td className="border-r border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700">Versements</td>
               <td
                 className="px-2 py-1 text-right font-mono text-[11px] tabular-nums text-emerald-700 bg-emerald-50/30"
                 data-testid="text-versement-banque"
