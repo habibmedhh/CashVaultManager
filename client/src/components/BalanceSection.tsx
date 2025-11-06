@@ -84,7 +84,7 @@ export default function BalanceSection({
               size="sm"
               onClick={() => handleOpenDialog("versement")}
               data-testid="button-add-versement"
-              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
+              className="shadow-sm h-7 text-xs hover:bg-primary/90 bg-[#ffffffe6] text-[#19a89a] font-bold"
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -152,7 +152,7 @@ export default function BalanceSection({
               size="sm"
               onClick={() => handleOpenDialog("retrait")}
               data-testid="button-add-retrait"
-              className="shadow-sm h-7 text-xs bg-primary hover:bg-primary/90"
+              className="shadow-sm h-7 text-xs hover:bg-primary/90 bg-[#ffffffe6] text-[#19a89a] font-bold"
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -214,7 +214,7 @@ export default function BalanceSection({
       </div>
 
       <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card w-full max-w-5xl">
-        <div className="px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-500">
+        <div className="px-3 py-2 bg-[#fc9b05] border-b border-slate-500">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             Soldes et Écart
           </h3>
