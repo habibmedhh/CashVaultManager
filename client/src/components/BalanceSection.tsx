@@ -132,7 +132,7 @@ export default function BalanceSection({
                   TOTAL
                 </td>
                 <td
-                  className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-emerald-700 whitespace-nowrap"
+                  className="border-r border-slate-300 px-0.5 py-1.5 text-right font-mono text-[11px] tabular-nums text-emerald-700 whitespace-nowrap bg-[#d5eff4]"
                   data-testid="text-versement-total"
                 >
                   {formatNumber(totalVersements)} DH
