@@ -242,9 +242,7 @@ export default function BalanceSection({
               </td>
             </tr>
             <tr className="hover:bg-slate-50/50 border-b border-slate-100">
-              <td className="border-r border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700">
-                Retrait STET
-              </td>
+              <td className="border-r border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-700">Retraits</td>
               <td
                 className="px-2 py-1 text-right font-mono text-[11px] tabular-nums text-rose-700 bg-rose-50/30"
                 data-testid="text-retrait-banque"
