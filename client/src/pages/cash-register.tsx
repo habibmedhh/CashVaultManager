@@ -428,7 +428,7 @@ export default function CashRegister() {
   return (
     <div className="min-h-screen bg-slate-50 p-3">
       <div className="max-w-7xl mx-auto space-y-4">
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-teal-500 shadow-lg print:hidden rounded-lg px-4 py-3 text-white"></div>
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-teal-500 shadow-lg print:hidden rounded-lg px-4 py-3 text-white">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-lg font-bold tracking-tight text-white">
