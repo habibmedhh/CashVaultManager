@@ -45,9 +45,6 @@ function AppContent() {
         <div className="flex flex-col flex-1">
           <header className="flex items-center justify-between gap-4 p-2 border-b">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <div className="text-lg font-semibold text-foreground">
-              MAD - Gestion de Caisse
-            </div>
             <UserSelector selectedUserId={selectedUserId} onUserChange={setSelectedUserId} />
           </header>
           <main className="flex-1 overflow-auto">
