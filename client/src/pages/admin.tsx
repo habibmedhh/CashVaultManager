@@ -456,37 +456,94 @@ export default function Admin() {
               {loadingAgencies ? (
                 <div className="text-muted-foreground">Chargement...</div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {agencies.map((agency) => {
                     const agencyUsers = users.filter(u => u.agencyId === agency.id);
                     const agencyPVs = cashRegisters.filter(cr => cr.agencyId === agency.id);
+                    
+                    const currentMonth = new Date().getMonth();
+                    const currentYear = new Date().getFullYear();
+                    const monthPVs = agencyPVs.filter(pv => {
+                      const [year, month] = pv.date.split('-');
+                      return parseInt(year) === currentYear && parseInt(month) - 1 === currentMonth;
+                    });
+                    
+                    const uniqueUsers = new Set(monthPVs.map(pv => pv.userId).filter(Boolean));
+                    const activeAgents = uniqueUsers.size;
+                    
+                    const totalSoldeFinal = monthPVs.reduce((sum, pv) => {
+                      try {
+                        const operations: Operation[] = JSON.parse(pv.operationsData);
+                        const transactions: Transaction[] = JSON.parse(pv.transactionsData);
+                        const totalOps = operations.reduce((s, op) => s + (op.amount || 0), 0);
+                        const totalVers = transactions.filter(t => t.type === 'versement').reduce((s, t) => s + t.amount, 0);
+                        const totalRetr = transactions.filter(t => t.type === 'retrait').reduce((s, t) => s + t.amount, 0);
+                        return sum + (pv.soldeDepart + totalOps + totalVers - totalRetr);
+                      } catch {
+                        return sum;
+                      }
+                    }, 0);
 
                     return (
                       <Card
                         key={agency.id}
-                        className="p-6 cursor-pointer hover:border-primary transition-colors"
+                        className="overflow-hidden cursor-pointer hover:shadow-lg transition-all border-2 hover:border-primary"
                         onClick={() => setSelectedAgencyId(agency.id)}
                         data-testid={`card-agency-${agency.id}`}
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-primary/10 rounded-lg">
-                            <Building2 className="w-6 h-6 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{agency.name}</h3>
-                            <p className="text-sm text-muted-foreground">{agency.code}</p>
-                            <div className="mt-3 space-y-1">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Agents:</span>
-                                <Badge variant="secondary">{agencyUsers.length}</Badge>
+                        <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 border-b">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-3 bg-primary/20 rounded-xl">
+                                <Building2 className="w-7 h-7 text-primary" />
                               </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">PVs:</span>
-                                <Badge variant="secondary">{agencyPVs.length}</Badge>
+                              <div>
+                                <h3 className="font-bold text-xl">{agency.name}</h3>
+                                <p className="text-sm text-muted-foreground font-medium">{agency.code}</p>
                               </div>
                             </div>
+                            <ChevronRight className="w-5 h-5 text-primary" />
                           </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        
+                        <div className="p-5 space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+                              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Total Agents</div>
+                              <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{agencyUsers.length}</div>
+                            </div>
+                            <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
+                              <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Agents Actifs</div>
+                              <div className="text-2xl font-bold text-green-700 dark:text-green-300">{activeAgents}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-purple-50 dark:bg-purple-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">PVs Ce Mois</div>
+                            <div className="flex items-baseline justify-between">
+                              <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{monthPVs.length}</div>
+                              <div className="text-sm text-muted-foreground">Total: {agencyPVs.length}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">Solde Final Moyen</div>
+                            <div className="text-lg font-bold text-amber-700 dark:text-amber-300">
+                              {monthPVs.length > 0 ? (totalSoldeFinal / monthPVs.length).toFixed(2) : '0.00'} DH
+                            </div>
+                          </div>
+                          
+                          <Button 
+                            variant="outline" 
+                            className="w-full mt-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedAgencyId(agency.id);
+                            }}
+                          >
+                            Voir les détails
+                            <ChevronRight className="w-4 h-4 ml-2" />
+                          </Button>
                         </div>
                       </Card>
                     );
@@ -546,56 +603,102 @@ export default function Admin() {
                   Aucun PV pour cette période
                 </div>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                   {agencyDailyData.map((day) => (
                     <Card
                       key={day.date}
-                      className="p-6 cursor-pointer hover:border-primary transition-colors"
+                      className="overflow-hidden cursor-pointer hover:shadow-lg transition-all border-2 hover:border-primary"
                       onClick={() => setSelectedDate(day.date)}
                       data-testid={`card-date-${day.date}`}
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 rounded-lg">
-                          <Calendar className="w-6 h-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-lg">
-                              {new Date(day.date).toLocaleDateString('fr-FR', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </h3>
-                            <Badge>{day.userCount} agents</Badge>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                            <div>
-                              <div className="text-sm text-muted-foreground">Solde Final</div>
-                              <div className="text-lg font-semibold">{day.soldeFinal.toFixed(2)} DH</div>
+                      <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-5 border-b">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="p-4 bg-indigo-500/20 rounded-xl">
+                              <Calendar className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div>
-                              <div className="text-sm text-muted-foreground">Versements</div>
-                              <div className="text-lg font-semibold text-green-600">
-                                +{day.versements.toFixed(2)} DH
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Retraits</div>
-                              <div className="text-lg font-semibold text-red-600">
-                                -{day.retraits.toFixed(2)} DH
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Écart Caisse</div>
-                              <div className={`text-lg font-semibold ${Math.abs(day.ecartCaisse) < 0.01 ? 'text-green-600' : 'text-orange-600'}`}>
-                                {day.ecartCaisse >= 0 ? '+' : ''}{day.ecartCaisse.toFixed(2)} DH
+                              <h3 className="font-bold text-xl">
+                                {new Date(day.date).toLocaleDateString('fr-FR', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  {day.userCount} agents actifs
+                                </Badge>
                               </div>
                             </div>
                           </div>
+                          <ChevronRight className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      
+                      <div className="p-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Solde Départ</div>
+                            <div className="text-xl font-bold text-blue-700 dark:text-blue-300">{day.soldeDepart.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className="bg-emerald-50 dark:bg-emerald-950/20 p-4 rounded-lg">
+                            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">Versements</div>
+                            <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                              +{day.versements.toFixed(2)} DH
+                            </div>
+                          </div>
+                          
+                          <div className="bg-rose-50 dark:bg-rose-950/20 p-4 rounded-lg">
+                            <div className="text-xs text-rose-600 dark:text-rose-400 font-medium mb-1">Retraits</div>
+                            <div className="text-xl font-bold text-rose-700 dark:text-rose-300">
+                              -{day.retraits.toFixed(2)} DH
+                            </div>
+                          </div>
+                          
+                          <div className="bg-violet-50 dark:bg-violet-950/20 p-4 rounded-lg">
+                            <div className="text-xs text-violet-600 dark:text-violet-400 font-medium mb-1">Solde Final</div>
+                            <div className="text-xl font-bold text-violet-700 dark:text-violet-300">
+                              {day.soldeFinal.toFixed(2)} DH
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-4 mt-4">
+                          <div className="bg-slate-50 dark:bg-slate-900/20 p-3 rounded-lg">
+                            <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Caisse</div>
+                            <div className="text-lg font-bold text-slate-700 dark:text-slate-300">{day.totalCaisse.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className="bg-slate-50 dark:bg-slate-900/20 p-3 rounded-lg">
+                            <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Coffre</div>
+                            <div className="text-lg font-bold text-slate-700 dark:text-slate-300">{day.totalCoffre.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className={`p-3 rounded-lg ${Math.abs(day.ecartCaisse) < 0.01 ? 'bg-green-50 dark:bg-green-950/20' : 'bg-orange-50 dark:bg-orange-950/20'}`}>
+                            <div className={`text-xs font-medium mb-1 ${Math.abs(day.ecartCaisse) < 0.01 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                              Écart Caisse
+                            </div>
+                            <div className={`text-lg font-bold ${Math.abs(day.ecartCaisse) < 0.01 ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
+                              {day.ecartCaisse >= 0 ? '+' : ''}{day.ecartCaisse.toFixed(2)} DH
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-4"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(day.date);
+                          }}
+                        >
+                          Voir les PVs des agents
+                          <ChevronRight className="w-4 h-4 ml-2" />
+                        </Button>
                       </div>
                     </Card>
                   ))}
@@ -628,52 +731,88 @@ export default function Admin() {
               </Card>
 
               {selectedDateData && selectedDateData.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="grid gap-6 md:grid-cols-2">
                   {selectedDateData.map((userData) => (
-                    <Card key={userData.userId} className="p-6" data-testid={`card-user-${userData.userId}`}>
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 rounded-lg">
-                          <User className="w-6 h-6 text-primary" />
+                    <Card 
+                      key={userData.userId} 
+                      className="overflow-hidden border-2 hover:border-primary/50 transition-all"
+                      data-testid={`card-user-${userData.userId}`}
+                    >
+                      <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 p-4 border-b">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-cyan-500/20 rounded-xl">
+                            <User className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg">{userData.userName}</h3>
+                            <p className="text-xs text-muted-foreground">PV Final de l'Agent</p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-4">{userData.userName}</h3>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                              <div className="text-sm text-muted-foreground">Solde Départ</div>
-                              <div className="text-lg font-semibold">{userData.soldeDepart.toFixed(2)} DH</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Versements</div>
-                              <div className="text-lg font-semibold text-green-600">
-                                +{userData.versements.toFixed(2)} DH
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Retraits</div>
-                              <div className="text-lg font-semibold text-red-600">
-                                -{userData.retraits.toFixed(2)} DH
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Solde Final</div>
-                              <div className="text-lg font-semibold">{userData.soldeFinal.toFixed(2)} DH</div>
+                      </div>
+                      
+                      <div className="p-5 space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-sky-50 dark:bg-sky-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-sky-600 dark:text-sky-400 font-medium mb-1">Solde Départ</div>
+                            <div className="text-lg font-bold text-sky-700 dark:text-sky-300">{userData.soldeDepart.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className="bg-teal-50 dark:bg-teal-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-teal-600 dark:text-teal-400 font-medium mb-1">Opérations</div>
+                            <div className="text-lg font-bold text-teal-700 dark:text-teal-300">
+                              {userData.operations >= 0 ? '+' : ''}{userData.operations.toFixed(2)} DH
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 pt-4 border-t">
-                            <div>
-                              <div className="text-sm text-muted-foreground">Caisse</div>
-                              <div className="text-lg font-semibold">{userData.caisse.toFixed(2)} DH</div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-emerald-50 dark:bg-emerald-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">Versements</div>
+                            <div className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                              +{userData.versements.toFixed(2)} DH
                             </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Coffre</div>
-                              <div className="text-lg font-semibold">{userData.coffre.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className="bg-rose-50 dark:bg-rose-950/20 p-3 rounded-lg">
+                            <div className="text-xs text-rose-600 dark:text-rose-400 font-medium mb-1">Retraits</div>
+                            <div className="text-lg font-bold text-rose-700 dark:text-rose-300">
+                              -{userData.retraits.toFixed(2)} DH
                             </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border-2 border-indigo-200 dark:border-indigo-800">
+                          <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">Solde Final Théorique</div>
+                          <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{userData.soldeFinal.toFixed(2)} DH</div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-slate-50 dark:bg-slate-900/20 p-3 rounded-lg">
+                            <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Total Caisse</div>
+                            <div className="text-lg font-bold text-slate-700 dark:text-slate-300">{userData.caisse.toFixed(2)} DH</div>
+                          </div>
+                          
+                          <div className="bg-slate-50 dark:bg-slate-900/20 p-3 rounded-lg">
+                            <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Total Coffre</div>
+                            <div className="text-lg font-bold text-slate-700 dark:text-slate-300">{userData.coffre.toFixed(2)} DH</div>
+                          </div>
+                        </div>
+                        
+                        <div className={`p-4 rounded-lg border-2 ${Math.abs(userData.ecart) < 0.01 ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800' : 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800'}`}>
+                          <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm text-muted-foreground">Écart</div>
-                              <div className={`text-lg font-semibold ${Math.abs(userData.ecart) < 0.01 ? 'text-green-600' : 'text-orange-600'}`}>
+                              <div className={`text-xs font-medium mb-1 ${Math.abs(userData.ecart) < 0.01 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                                Écart (Réel - Théorique)
+                              </div>
+                              <div className={`text-2xl font-bold ${Math.abs(userData.ecart) < 0.01 ? 'text-green-700 dark:text-green-300' : 'text-orange-700 dark:text-orange-300'}`}>
                                 {userData.ecart >= 0 ? '+' : ''}{userData.ecart.toFixed(2)} DH
                               </div>
                             </div>
+                            {Math.abs(userData.ecart) < 0.01 ? (
+                              <Badge className="bg-green-600 text-white">✓ OK</Badge>
+                            ) : (
+                              <Badge variant="destructive">⚠ Écart</Badge>
+                            )}
                           </div>
                         </div>
                       </div>
