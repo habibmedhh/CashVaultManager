@@ -35,6 +35,15 @@ export default function CashRegister() {
   const [date, setDate] = useState<Date>(new Date());
   const [hideZeroRows, setHideZeroRows] = useState(false);
   const [showCashTable, setShowCashTable] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  // Pour stocker l'état initial sauvegardé
+  const savedStateRef = useRef<{
+    items: CashItem[];
+    operations: Operation[];
+    transactions: Transaction[];
+    soldeDepart: number;
+  } | null>(null);
 
   // Get the selected user's info
   const { data: currentUser } = useQuery<User>({
@@ -192,11 +201,24 @@ export default function CashRegister() {
         const billsData = JSON.parse(savedData.billsData);
         const coinsData = JSON.parse(savedData.coinsData);
         const combinedItems = [...billsData, ...coinsData];
-        setItems(combinedItems);
+        const loadedOperations = JSON.parse(savedData.operationsData);
+        const loadedTransactions = JSON.parse(savedData.transactionsData);
         
-        setOperations(JSON.parse(savedData.operationsData));
-        setTransactions(JSON.parse(savedData.transactionsData));
+        setItems(combinedItems);
+        setOperations(loadedOperations);
+        setTransactions(loadedTransactions);
         setSoldeDepart(savedData.soldeDepart);
+        
+        // Stocker l'état sauvegardé pour la comparaison
+        savedStateRef.current = {
+          items: combinedItems,
+          operations: loadedOperations,
+          transactions: loadedTransactions,
+          soldeDepart: savedData.soldeDepart,
+        };
+        
+        // Pas de changements au chargement initial
+        setHasChanges(false);
         operationsInitialized.current = true;
       } catch (e) {
         console.error("Erreur lors du chargement des données:", e);
@@ -204,6 +226,8 @@ export default function CashRegister() {
     } else if (!isLoading && previousSoldeData) {
       // Si pas de données sauvegardées, utiliser le solde final du jour précédent
       setSoldeDepart(previousSoldeData.soldeFinal);
+      savedStateRef.current = null;
+      setHasChanges(false);
     }
   }, [savedData, isLoading, previousSoldeData]);
 
@@ -237,12 +261,44 @@ export default function CashRegister() {
         ];
         
         setOperations(initialOperations);
+        
+        // Stocker l'état initial pour un nouveau PV
+        savedStateRef.current = {
+          items,
+          operations: initialOperations,
+          transactions,
+          soldeDepart,
+        };
+        setHasChanges(false);
+        
         operationsInitialized.current = true;
       } catch (e) {
         console.error("Erreur lors de l'initialisation des opérations:", e);
       }
     }
-  }, [pvConfig, savedData, isLoading]);
+  }, [pvConfig, savedData, isLoading, items, transactions, soldeDepart]);
+  
+  // Détecter les changements par rapport à l'état sauvegardé
+  useEffect(() => {
+    if (!savedStateRef.current) {
+      // Si pas de données sauvegardées, considérer comme des changements dès qu'il y a des modifications
+      const hasAnyData = 
+        items.some(item => item.caisseAmount !== 0 || item.coffreAmount !== 0) ||
+        operations.some(op => op.amount !== 0) ||
+        transactions.some(t => t.amount !== 0) ||
+        soldeDepart !== 0;
+      setHasChanges(hasAnyData);
+      return;
+    }
+    
+    // Comparer avec l'état sauvegardé
+    const itemsChanged = JSON.stringify(items) !== JSON.stringify(savedStateRef.current.items);
+    const operationsChanged = JSON.stringify(operations) !== JSON.stringify(savedStateRef.current.operations);
+    const transactionsChanged = JSON.stringify(transactions) !== JSON.stringify(savedStateRef.current.transactions);
+    const soldeChanged = soldeDepart !== savedStateRef.current.soldeDepart;
+    
+    setHasChanges(itemsChanged || operationsChanged || transactionsChanged || soldeChanged);
+  }, [items, operations, transactions, soldeDepart]);
 
   // Invalider le cache quand la date change pour recharger les données
   useEffect(() => {
@@ -295,6 +351,15 @@ export default function CashRegister() {
 
       // Mettre à jour le cache avec les données sauvegardées
       queryClient.setQueryData([`/api/cash-register/${dateKey}/user/${selectedUserId}`], savedResult);
+
+      // Mettre à jour l'état sauvegardé pour refléter l'enregistrement
+      savedStateRef.current = {
+        items: [...items],
+        operations: [...operations],
+        transactions: [...transactions],
+        soldeDepart,
+      };
+      setHasChanges(false);
 
       toast({
         title: "Enregistré",
@@ -486,6 +551,7 @@ export default function CashRegister() {
                   size="sm" 
                   data-testid="button-save" 
                   className="h-7 px-3 text-xs"
+                  disabled={!hasChanges}
                 >
                   <Save className="w-3 h-3 mr-1" />
                   Enregistrer
