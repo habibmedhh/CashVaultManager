@@ -239,7 +239,7 @@ export default function OperationsTable({
               >
                 {formatNumber(total)} DH
               </td>
-              <td className="bg-[#d5eff4]"></td>
+              <td className="bg-[#19a89a] text-[#ffffff]"></td>
             </tr>
           </tbody>
         </table>
