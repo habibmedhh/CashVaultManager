@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { CalendarIcon, Download, Printer, Save } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -426,22 +427,22 @@ export default function CashRegister() {
   return (
     <div className="min-h-screen bg-slate-50 p-3">
       <div className="max-w-7xl mx-auto space-y-4">
-        <div className="sticky top-0 z-10 bg-white shadow-md print:hidden rounded-lg px-4 py-2 border-b">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold text-slate-800">
-                💼 PV de Caisse
+        <div className="sticky top-0 z-10 bg-white print:hidden border-b px-3 py-1">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h1 className="text-sm font-semibold text-slate-900">
+                PV d'Arrêté de Caisse
               </h1>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1 h-8 text-xs"
+                    className="h-7 px-2 text-xs border-slate-300"
                     data-testid="button-date-picker"
-                    title="Sélectionner la date"
                   >
-                    📅 {format(date, "dd/MM/yyyy", { locale: fr })}
+                    <CalendarIcon className="w-3 h-3 mr-1" />
+                    {format(date, "dd/MM/yyyy", { locale: fr })}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -454,60 +455,72 @@ export default function CashRegister() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-1 cursor-pointer" title="Masquer les lignes à zéro">
-                <input
-                  type="checkbox"
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="hide-zero"
                   checked={hideZeroRows}
-                  onChange={(e) => setHideZeroRows(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 cursor-pointer"
-                  data-testid="checkbox-hide-zero"
+                  onCheckedChange={setHideZeroRows}
+                  className="scale-75"
+                  data-testid="switch-hide-zero"
                 />
-                <span className="text-xs">🚫0</span>
-              </label>
-              <label className="flex items-center gap-1 cursor-pointer" title="Afficher Caisse & Coffre">
-                <input
-                  type="checkbox"
+                <label htmlFor="hide-zero" className="text-xs text-slate-600 cursor-pointer">
+                  Masquer zéros
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="show-cash"
                   checked={showCashTable}
-                  onChange={(e) => setShowCashTable(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 cursor-pointer"
-                  data-testid="checkbox-show-cash-table"
+                  onCheckedChange={setShowCashTable}
+                  className="scale-75"
+                  data-testid="switch-show-cash"
                 />
-                <span className="text-xs">💰</span>
-              </label>
-              <Button onClick={handleSave} size="sm" data-testid="button-save" className="h-8 px-3" title="Enregistrer">
-                💾
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadExcel}
-                data-testid="button-download-excel"
-                className="h-8 px-3"
-                title="Télécharger Excel"
-              >
-                📊
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadPDF}
-                data-testid="button-download-pdf"
-                className="h-8 px-3"
-                title="Télécharger PDF"
-              >
-                📄
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                data-testid="button-print"
-                className="h-8 px-3"
-                title="Imprimer"
-              >
-                🖨️
-              </Button>
+                <label htmlFor="show-cash" className="text-xs text-slate-600 cursor-pointer">
+                  Caisse & Coffre
+                </label>
+              </div>
+              <div className="flex items-center gap-1 border-l pl-3">
+                <Button 
+                  onClick={handleSave} 
+                  size="sm" 
+                  data-testid="button-save" 
+                  className="h-7 px-3 text-xs"
+                >
+                  <Save className="w-3 h-3 mr-1" />
+                  Enregistrer
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadExcel}
+                  data-testid="button-download-excel"
+                  className="h-7 px-2 text-xs"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  Excel
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadPDF}
+                  data-testid="button-download-pdf"
+                  className="h-7 px-2 text-xs"
+                >
+                  <Download className="w-3 h-3 mr-1" />
+                  PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrint}
+                  data-testid="button-print"
+                  className="h-7 px-2 text-xs"
+                >
+                  <Printer className="w-3 h-3 mr-1" />
+                  Imprimer
+                </Button>
+              </div>
             </div>
           </div>
         </div>
