@@ -135,7 +135,7 @@ export default function OperationsTable({
               <th className="border-r border-slate-500 px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wider w-24 text-white bg-[#ff9d05] text-center">
                 Montant
               </th>
-              <th className="px-1 py-1.5 w-14 text-white bg-[#ff9d05]">Actions</th>
+              <th className="px-1 py-1.5 w-14 text-white bg-[#ff9d05] font-semibold text-[12px] pt-[0px] pb-[0px] pl-[8px] pr-[8px]">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
