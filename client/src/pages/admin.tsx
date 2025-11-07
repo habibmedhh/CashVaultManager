@@ -516,20 +516,18 @@ export default function Admin() {
                               <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Agents Actifs</div>
                               <div className="text-2xl font-bold text-green-700 dark:text-green-300">{activeAgents}</div>
                             </div>
-                          </div>
-                          
-                          <div className="bg-purple-50 dark:bg-purple-950/20 p-3 rounded-lg">
-                            <div className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">PVs Ce Mois</div>
-                            <div className="flex items-baseline justify-between">
-                              <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{monthPVs.length}</div>
-                              <div className="text-sm text-muted-foreground">Total: {agencyPVs.length}</div>
+                            <div className="bg-purple-50 dark:bg-purple-950/20 p-3 rounded-lg">
+                              <div className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">PVs Ce Mois</div>
+                              <div className="flex items-baseline justify-between">
+                                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{monthPVs.length}</div>
+                                <div className="text-sm text-muted-foreground">Total: {agencyPVs.length}</div>
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
-                            <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">Solde Final Moyen</div>
-                            <div className="text-lg font-bold text-amber-700 dark:text-amber-300">
-                              {monthPVs.length > 0 ? (totalSoldeFinal / monthPVs.length).toFixed(2) : '0.00'} DH
+                            <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
+                              <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">Solde Final Moyen</div>
+                              <div className="text-lg font-bold text-amber-700 dark:text-amber-300">
+                                {monthPVs.length > 0 ? (totalSoldeFinal / monthPVs.length).toFixed(2) : '0.00'} DH
+                              </div>
                             </div>
                           </div>
                           

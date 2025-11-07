@@ -18,12 +18,7 @@ const menuItems = [
     icon: FileText,
   },
   {
-    title: "PV Agence",
-    url: "/pv-agence",
-    icon: Building2,
-  },
-  {
-    title: "Historique des PVs",
+    title: "Historique & Consolidation",
     url: "/historique",
     icon: History,
   },

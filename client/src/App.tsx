@@ -7,9 +7,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import NotFound from "@/pages/not-found";
 import CashRegister from "@/pages/cash-register";
-import PVHistory from "@/pages/pv-history";
+import PVConsolidated from "@/pages/pv-consolidated";
 import OperationsDetail from "@/pages/operations-detail";
-import PVAgence from "@/pages/pv-agence";
 import PrintPV from "@/pages/print-pv";
 import Admin from "@/pages/admin";
 import PVConfiguration from "@/pages/pv-configuration";
@@ -20,9 +19,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={CashRegister} />
-      <Route path="/historique" component={PVHistory} />
+      <Route path="/historique" component={PVConsolidated} />
       <Route path="/operations" component={OperationsDetail} />
-      <Route path="/pv-agence" component={PVAgence} />
       <Route path="/imprimer-pv" component={PrintPV} />
       <Route path="/admin" component={Admin} />
       <Route path="/configuration" component={PVConfiguration} />
