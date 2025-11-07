@@ -17,7 +17,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CashRegister, User as UserType, Agency } from "@shared/schema";
+import type { CashRegister, User as UserType, Agency, PVConfiguration } from "@shared/schema";
+
+interface CommissionTier {
+  min: number;
+  max: number;
+  commission: number;
+}
+
+interface OperationConfig {
+  name: string;
+  defaultNumber: number;
+  commissionType?: 'none' | 'fixed' | 'percentage' | 'tiered';
+  commissionFixed?: number;
+  commissionPercentage?: number;
+  commissionTiers?: CommissionTier[];
+}
 
 interface Operation {
   id: string;
@@ -55,6 +70,7 @@ interface OperationRow {
   number: number;
   detailLabel?: string;
   isDetailRow?: boolean;
+  commission?: number;
 }
 
 export default function OperationsDetail() {
@@ -78,11 +94,55 @@ export default function OperationsDetail() {
     queryKey: ["/api/users/all"],
   });
 
+  const { data: config } = useQuery<PVConfiguration>({
+    queryKey: ["/api/pv-configuration"],
+  });
+
   const formatNumber = (num: number) => {
     return num.toLocaleString("fr-FR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  const calculateCommission = (operationName: string, amount: number): number => {
+    if (!config) return 0;
+
+    try {
+      const opsIn: OperationConfig[] = JSON.parse(config.operationsInData);
+      const opsOut: OperationConfig[] = JSON.parse(config.operationsOutData);
+      const allOps = [...opsIn, ...opsOut];
+
+      const opConfig = allOps.find(op => op.name === operationName);
+      if (!opConfig || !opConfig.commissionType || opConfig.commissionType === 'none') {
+        return 0;
+      }
+
+      const absAmount = Math.abs(amount);
+
+      switch (opConfig.commissionType) {
+        case 'fixed':
+          return opConfig.commissionFixed || 0;
+        
+        case 'percentage':
+          return (absAmount * (opConfig.commissionPercentage || 0)) / 100;
+        
+        case 'tiered':
+          if (!opConfig.commissionTiers || opConfig.commissionTiers.length === 0) {
+            return 0;
+          }
+          const tier = opConfig.commissionTiers.find(
+            t => absAmount >= t.min && absAmount <= t.max
+          );
+          return tier ? tier.commission : 0;
+        
+        default:
+          return 0;
+      }
+    } catch (e) {
+      console.error("Error calculating commission:", e);
+      return 0;
+    }
   };
 
   const allOperations = useMemo(() => {
@@ -126,6 +186,8 @@ export default function OperationsDetail() {
           if (op.details && op.details.length > 0) {
             op.details.forEach((detail) => {
               if (detail.amount !== 0) {
+                const amount = op.type === "OUT" ? -detail.amount : detail.amount;
+                const commission = calculateCommission(op.name, amount);
                 rows.push({
                   pvId: pv.id,
                   userId: pv.userId,
@@ -134,14 +196,17 @@ export default function OperationsDetail() {
                   time,
                   operationName: op.name,
                   operationType: "operation",
-                  amount: op.type === "OUT" ? -detail.amount : detail.amount,
+                  amount,
                   number: 1,
                   detailLabel: detail.label,
                   isDetailRow: true,
+                  commission,
                 });
               }
             });
           } else if (op.amount !== 0 || op.number !== 0) {
+            const amount = op.type === "OUT" ? -op.amount : op.amount;
+            const commission = calculateCommission(op.name, amount);
             rows.push({
               pvId: pv.id,
               userId: pv.userId,
@@ -150,9 +215,10 @@ export default function OperationsDetail() {
               time,
               operationName: op.name,
               operationType: "operation",
-              amount: op.type === "OUT" ? -op.amount : op.amount,
+              amount,
               number: op.number,
               isDetailRow: false,
+              commission,
             });
           }
         });
@@ -171,6 +237,7 @@ export default function OperationsDetail() {
               amount: trans.type === "versement" ? trans.amount : -trans.amount,
               number: 1,
               isDetailRow: false,
+              commission: 0,
             });
           }
         });
@@ -184,7 +251,7 @@ export default function OperationsDetail() {
       if (dateCompare !== 0) return dateCompare;
       return b.time.localeCompare(a.time);
     });
-  }, [allPVs]);
+  }, [allPVs, config]);
 
   const filteredOperations = useMemo(() => {
     return allOperations.filter((row) => {
@@ -458,6 +525,7 @@ export default function OperationsDetail() {
                       <th className="px-4 py-3 text-left text-sm font-semibold">Type</th>
                       <th className="px-4 py-3 text-right text-sm font-semibold">Nombre</th>
                       <th className="px-4 py-3 text-right text-sm font-semibold">Montant</th>
+                      <th className="px-4 py-3 text-right text-sm font-semibold">Commission</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -513,6 +581,12 @@ export default function OperationsDetail() {
                           >
                             {row.amount >= 0 ? "+" : ""}
                             {formatNumber(row.amount)} MAD
+                          </td>
+                          <td
+                            className="px-4 py-3 text-sm text-right font-mono text-blue-600 dark:text-blue-400"
+                            data-testid={`text-commission-${index}`}
+                          >
+                            {row.commission && row.commission > 0 ? `${formatNumber(row.commission)} DH` : "-"}
                           </td>
                         </tr>
                       );
