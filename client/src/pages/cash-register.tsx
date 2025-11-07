@@ -33,6 +33,7 @@ export default function CashRegister() {
   const [, setLocation] = useLocation();
   const [date, setDate] = useState<Date>(new Date());
   const [hideZeroRows, setHideZeroRows] = useState(false);
+  const [showCashTable, setShowCashTable] = useState(true);
 
   // Get the selected user's info
   const { data: currentUser } = useQuery<User>({
@@ -465,6 +466,16 @@ export default function CashRegister() {
                 />
                 <span className="text-xs text-white font-medium">Masquer les lignes à zéro</span>
               </label>
+              <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors bg-[#e8b33800]">
+                <input
+                  type="checkbox"
+                  checked={showCashTable}
+                  onChange={(e) => setShowCashTable(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
+                  data-testid="checkbox-show-cash-table"
+                />
+                <span className="text-xs text-white font-medium">Afficher Caisse & Coffre</span>
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleSave} size="sm" data-testid="button-save" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
@@ -505,14 +516,18 @@ export default function CashRegister() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 items-start justify-center">
-          <IntegratedCashTable
-            items={items}
-            onItemChange={handleItemChange}
-            hideZeroRows={hideZeroRows}
-          />
+        {showCashTable && (
+          <div className="flex justify-center">
+            <IntegratedCashTable
+              items={items}
+              onItemChange={handleItemChange}
+              hideZeroRows={hideZeroRows}
+            />
+          </div>
+        )}
 
-          <div className="w-full lg:max-w-md mx-auto border border-border rounded-lg overflow-hidden shadow-sm bg-card">
+        <div className="flex justify-center">
+          <div className="w-full lg:max-w-md border border-border rounded-lg overflow-hidden shadow-sm bg-card">
             <OperationsTable
               operations={operations}
               onOperationChange={handleOperationChange}
