@@ -44,7 +44,7 @@ export default function IntegratedCashTable({
             <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white bg-[#ff9d05] pl-[22px] pr-[22px]">
               Caisse
             </th>
-            <th className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white bg-[#ff9d05]">
+            <th className="px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white bg-[#ff9d05] pl-[22px] pr-[22px] pt-[0px] pb-[0px]">
               Coffre
             </th>
           </tr>
