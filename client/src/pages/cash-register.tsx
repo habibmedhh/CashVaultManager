@@ -426,22 +426,22 @@ export default function CashRegister() {
   return (
     <div className="min-h-screen bg-slate-50 p-3">
       <div className="max-w-7xl mx-auto space-y-4">
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-teal-500 shadow-lg print:hidden rounded-lg px-4 py-3 text-white">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-lg font-bold tracking-tight text-white">
-                PV D'ARRÊTÉ DE CAISSE
+        <div className="sticky top-0 z-10 bg-white shadow-md print:hidden rounded-lg px-4 py-2 border-b">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold text-slate-800">
+                💼 PV de Caisse
               </h1>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-slate-500 hover:bg-slate-500 text-white bg-[#8b647b33]"
+                    className="gap-1 h-8 text-xs"
                     data-testid="button-date-picker"
+                    title="Sélectionner la date"
                   >
-                    <CalendarIcon className="w-3 h-3" />
-                    <span className="text-xs">{format(date, "dd/MM/yyyy", { locale: fr })}</span>
+                    📅 {format(date, "dd/MM/yyyy", { locale: fr })}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -453,61 +453,60 @@ export default function CashRegister() {
                   />
                 </PopoverContent>
               </Popover>
-              <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors bg-[#e8b33800]">
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-1 cursor-pointer" title="Masquer les lignes à zéro">
                 <input
                   type="checkbox"
                   checked={hideZeroRows}
                   onChange={(e) => setHideZeroRows(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
+                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 cursor-pointer"
                   data-testid="checkbox-hide-zero"
                 />
-                <span className="text-xs text-white font-medium">Masquer les lignes à zéro</span>
+                <span className="text-xs">🚫0</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-md border border-slate-500 hover:bg-slate-500 transition-colors bg-[#e8b33800]">
+              <label className="flex items-center gap-1 cursor-pointer" title="Afficher Caisse & Coffre">
                 <input
                   type="checkbox"
                   checked={showCashTable}
                   onChange={(e) => setShowCashTable(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer"
+                  className="w-3.5 h-3.5 rounded border-slate-400 text-emerald-600 cursor-pointer"
                   data-testid="checkbox-show-cash-table"
                 />
-                <span className="text-xs text-white font-medium">Afficher Caisse & Coffre</span>
+                <span className="text-xs">💰</span>
               </label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} size="sm" data-testid="button-save" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
-                <Save className="w-3 h-3 mr-1" />
-                <span className="text-xs font-medium">Enregistrer</span>
+              <Button onClick={handleSave} size="sm" data-testid="button-save" className="h-8 px-3" title="Enregistrer">
+                💾
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadExcel}
                 data-testid="button-download-excel"
-                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
+                className="h-8 px-3"
+                title="Télécharger Excel"
               >
-                <Download className="w-3 h-3 mr-1" />
-                <span className="text-xs">Excel</span>
+                📊
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDownloadPDF}
                 data-testid="button-download-pdf"
-                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
+                className="h-8 px-3"
+                title="Télécharger PDF"
               >
-                <Download className="w-3 h-3 mr-1" />
-                <span className="text-xs">PDF</span>
+                📄
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handlePrint}
                 data-testid="button-print"
-                className="bg-white/10 border-slate-500 hover:bg-white/20 text-white"
+                className="h-8 px-3"
+                title="Imprimer"
               >
-                <Printer className="w-3 h-3 mr-1" />
-                <span className="text-xs">Imprimer</span>
+                🖨️
               </Button>
             </div>
           </div>
