@@ -40,9 +40,7 @@ export default function IntegratedCashTable({
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gradient-to-r from-slate-700 to-slate-600">
-            <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left w-14 text-white bg-[#ff9d05]">
-              
-            </th>
+            <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-left w-14 text-white bg-[#ff9d05]">Billets</th>
             <th className="border-r border-slate-500 px-1.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-center w-16 text-white bg-[#ff9d05]">
               Caisse
             </th>
