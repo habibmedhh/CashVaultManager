@@ -63,10 +63,7 @@ export default function CashRegister() {
 
   const [operations, setOperations] = useState<Operation[]>([]);
 
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: "1", type: "versement", label: "Versement banque", amount: 0 },
-    { id: "2", type: "retrait", label: "Retrait STET", amount: 0 },
-  ]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [soldeDepart, setSoldeDepart] = useState(0);
 
