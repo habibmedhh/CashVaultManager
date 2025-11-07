@@ -215,7 +215,7 @@ export default function BalanceSection({
 
       <div className="border border-border rounded-lg overflow-hidden shadow-sm bg-card w-full max-w-5xl">
         <div className="px-3 py-2 bg-[#fc9b05] border-b border-slate-500">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#000000]">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-[#ffffff]">
             Soldes et Écart
           </h3>
         </div>
