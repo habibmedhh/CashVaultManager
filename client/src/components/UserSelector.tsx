@@ -16,7 +16,7 @@ interface UserSelectorProps {
 }
 
 export function UserSelector({ selectedUserId, onUserChange }: UserSelectorProps) {
-  const { currentUser, isAgent, isAdmin } = useUser();
+  const { loggedInUser, isAgent, isAdmin } = useUser();
   
   const { data: agencies = [] } = useQuery<Agency[]>({
     queryKey: ["/api/agencies"],
@@ -42,22 +42,22 @@ export function UserSelector({ selectedUserId, onUserChange }: UserSelectorProps
 
   // Si l'utilisateur est un agent, le fixer automatiquement sur son propre compte
   useEffect(() => {
-    if (isAgent && currentUser && selectedUserId !== currentUser.id) {
-      onUserChange(currentUser.id);
+    if (isAgent && loggedInUser && selectedUserId !== loggedInUser.id) {
+      onUserChange(loggedInUser.id);
     }
-  }, [isAgent, currentUser, selectedUserId, onUserChange]);
+  }, [isAgent, loggedInUser, selectedUserId, onUserChange]);
 
   const selectedUser = allUsers.find(u => u.id === selectedUserId);
   const selectedAgency = agencies.find(a => a.id === selectedUser?.agencyId);
 
   // Pour les agents, afficher juste leur nom (pas de sélecteur)
-  if (isAgent && currentUser) {
-    const agency = agencies.find(a => a.id === currentUser.agencyId);
+  if (isAgent && loggedInUser) {
+    const agency = agencies.find(a => a.id === loggedInUser.agencyId);
     return (
       <div className="flex items-center gap-2">
         <div className="text-sm text-slate-600">Agent:</div>
         <div className="px-3 py-2 text-sm font-medium bg-slate-100 rounded-md">
-          {currentUser.fullName || currentUser.username} {agency && `(${agency.code})`}
+          {loggedInUser.fullName || loggedInUser.username} {agency && `(${agency.code})`}
         </div>
         {agency && (
           <div className="text-xs text-slate-500">

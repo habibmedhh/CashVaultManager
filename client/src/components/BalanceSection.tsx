@@ -20,6 +20,7 @@ interface BalanceSectionProps {
   totalCaisse: number;
   totalCoffre: number;
   totalOperations: number;
+  editable?: boolean;
 }
 
 export default function BalanceSection({
@@ -31,6 +32,7 @@ export default function BalanceSection({
   totalCaisse,
   totalCoffre,
   totalOperations,
+  editable = true,
 }: BalanceSectionProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<"versement" | "retrait">("versement");
@@ -85,6 +87,7 @@ export default function BalanceSection({
               onClick={() => handleOpenDialog("versement")}
               data-testid="button-add-versement"
               className="shadow-sm h-7 text-xs hover:bg-primary/90 bg-[#ffffffe6] text-[#19a89a] font-bold"
+              disabled={!editable}
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -121,6 +124,7 @@ export default function BalanceSection({
                       onClick={() => onRemoveTransaction(t.id)}
                       className="h-6 w-6"
                       data-testid={`button-remove-versement-${t.id}`}
+                      disabled={!editable}
                     >
                       <X className="w-2.5 h-2.5" />
                     </Button>
@@ -153,6 +157,7 @@ export default function BalanceSection({
               onClick={() => handleOpenDialog("retrait")}
               data-testid="button-add-retrait"
               className="shadow-sm h-7 text-xs hover:bg-primary/90 bg-[#ffffffe6] text-[#19a89a] font-bold"
+              disabled={!editable}
             >
               <Plus className="w-3 h-3 mr-1" />
               Ajouter
@@ -189,6 +194,7 @@ export default function BalanceSection({
                       onClick={() => onRemoveTransaction(t.id)}
                       className="h-6 w-6"
                       data-testid={`button-remove-retrait-${t.id}`}
+                      disabled={!editable}
                     >
                       <X className="w-2.5 h-2.5" />
                     </Button>

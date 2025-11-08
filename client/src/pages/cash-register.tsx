@@ -30,12 +30,19 @@ interface CashItem {
 
 export default function CashRegister() {
   const { toast } = useToast();
-  const { selectedUserId } = useUser();
+  const { selectedUserId, loggedInUser, selectedUser, isAgent, isAdmin } = useUser();
   const [, setLocation] = useLocation();
   const [date, setDate] = useState<Date>(new Date());
   const [hideZeroRows, setHideZeroRows] = useState(false);
   const [showCashTable, setShowCashTable] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // Vérifier si la date est aujourd'hui
+  const isToday = format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+  
+  // Les agents ne peuvent modifier que le jour courant, les admins peuvent tout modifier
+  // Les vérifications de rôle sont basées sur loggedInUser, pas selectedUser
+  const isEditable = isAdmin || (isAgent && isToday);
   
   // Pour stocker l'état initial sauvegardé
   const savedStateRef = useRef<{
@@ -45,16 +52,8 @@ export default function CashRegister() {
     soldeDepart: number;
   } | null>(null);
 
-  // Get the selected user's info
-  const { data: currentUser } = useQuery<User>({
-    queryKey: ["/api/users", selectedUserId],
-    enabled: !!selectedUserId,
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${selectedUserId}`);
-      if (!response.ok) throw new Error("Failed to load user");
-      return response.json();
-    },
-  });
+  // currentUser is now selectedUser from the context
+  const currentUser = selectedUser;
 
   const [items, setItems] = useState<CashItem[]>([
     { value: 200, caisseAmount: 0, coffreAmount: 0, color: "#3B82F6", icon: "", type: "billet" },
@@ -598,6 +597,7 @@ export default function CashRegister() {
               items={items}
               onItemChange={handleItemChange}
               hideZeroRows={hideZeroRows}
+              editable={isEditable}
             />
           </div>
         )}
@@ -612,6 +612,7 @@ export default function CashRegister() {
               onClearOperations={handleClearOperations}
               date={date}
               hideZeroRows={hideZeroRows}
+              editable={isEditable}
             />
           </div>
         </div>
@@ -626,6 +627,7 @@ export default function CashRegister() {
             totalCaisse={totalCaisse}
             totalCoffre={totalCoffre}
             totalOperations={totalOperations}
+            editable={isEditable}
           />
         </div>
       </div>

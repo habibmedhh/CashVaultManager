@@ -33,6 +33,7 @@ interface OperationsTableProps {
   onClearOperations: () => void;
   date: Date;
   hideZeroRows?: boolean;
+  editable?: boolean;
 }
 
 export default function OperationsTable({
@@ -43,6 +44,7 @@ export default function OperationsTable({
   onClearOperations,
   date,
   hideZeroRows = false,
+  editable = true,
 }: OperationsTableProps) {
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -119,6 +121,7 @@ export default function OperationsTable({
               onClick={handleClearClick}
               data-testid="button-clear-operations"
               className="shadow-sm h-7 text-xs border-rose-200 text-rose-700 hover:bg-rose-50"
+              disabled={!editable}
             >
               <Trash2 className="w-3 h-3 mr-1" />
               Vider
@@ -158,8 +161,8 @@ export default function OperationsTable({
                       onChange={(e) => onOperationChange(op.id, "name", e.target.value)}
                       className="flex-1 bg-transparent hover-elevate active-elevate-2 focus:ring-1 focus:ring-primary focus:outline-none text-[11px] border-0 p-0"
                       data-testid={`input-operation-name-${op.id}`}
-                      disabled={op.name !== "" && !op.isNew}
-                      style={op.name !== "" && !op.isNew ? { cursor: 'not-allowed', opacity: 0.8 } : {}}
+                      disabled={!editable || (op.name !== "" && !op.isNew)}
+                      style={!editable || (op.name !== "" && !op.isNew) ? { cursor: 'not-allowed', opacity: 0.8 } : {}}
                     />
                   </div>
                 </td>
@@ -170,7 +173,7 @@ export default function OperationsTable({
                       onChange={(val) => onOperationChange(op.id, "number", val)}
                       className="border-0 rounded-none text-center h-7 text-[11px]"
                       dataTestId={`input-operation-number-${op.id}`}
-                      editable={!op.details || op.details.length === 0}
+                      editable={editable && (!op.details || op.details.length === 0)}
                     />
                     {op.details && op.details.length > 0 && (
                       <div className="px-0.5 flex-shrink-0">
@@ -187,7 +190,7 @@ export default function OperationsTable({
                       allowFormula={true}
                       className="border-0 rounded-none h-7 text-[11px]"
                       dataTestId={`input-operation-amount-${op.id}`}
-                      editable={!op.details || op.details.length === 0}
+                      editable={editable && (!op.details || op.details.length === 0)}
                     />
                     {op.details && op.details.length > 0 && (
                       <div className="px-0.5 flex-shrink-0">
@@ -205,6 +208,7 @@ export default function OperationsTable({
                       className="h-6 w-6"
                       title="Opérations détaillées"
                       data-testid={`button-details-${op.id}`}
+                      disabled={!editable}
                     >
                       <FileText className="w-3 h-3" />
                     </Button>
@@ -214,6 +218,7 @@ export default function OperationsTable({
                       onClick={() => onRemoveOperation(op.id)}
                       className="h-6 w-6"
                       data-testid={`button-remove-operation-${op.id}`}
+                      disabled={!editable}
                     >
                       <X className="w-3 h-3" />
                     </Button>

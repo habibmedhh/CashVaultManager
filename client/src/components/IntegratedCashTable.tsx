@@ -13,12 +13,14 @@ interface IntegratedCashTableProps {
   items: CashItem[];
   onItemChange: (index: number, field: "caisseAmount" | "coffreAmount", value: number) => void;
   hideZeroRows?: boolean;
+  editable?: boolean;
 }
 
 export default function IntegratedCashTable({
   items,
   onItemChange,
   hideZeroRows = false,
+  editable = true,
 }: IntegratedCashTableProps) {
   const filteredItems = hideZeroRows
     ? items.filter(item => item.caisseAmount !== 0 || item.coffreAmount !== 0)
@@ -67,6 +69,7 @@ export default function IntegratedCashTable({
                   onChange={(val) => onItemChange(originalIndex, "caisseAmount", val)}
                   className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
                   dataTestId={`input-item-caisse-${originalIndex}`}
+                  editable={editable}
                 />
               </td>
               <td className="p-0">
@@ -75,6 +78,7 @@ export default function IntegratedCashTable({
                   onChange={(val) => onItemChange(originalIndex, "coffreAmount", val)}
                   className="border-0 w-full rounded-none h-6 text-[11px] px-0.5"
                   dataTestId={`input-item-coffre-${originalIndex}`}
+                  editable={editable}
                 />
               </td>
             </tr>
