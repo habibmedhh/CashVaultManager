@@ -82,8 +82,9 @@ export default function CashRegister() {
     field: "caisseAmount" | "coffreAmount",
     value: number
   ) => {
-    const newItems = [...items];
-    newItems[index][field] = value;
+    const newItems = items.map((item, idx) => 
+      idx === index ? { ...item, [field]: value } : item
+    );
     setItems(newItems);
   };
 
@@ -209,11 +210,11 @@ export default function CashRegister() {
         setTransactions(loadedTransactions);
         setSoldeDepart(savedData.soldeDepart);
         
-        // Stocker l'état sauvegardé pour la comparaison
+        // Stocker l'état sauvegardé pour la comparaison (copie profonde)
         savedStateRef.current = {
-          items: combinedItems,
-          operations: loadedOperations,
-          transactions: loadedTransactions,
+          items: structuredClone(combinedItems),
+          operations: structuredClone(loadedOperations),
+          transactions: structuredClone(loadedTransactions),
           soldeDepart: savedData.soldeDepart,
         };
         
@@ -262,11 +263,11 @@ export default function CashRegister() {
         
         setOperations(initialOperations);
         
-        // Stocker l'état initial pour un nouveau PV
+        // Stocker l'état initial pour un nouveau PV (copie profonde)
         savedStateRef.current = {
-          items,
-          operations: initialOperations,
-          transactions,
+          items: structuredClone(items),
+          operations: structuredClone(initialOperations),
+          transactions: structuredClone(transactions),
           soldeDepart,
         };
         setHasChanges(false);
@@ -352,11 +353,11 @@ export default function CashRegister() {
       // Mettre à jour le cache avec les données sauvegardées
       queryClient.setQueryData([`/api/cash-register/${dateKey}/user/${selectedUserId}`], savedResult);
 
-      // Mettre à jour l'état sauvegardé pour refléter l'enregistrement
+      // Mettre à jour l'état sauvegardé pour refléter l'enregistrement (copie profonde)
       savedStateRef.current = {
-        items: [...items],
-        operations: [...operations],
-        transactions: [...transactions],
+        items: structuredClone(items),
+        operations: structuredClone(operations),
+        transactions: structuredClone(transactions),
         soldeDepart,
       };
       setHasChanges(false);
