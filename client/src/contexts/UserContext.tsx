@@ -52,7 +52,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("selectedUserId", userId);
       // Si loggedInUserId n'est pas défini, le définir automatiquement
       if (!loggedInUserId) {
-        setLoggedInUserId(userId);
+        setLoggedInUserIdState(userId);
+        localStorage.setItem("loggedInUserId", userId);
       }
     } else {
       localStorage.removeItem("selectedUserId");
@@ -65,7 +66,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("loggedInUserId", userId);
       // Par défaut, l'utilisateur sélectionné est l'utilisateur connecté
       if (!selectedUserId) {
-        setSelectedUserId(userId);
+        setSelectedUserIdState(userId);
+        localStorage.setItem("selectedUserId", userId);
       }
     } else {
       localStorage.removeItem("loggedInUserId");
